@@ -106,7 +106,7 @@ export function BudgetItemRow({
 
 	return (
 		<tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors animate-fade-in-slide-up">
-			<td className="px-4 py-3 text-gray-800">{category.name}</td>
+			<td className="px-4 py-3 text-gray-800 truncate" title={category.name}>{category.name}</td>
 			<td className="px-4 py-3 text-right text-gray-800">
 				{isEditing ? (
 					<input

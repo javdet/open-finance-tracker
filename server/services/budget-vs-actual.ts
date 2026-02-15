@@ -1,15 +1,18 @@
 /**
  * Budget vs actual report: compares planned amounts (budget_items) to actual
- * spending/income (operations.amount_in_base) over the budget date range.
+ * spending/income over the budget date range, converting foreign-currency
+ * operations to the budget's base currency via exchange_rates.
  */
 import { getPool } from '../db/client.js'
 import * as budgetsRepo from '../repositories/budgets.js'
 import * as budgetItemsRepo from '../repositories/budget-items.js'
 import * as operationsRepo from '../repositories/operations.js'
+import { ensureRatesForDate } from './exchange-rate-cache.js'
 
 export interface BudgetVsActualRow {
 	categoryId: string
 	categoryName: string
+	categoryDirection: 'income' | 'expense'
 	plannedAmount: number
 	actualAmount: number
 	variance: number
@@ -26,6 +29,10 @@ export interface BudgetVsActualReport {
 	totalPlanned: number
 	totalActual: number
 	totalVariance: number
+	incomeTotalPlanned: number
+	incomeTotalActual: number
+	expenseTotalPlanned: number
+	expenseTotalActual: number
 }
 
 /**
@@ -60,6 +67,10 @@ export async function getBudgetVsActualReport(
 			totalPlanned: 0,
 			totalActual: 0,
 			totalVariance: 0,
+			incomeTotalPlanned: 0,
+			incomeTotalActual: 0,
+			expenseTotalPlanned: 0,
+			expenseTotalActual: 0,
 		}
 	}
 
@@ -73,6 +84,13 @@ export async function getBudgetVsActualReport(
 	const incomeItems = itemsWithNames.filter((item) => item.category_direction === 'income')
 	const expenseItems = itemsWithNames.filter((item) => item.category_direction === 'expense')
 
+	// Ensure exchange rates are cached so the SQL conversion can look them up.
+	// We cache rates for the budget start date; Frankfurter returns the nearest
+	// previous business-day rates when the exact date is unavailable.
+	await ensureRatesForDate(budget.baseCurrencyCode, budget.startDate, pool)
+
+	const baseCurrency = budget.baseCurrencyCode
+
 	// Fetch actuals for both income and expenses
 	const [incomeActuals, expenseActuals] = await Promise.all([
 		incomeItems.length > 0
@@ -81,6 +99,7 @@ export async function getBudgetVsActualReport(
 					fromTime,
 					toTime,
 					'income',
+					baseCurrency,
 					pool,
 				)
 			: [],
@@ -90,6 +109,7 @@ export async function getBudgetVsActualReport(
 					fromTime,
 					toTime,
 					'payment',
+					baseCurrency,
 					pool,
 				)
 			: [],
@@ -105,14 +125,32 @@ export async function getBudgetVsActualReport(
 
 	let totalPlanned = 0
 	let totalActual = 0
+	let incomeTotalPlanned = 0
+	let incomeTotalActual = 0
+	let expenseTotalPlanned = 0
+	let expenseTotalActual = 0
+
 	const rows: BudgetVsActualRow[] = itemsWithNames.map((item) => {
 		const planned = Number(item.planned_amount)
 		const actual = actualByCategory.get(item.category_id) ?? 0
+		const direction =
+			item.category_direction === 'income' ? 'income' : 'expense'
+
 		totalPlanned += planned
 		totalActual += actual
+
+		if (direction === 'income') {
+			incomeTotalPlanned += planned
+			incomeTotalActual += actual
+		} else {
+			expenseTotalPlanned += planned
+			expenseTotalActual += actual
+		}
+
 		return {
 			categoryId: item.category_id,
 			categoryName: item.category_name,
+			categoryDirection: direction as 'income' | 'expense',
 			plannedAmount: planned,
 			actualAmount: actual,
 			variance: planned - actual,
@@ -130,5 +168,9 @@ export async function getBudgetVsActualReport(
 		totalPlanned,
 		totalActual,
 		totalVariance: totalPlanned - totalActual,
+		incomeTotalPlanned,
+		incomeTotalActual,
+		expenseTotalPlanned,
+		expenseTotalActual,
 	}
 }

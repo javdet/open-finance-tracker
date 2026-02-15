@@ -3,12 +3,12 @@ import type { BudgetItem, Category, BudgetVsActualReport } from '@/types'
 import { fetchBudgetItems } from '@/api/budgets'
 import { fetchCategories } from '@/api'
 import { BudgetItemRow } from './BudgetItemRow'
-import { AddIncomeItemModal } from './AddIncomeItemModal'
+import { AddExpenseItemModal } from './AddExpenseItemModal'
 import { clsx } from '@/lib/clsx'
 
 const DEFAULT_USER_ID = '1'
 
-interface IncomeSectionProps {
+interface ExpenseSectionProps {
 	budgetId: string
 	report: BudgetVsActualReport | null
 	onRefresh: () => void
@@ -31,11 +31,11 @@ function formatMoney(amount: number, currencyCode: string): string {
 	}
 }
 
-export function IncomeSection({
+export function ExpenseSection({
 	budgetId,
 	report,
 	onRefresh,
-}: IncomeSectionProps) {
+}: ExpenseSectionProps) {
 	const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([])
 	const [categories, setCategories] = useState<Category[]>([])
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -57,10 +57,10 @@ export function IncomeSection({
 			.finally(() => setIsLoading(false))
 	}, [budgetId])
 
-	// Filter to income categories only
-	const incomeItems = budgetItems.filter((item) => {
+	// Filter to expense categories only
+	const expenseItems = budgetItems.filter((item) => {
 		const category = categories.find((c) => c.id === item.categoryId)
-		return category?.type === 'income'
+		return category?.type === 'expense'
 	})
 
 	// Create map of actual amounts by category
@@ -68,18 +68,18 @@ export function IncomeSection({
 	if (report) {
 		report.rows.forEach((row) => {
 			const category = categories.find((c) => c.id === row.categoryId)
-			if (category?.type === 'income') {
+			if (category?.type === 'expense') {
 				actualByCategory.set(row.categoryId, row.actualAmount)
 			}
 		})
 	}
 
 	// Calculate totals
-	const totalPlanned = incomeItems.reduce(
+	const totalPlanned = expenseItems.reduce(
 		(sum, item) => sum + item.plannedAmount,
 		0,
 	)
-	const totalActual = incomeItems.reduce(
+	const totalActual = expenseItems.reduce(
 		(sum, item) => sum + (actualByCategory.get(item.categoryId) ?? 0),
 		0,
 	)
@@ -106,20 +106,24 @@ export function IncomeSection({
 
 	if (isLoading) {
 		return (
-			<div className="text-sm text-gray-500 py-4">Loading income data...</div>
+			<div className="text-sm text-gray-500 py-4">
+				Loading expense data...
+			</div>
 		)
 	}
 
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h3 className="text-base font-semibold text-gray-900">Income</h3>
+				<h3 className="text-base font-semibold text-gray-900">
+					Expenses
+				</h3>
 				<button
 					type="button"
 					onClick={() => setIsAddModalOpen(true)}
-					className="px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 active:scale-95 transition-all duration-150 shadow-sm hover:shadow"
+					className="px-3 py-1.5 text-sm font-medium text-white bg-rose-600 rounded-md hover:bg-rose-700 active:scale-95 transition-all duration-150 shadow-sm hover:shadow"
 				>
-					+ Add Income
+					+ Add Expense
 				</button>
 			</div>
 			<div className="rounded-md border border-gray-200 bg-white overflow-hidden">
@@ -150,18 +154,18 @@ export function IncomeSection({
 							</tr>
 						</thead>
 						<tbody>
-							{incomeItems.length === 0 ? (
+							{expenseItems.length === 0 ? (
 								<tr>
 									<td
 										colSpan={5}
 										className="px-4 py-8 text-center text-gray-500"
 									>
-										No income items yet. Click &quot;+ Add Income&quot; to get
-										started.
+										No expense items yet. Click &quot;+ Add
+										Expense&quot; to get started.
 									</td>
 								</tr>
 							) : (
-								incomeItems.map((item) => {
+								expenseItems.map((item) => {
 									const category = categories.find(
 										(c) => c.id === item.categoryId,
 									)
@@ -171,7 +175,11 @@ export function IncomeSection({
 											key={item.id}
 											item={item}
 											category={category}
-											actualAmount={actualByCategory.get(item.categoryId) ?? 0}
+											actualAmount={
+												actualByCategory.get(
+													item.categoryId,
+												) ?? 0
+											}
 											currencyCode={currencyCode}
 											onUpdate={handleItemUpdate}
 											onDelete={handleItemUpdate}
@@ -180,15 +188,23 @@ export function IncomeSection({
 								})
 							)}
 						</tbody>
-						{incomeItems.length > 0 && (
+						{expenseItems.length > 0 && (
 							<tfoot className="bg-gray-50 font-medium">
 								<tr className="border-t-2 border-gray-200">
-									<td className="px-4 py-2 text-gray-900">Total</td>
-									<td className="px-4 py-2 text-right text-gray-900">
-										{formatMoney(totalPlanned, currencyCode)}
+									<td className="px-4 py-2 text-gray-900">
+										Total
 									</td>
 									<td className="px-4 py-2 text-right text-gray-900">
-										{formatMoney(totalActual, currencyCode)}
+										{formatMoney(
+											totalPlanned,
+											currencyCode,
+										)}
+									</td>
+									<td className="px-4 py-2 text-right text-gray-900">
+										{formatMoney(
+											totalActual,
+											currencyCode,
+										)}
 									</td>
 									<td
 										className={clsx(
@@ -200,7 +216,10 @@ export function IncomeSection({
 													: 'text-gray-900',
 										)}
 									>
-										{formatMoney(totalDifference, currencyCode)}
+										{formatMoney(
+											totalDifference,
+											currencyCode,
+										)}
 									</td>
 									<td className="px-4 py-2"></td>
 								</tr>
@@ -209,7 +228,7 @@ export function IncomeSection({
 					</table>
 				</div>
 			</div>
-			<AddIncomeItemModal
+			<AddExpenseItemModal
 				isOpen={isAddModalOpen}
 				onClose={() => setIsAddModalOpen(false)}
 				onSuccess={handleAddSuccess}

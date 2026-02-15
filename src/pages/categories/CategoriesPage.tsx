@@ -468,9 +468,6 @@ export function CategoriesPage() {
 	const [categories, setCategories] = useState<Category[]>([])
 	const [groups, setGroups] = useState<CategoryGroup[]>([])
 	const [error, setError] = useState<string | null>(null)
-	const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-		null,
-	)
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 	const [editingCategory, setEditingCategory] = useState<Category | null>(null)
 	const [typeSortOrder, setTypeSortOrder] = useState<TypeSortOrder>(null)
@@ -606,37 +603,67 @@ export function CategoriesPage() {
 		setTypeSortOrder((prev) => cycleTypeSort(prev))
 	}, [])
 
+	const allSystemCategoriesExpanded =
+		systemCategoryIds.size > 0 &&
+		systemCategoryIds.size === expandedSystemCategoryIds.length &&
+		[...systemCategoryIds].every((id) =>
+			expandedSystemCategoryIds.includes(id),
+		)
+
+	function handleCollapseExpandAll() {
+		if (allSystemCategoriesExpanded) {
+			setExpandedSystemCategoryIds([])
+		} else {
+			setExpandedSystemCategoryIds([...systemCategoryIds])
+		}
+	}
+
 	return (
-		<div className="flex flex-col h-full">
-			<h2 className="mb-4 text-lg font-semibold text-gray-900">
-				CATEGORIES
-			</h2>
-			<div className="mb-4">
-				<button
-					type="button"
-					onClick={handleAddNew}
-					className="text-emerald-600 hover:text-emerald-800 text-sm font-medium"
-				>
-					Add New Category
-				</button>
+		<div className="flex flex-col h-full space-y-4">
+			<div className="flex items-center justify-between">
+				<h2 className="text-xl font-semibold text-gray-900">
+					Categories
+				</h2>
+				<div className="flex items-center gap-3">
+					{systemCategoryIds.size > 0 && (
+						<button
+							type="button"
+							onClick={handleCollapseExpandAll}
+							className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+						>
+							{allSystemCategoriesExpanded
+								? 'Collapse all'
+								: 'Expand all'}
+						</button>
+					)}
+					<button
+						type="button"
+						onClick={handleAddNew}
+						className="px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 active:scale-95 transition-all duration-150 shadow-sm hover:shadow"
+					>
+						+ Add Category
+					</button>
+				</div>
 			</div>
 			{error && (
-				<p className="mb-4 text-sm text-amber-600">{error}</p>
+				<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3">
+					<p className="text-sm text-red-600">{error}</p>
+				</div>
 			)}
 			<div className="flex-1 overflow-hidden rounded-md border border-gray-200 bg-white">
 				<div className="max-h-[calc(100vh-220px)] overflow-auto">
-					<table className="min-w-full border-collapse text-xs md:text-sm">
+					<table className="min-w-full border-collapse text-sm">
 						<thead className="bg-gray-50 sticky top-0 z-10">
 							<tr className="text-left text-gray-600">
-								<th className="border-b border-gray-200 px-2 py-2">
+								<th className="border-b border-gray-200 px-4 py-2 font-medium">
 									Category
 								</th>
-								<th className="border-b border-gray-200 px-2 py-2">
+								<th className="border-b border-gray-200 px-4 py-2 font-medium">
 									<button
 										type="button"
 										onClick={handleTypeHeaderClick}
 										className={clsx(
-											'flex items-center gap-1 font-medium outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 rounded',
+											'flex items-center gap-1 outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 rounded',
 											typeSortOrder != null && 'text-emerald-700',
 										)}
 										title={
@@ -654,10 +681,10 @@ export function CategoriesPage() {
 										)}
 									</button>
 								</th>
-								<th className="border-b border-gray-200 px-2 py-2">
+								<th className="border-b border-gray-200 px-4 py-2 font-medium">
 									System Category
 								</th>
-								<th className="border-b border-gray-200 px-2 py-2 w-24">
+								<th className="border-b border-gray-200 px-4 py-2 w-24 font-medium">
 									{/* Actions */}
 								</th>
 							</tr>
@@ -667,18 +694,17 @@ export function CategoriesPage() {
 								<tr>
 									<td
 										colSpan={4}
-										className="px-2 py-4 text-center text-gray-500"
+										className="px-4 py-8 text-center text-gray-500"
 									>
-										No categories yet. Add one above.
+										No categories yet. Click &quot;+ Add Category&quot; to get
+										started.
 									</td>
 								</tr>
 							)}
-							{sortedCategories.map((category, index) => {
+							{sortedCategories.map((category) => {
 								const isChild =
 									!!category.groupId ||
 									!!category.parentCategoryId
-								const isSelected =
-									selectedCategoryId === category.id
 
 								const parentId = category.parentCategoryId
 								const isChildOfSystem =
@@ -702,13 +728,7 @@ export function CategoriesPage() {
 								return (
 									<tr
 										key={category.id}
-										className={clsx(
-											'group',
-											index % 2 === 0
-												? 'bg-emerald-50/40'
-												: 'bg-white',
-											isSelected && 'bg-emerald-100',
-										)}
+										className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
 										onClick={() => {
 											if (isTopLevelSystem && hasChildren) {
 												handleToggleSystemCategory(
@@ -716,14 +736,8 @@ export function CategoriesPage() {
 												)
 											}
 										}}
-										onMouseEnter={() =>
-											setSelectedCategoryId(category.id)
-										}
-										onMouseLeave={() =>
-											setSelectedCategoryId(null)
-										}
 									>
-										<td className="border-b border-gray-100 px-2 py-1.5 align-top text-gray-800">
+										<td className="px-4 py-3 align-top text-gray-800">
 											<div
 												className={clsx(
 													'flex items-center gap-1',
@@ -759,7 +773,7 @@ export function CategoriesPage() {
 												{category.name}
 											</div>
 										</td>
-										<td className="border-b border-gray-100 px-2 py-1.5 align-top">
+										<td className="px-4 py-3 align-top">
 											<span
 												className={clsx(
 													'font-medium',
@@ -771,10 +785,10 @@ export function CategoriesPage() {
 												{getTypeDisplay(category.type)}
 											</span>
 										</td>
-										<td className="border-b border-gray-100 px-2 py-1.5 align-top text-gray-800">
+										<td className="px-4 py-3 align-top text-gray-800">
 											{getSystemCategoryDisplay(category)}
 										</td>
-										<td className="border-b border-gray-100 px-2 py-1.5 align-top">
+										<td className="px-4 py-3 align-top">
 											<div className="flex items-center gap-1">
 												<button
 													type="button"
@@ -782,13 +796,8 @@ export function CategoriesPage() {
 														e.stopPropagation()
 														handleEdit(category)
 													}}
-													className={clsx(
-														'inline-flex items-center justify-center w-6 h-6 rounded border border-emerald-600 text-emerald-600 transition-opacity hover:bg-emerald-50',
-														isSelected
-															? 'opacity-100'
-															: 'opacity-0 group-hover:opacity-100',
-													)}
-													aria-label="Edit Category"
+													className="text-gray-400 hover:text-emerald-600 transition-colors p-1 rounded"
+													aria-label="Edit category"
 												>
 													<PencilIcon />
 												</button>
@@ -800,13 +809,8 @@ export function CategoriesPage() {
 															category.id,
 														)
 													}}
-													className={clsx(
-														'inline-flex items-center justify-center w-6 h-6 rounded transition-opacity bg-emerald-600 text-white hover:bg-emerald-700',
-														isSelected
-															? 'opacity-100'
-															: 'opacity-0 group-hover:opacity-100',
-													)}
-													aria-label="Delete Category"
+													className="text-gray-400 hover:text-red-600 transition-colors p-1 rounded disabled:opacity-50"
+													aria-label="Delete category"
 												>
 													<TrashIcon />
 												</button>

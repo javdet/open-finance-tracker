@@ -5,19 +5,19 @@ import { fetchCategories } from '@/api'
 
 const DEFAULT_USER_ID = '1'
 
-interface AddIncomeItemModalProps {
+interface AddExpenseItemModalProps {
 	isOpen: boolean
 	onClose: () => void
 	onSuccess: () => void
 	budgetId: string
 }
 
-export function AddIncomeItemModal({
+export function AddExpenseItemModal({
 	isOpen,
 	onClose,
 	onSuccess,
 	budgetId,
-}: AddIncomeItemModalProps) {
+}: AddExpenseItemModalProps) {
 	const [categoryId, setCategoryId] = useState<string>('')
 	const [plannedAmount, setPlannedAmount] = useState<string>('')
 	const [categories, setCategories] = useState<Category[]>([])
@@ -31,7 +31,7 @@ export function AddIncomeItemModal({
 		if (isOpen) {
 			fetchCategories({ userId: DEFAULT_USER_ID })
 				.then((cats) => {
-					const byType = cats.filter((c) => c.type === 'income')
+					const byType = cats.filter((c) => c.type === 'expense')
 					const topLevel = byType
 						.filter((c) => !c.groupId && !c.parentCategoryId)
 						.sort((a, b) => a.name.localeCompare(b.name))
@@ -103,7 +103,11 @@ export function AddIncomeItemModal({
 			setError('Category is required')
 			return
 		}
-		if (!trimmedAmount || isNaN(Number(trimmedAmount)) || Number(trimmedAmount) <= 0) {
+		if (
+			!trimmedAmount ||
+			isNaN(Number(trimmedAmount)) ||
+			Number(trimmedAmount) <= 0
+		) {
 			setError('Planned amount must be a positive number')
 			return
 		}
@@ -138,7 +142,7 @@ export function AddIncomeItemModal({
 			<div className="relative z-10 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-xl mx-4 transform transition-all duration-200 scale-100 animate-scale-in">
 				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
 					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
-						Add Income
+						Add Expense
 					</h2>
 					<button
 						type="button"
@@ -169,7 +173,7 @@ export function AddIncomeItemModal({
 									setIsCategoryOpen(true)
 								}
 							}}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
+							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 flex items-center justify-between gap-2"
 							aria-haspopup="listbox"
 							aria-expanded={isCategoryOpen}
 							aria-label="Select category"
@@ -202,7 +206,7 @@ export function AddIncomeItemModal({
 										}
 										autoFocus
 										placeholder="Type to filter categories…"
-										className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+										className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500"
 									/>
 								</li>
 								<li
@@ -235,7 +239,7 @@ export function AddIncomeItemModal({
 											aria-selected={
 												categoryId === cat.id
 											}
-											className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+											className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-rose-50 text-rose-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
 											onClick={() => {
 												setCategoryId(cat.id)
 												setIsCategoryOpen(false)
@@ -250,20 +254,21 @@ export function AddIncomeItemModal({
 					</div>
 					<div>
 						<label
-							htmlFor="planned-amount"
+							htmlFor="expense-planned-amount"
 							className="block text-xs font-medium text-gray-700 mb-1"
 						>
-							Planned Amount ($) <span className="text-red-500">*</span>
+							Planned Amount ($){' '}
+							<span className="text-red-500">*</span>
 						</label>
 						<input
-							id="planned-amount"
+							id="expense-planned-amount"
 							type="number"
 							step="0.01"
 							min="0"
 							value={plannedAmount}
 							onChange={(e) => setPlannedAmount(e.target.value)}
 							placeholder="0.00"
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500"
 						/>
 					</div>
 					<div className="flex gap-2 justify-end pt-2">
@@ -277,9 +282,9 @@ export function AddIncomeItemModal({
 						<button
 							type="submit"
 							disabled={isSubmitting}
-							className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 border border-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-rose-600 rounded-md hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
-							{isSubmitting ? 'Adding...' : 'Add Income'}
+							{isSubmitting ? 'Adding...' : 'Add Expense'}
 						</button>
 					</div>
 				</form>

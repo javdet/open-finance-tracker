@@ -230,23 +230,55 @@ export async function deleteOperation(
 }
 
 /**
- * Sum amount_in_base for operations in a date range, optionally by category.
- * Used for budget vs actual: filter operation_type = 'payment' for expenses.
+ * Sum actual amounts for operations in a date range, grouped by category.
+ * Converts to the budget base currency using exchange_rates when
+ * amount_in_base is NULL.
+ *
+ * Conversion logic per row:
+ *   1. Use amount_in_base when present (already in base currency).
+ *   2. If the operation currency matches baseCurrencyCode → ABS(amount).
+ *   3. Otherwise divide ABS(amount) by the exchange rate
+ *      (base→counter, e.g. 1 USD = 33.5 THB → THB/33.5 = USD).
+ *      Falls back to NULL (excluded from SUM) when no rate is found.
  */
 export async function sumAmountInBaseByCategory(
 	userId: string,
 	fromTime: string,
 	toTime: string,
 	operationType: 'payment' | 'income',
+	baseCurrencyCode: string,
 	pool?: Pool,
 ): Promise<{ category_id: string; actual_amount: string }[]> {
 	const client = pool ?? getPool()
-	const result = await client.query<{ category_id: string; actual_amount: string }>(
-		`SELECT category_id::text AS category_id, COALESCE(SUM(amount_in_base), 0)::text AS actual_amount
-		 FROM operations
-		 WHERE user_id = $1 AND operation_time >= $2 AND operation_time < $3 AND operation_type = $4 AND category_id IS NOT NULL
-		 GROUP BY category_id`,
-		[userId, fromTime, toTime, operationType],
+	const result = await client.query<{
+		category_id: string
+		actual_amount: string
+	}>(
+		`SELECT o.category_id::text AS category_id,
+		        COALESCE(SUM(
+		          COALESCE(
+		            o.amount_in_base,
+		            CASE
+		              WHEN o.currency_code = $5 THEN ABS(o.amount)
+		              ELSE ABS(o.amount) / NULLIF(
+		                (SELECT er.rate
+		                 FROM exchange_rates er
+		                 WHERE er.base_currency_code = $5
+		                   AND er.counter_currency_code = o.currency_code
+		                   AND er.rate_date <= o.operation_time::date
+		                 ORDER BY er.rate_date DESC
+		                 LIMIT 1), 0)
+		            END
+		          )
+		        ), 0)::text AS actual_amount
+		 FROM operations o
+		 WHERE o.user_id = $1
+		   AND o.operation_time >= $2
+		   AND o.operation_time < $3
+		   AND o.operation_type = $4
+		   AND o.category_id IS NOT NULL
+		 GROUP BY o.category_id`,
+		[userId, fromTime, toTime, operationType, baseCurrencyCode],
 	)
 	return result.rows
 }

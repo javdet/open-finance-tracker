@@ -5,8 +5,108 @@ import {
 	fetchBudgetVsActualReport,
 } from '@/api/budgets'
 import { IncomeSection } from './IncomeSection'
+import { ExpenseSection } from './ExpenseSection'
+import { clsx } from '@/lib/clsx'
 
 const DEFAULT_USER_ID = '1'
+
+function formatMoney(amount: number, currencyCode: string): string {
+	try {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: currencyCode,
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 2,
+		}).format(amount)
+	} catch {
+		const formatted = new Intl.NumberFormat('en-US', {
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 2,
+		}).format(amount)
+		return `${formatted} ${currencyCode}`
+	}
+}
+
+interface BalanceSummaryProps {
+	report: BudgetVsActualReport
+}
+
+function BalanceSummary({ report }: BalanceSummaryProps) {
+	const {
+		incomeTotalPlanned,
+		incomeTotalActual,
+		expenseTotalPlanned,
+		expenseTotalActual,
+		baseCurrencyCode,
+	} = report
+
+	const plannedBalance = incomeTotalPlanned - expenseTotalPlanned
+	const actualBalance = incomeTotalActual - expenseTotalActual
+
+	return (
+		<div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+			<h3 className="text-base font-semibold text-gray-900 mb-4">
+				Balance Summary
+			</h3>
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				<div
+					className={clsx(
+						'rounded-lg p-4 border',
+						plannedBalance >= 0
+							? 'bg-emerald-50 border-emerald-200'
+							: 'bg-red-50 border-red-200',
+					)}
+				>
+					<p className="text-sm font-medium text-gray-600 mb-1">
+						Planned Balance
+					</p>
+					<p className="text-xs text-gray-500 mb-2">
+						Income {formatMoney(incomeTotalPlanned, baseCurrencyCode)}
+						{' \u2212 '}
+						Expenses {formatMoney(expenseTotalPlanned, baseCurrencyCode)}
+					</p>
+					<p
+						className={clsx(
+							'text-2xl font-bold',
+							plannedBalance >= 0
+								? 'text-emerald-700'
+								: 'text-red-700',
+						)}
+					>
+						{formatMoney(plannedBalance, baseCurrencyCode)}
+					</p>
+				</div>
+				<div
+					className={clsx(
+						'rounded-lg p-4 border',
+						actualBalance >= 0
+							? 'bg-emerald-50 border-emerald-200'
+							: 'bg-red-50 border-red-200',
+					)}
+				>
+					<p className="text-sm font-medium text-gray-600 mb-1">
+						Actual Balance
+					</p>
+					<p className="text-xs text-gray-500 mb-2">
+						Income {formatMoney(incomeTotalActual, baseCurrencyCode)}
+						{' \u2212 '}
+						Expenses {formatMoney(expenseTotalActual, baseCurrencyCode)}
+					</p>
+					<p
+						className={clsx(
+							'text-2xl font-bold',
+							actualBalance >= 0
+								? 'text-emerald-700'
+								: 'text-red-700',
+						)}
+					>
+						{formatMoney(actualBalance, baseCurrencyCode)}
+					</p>
+				</div>
+			</div>
+		</div>
+	)
+}
 
 const MONTH_NAMES = [
 	'JANUARY',
@@ -153,17 +253,25 @@ export function BudgetPage() {
 				</div>
 			)}
 
-			{isLoading ? (
-				<div className="text-sm text-gray-500 py-8 text-center">
-					Loading budget...
-				</div>
-			) : budget ? (
+		{isLoading ? (
+			<div className="text-sm text-gray-500 py-8 text-center">
+				Loading budget...
+			</div>
+		) : budget ? (
+			<>
 				<IncomeSection
 					budgetId={budget.id}
 					report={report}
 					onRefresh={handleRefresh}
 				/>
-			) : null}
+				<ExpenseSection
+					budgetId={budget.id}
+					report={report}
+					onRefresh={handleRefresh}
+				/>
+				{report && <BalanceSummary report={report} />}
+			</>
+		) : null}
 		</div>
 	)
 }

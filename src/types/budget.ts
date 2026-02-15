@@ -57,6 +57,7 @@ export interface UpdateBudgetInput {
 export interface BudgetVsActualRow {
 	categoryId: string
 	categoryName: string
+	categoryDirection: 'income' | 'expense'
 	plannedAmount: number
 	actualAmount: number
 	variance: number
@@ -70,10 +71,16 @@ export interface BudgetVsActualReport {
 	endDate: string
 	baseCurrencyCode: string
 	rows: BudgetVsActualRow[]
-	/** Total planned (expense categories). */
+	/** Total planned (all categories). */
 	totalPlanned: number
-	/** Total actual (payments in period). */
+	/** Total actual (all operations in period). */
 	totalActual: number
 	/** totalPlanned - totalActual (positive = under budget). */
 	totalVariance: number
+	/** Income-only totals. */
+	incomeTotalPlanned: number
+	incomeTotalActual: number
+	/** Expense-only totals. */
+	expenseTotalPlanned: number
+	expenseTotalActual: number
 }

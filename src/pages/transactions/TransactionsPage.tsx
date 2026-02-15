@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { Operation, Category } from '@/types'
 import {
 	fetchOperations,
@@ -148,6 +148,9 @@ function EditOperationModal({
 	>('expense')
 	const [categoryId, setCategoryId] = useState<string>('')
 	const [categories, setCategories] = useState<Category[]>([])
+	const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+	const [categorySearch, setCategorySearch] = useState('')
+	const categoryDropdownRef = useRef<HTMLDivElement>(null)
 	const [amount, setAmount] = useState('')
 	const [date, setDate] = useState('')
 	const [accountId, setAccountId] = useState('')
@@ -196,7 +199,26 @@ function EditOperationModal({
 		if (transactionType === 'transfer') {
 			setCategoryId('')
 		}
+		setCategorySearch('')
+		setIsCategoryOpen(false)
 	}, [transactionType])
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (
+				categoryDropdownRef.current &&
+				!categoryDropdownRef.current.contains(event.target as Node)
+			) {
+				setIsCategoryOpen(false)
+				setCategorySearch('')
+			}
+		}
+		if (isCategoryOpen) {
+			document.addEventListener('mousedown', handleClickOutside)
+			return () =>
+				document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [isCategoryOpen])
 
 	const selectedAccount = accounts.find((a) => a.id === accountId)
 	const currencyCode = selectedAccount?.currencyCode ?? 'USD'
@@ -397,22 +419,98 @@ function EditOperationModal({
 					</div>
 
 					{showCategory && (
-						<div>
+						<div ref={categoryDropdownRef} className="relative">
 							<label className="block text-xs font-medium text-gray-700 mb-1">
 								Category:
 							</label>
-							<select
-								value={categoryId}
-								onChange={(e) => setCategoryId(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							<button
+								type="button"
+								onClick={() => {
+									if (isCategoryOpen) {
+										setIsCategoryOpen(false)
+										setCategorySearch('')
+									} else {
+										setIsCategoryOpen(true)
+									}
+								}}
+								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
+								aria-haspopup="listbox"
+								aria-expanded={isCategoryOpen}
+								aria-label="Select category"
 							>
-								<option value="">— Select category —</option>
-								{categoryOptions.map((cat) => (
-									<option key={cat.id} value={cat.id}>
-										{(cat.parentCategoryId ? '  ' : '') + cat.name}
-									</option>
-								))}
-							</select>
+								<span className="truncate">
+									{categoryId
+										? categoryOptions.find((c) => c.id === categoryId)
+												?.name ?? '— Select category —'
+										: '— Select category —'}
+								</span>
+								<span
+									className={`shrink-0 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
+									aria-hidden
+								>
+									▾
+								</span>
+							</button>
+							{isCategoryOpen && (
+								<ul
+									role="listbox"
+									className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border border-gray-200 bg-white py-1 shadow-lg"
+									aria-label="Category options"
+								>
+									<li className="px-2 pb-1">
+										<input
+											type="text"
+											value={categorySearch}
+											onChange={(e) =>
+												setCategorySearch(e.target.value)
+											}
+											autoFocus
+											placeholder="Type to filter categories…"
+											className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+										/>
+									</li>
+									<li
+										role="option"
+										aria-selected={!categoryId}
+										className="cursor-pointer px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+										onClick={() => {
+											setCategoryId('')
+											setIsCategoryOpen(false)
+											setCategorySearch('')
+										}}
+									>
+										— Select category —
+									</li>
+									{categoryOptions
+										.filter((cat) => {
+											if (!categorySearch.trim()) {
+												return true
+											}
+											return cat.name
+												.toLowerCase()
+												.includes(
+													categorySearch.toLowerCase(),
+												)
+										})
+										.map((cat) => (
+											<li
+												key={cat.id}
+												role="option"
+												aria-selected={
+													categoryId === cat.id
+												}
+												className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+												onClick={() => {
+													setCategoryId(cat.id)
+													setIsCategoryOpen(false)
+													setCategorySearch('')
+												}}
+											>
+												{cat.name}
+											</li>
+										))}
+								</ul>
+							)}
 						</div>
 					)}
 
