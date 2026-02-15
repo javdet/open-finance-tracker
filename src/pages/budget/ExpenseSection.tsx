@@ -63,12 +63,12 @@ export function ExpenseSection({
 		return category?.type === 'expense'
 	})
 
-	// Create map of actual amounts by category
+	// Create map of actual amounts by category (use report's categoryDirection so
+	// we don't depend on categories being loaded yet)
 	const actualByCategory = new Map<string, number>()
 	if (report) {
 		report.rows.forEach((row) => {
-			const category = categories.find((c) => c.id === row.categoryId)
-			if (category?.type === 'expense') {
+			if (row.categoryDirection === 'expense') {
 				actualByCategory.set(row.categoryId, row.actualAmount)
 			}
 		})

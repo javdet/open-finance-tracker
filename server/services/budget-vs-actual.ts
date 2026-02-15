@@ -2,10 +2,13 @@
  * Budget vs actual report: compares planned amounts (budget_items) to actual
  * spending/income over the budget date range, converting foreign-currency
  * operations to the budget's base currency via exchange_rates.
+ * Includes rows for categories that have actual transactions even when there
+ * is no budget item for that category (planned=0).
  */
 import { getPool } from '../db/client.js'
 import * as budgetsRepo from '../repositories/budgets.js'
 import * as budgetItemsRepo from '../repositories/budget-items.js'
+import * as categoriesRepo from '../repositories/categories.js'
 import * as operationsRepo from '../repositories/operations.js'
 import { ensureRatesForDate } from './exchange-rate-cache.js'
 
@@ -91,28 +94,25 @@ export async function getBudgetVsActualReport(
 
 	const baseCurrency = budget.baseCurrencyCode
 
-	// Fetch actuals for both income and expenses
+	// Fetch actuals for both income and expenses (always fetch so totals are
+	// correct even when there are no budget items for that type)
 	const [incomeActuals, expenseActuals] = await Promise.all([
-		incomeItems.length > 0
-			? operationsRepo.sumAmountInBaseByCategory(
-					userId,
-					fromTime,
-					toTime,
-					'income',
-					baseCurrency,
-					pool,
-				)
-			: [],
-		expenseItems.length > 0
-			? operationsRepo.sumAmountInBaseByCategory(
-					userId,
-					fromTime,
-					toTime,
-					'payment',
-					baseCurrency,
-					pool,
-				)
-			: [],
+		operationsRepo.sumAmountInBaseByCategory(
+			userId,
+			fromTime,
+			toTime,
+			'income',
+			baseCurrency,
+			pool,
+		),
+		operationsRepo.sumAmountInBaseByCategory(
+			userId,
+			fromTime,
+			toTime,
+			'payment',
+			baseCurrency,
+			pool,
+		),
 	])
 
 	const actualByCategory = new Map<string, number>()

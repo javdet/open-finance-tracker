@@ -42,13 +42,14 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 
 	const plannedBalance = incomeTotalPlanned - expenseTotalPlanned
 	const actualBalance = incomeTotalActual - expenseTotalActual
+	const difference = actualBalance - plannedBalance
 
 	return (
 		<div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
 			<h3 className="text-base font-semibold text-gray-900 mb-4">
 				Balance Summary
 			</h3>
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 				<div
 					className={clsx(
 						'rounded-lg p-4 border',
@@ -101,6 +102,36 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 						)}
 					>
 						{formatMoney(actualBalance, baseCurrencyCode)}
+					</p>
+				</div>
+				<div
+					className={clsx(
+						'rounded-lg p-4 border',
+						difference > 0
+							? 'bg-emerald-50 border-emerald-200'
+							: difference < 0
+								? 'bg-red-50 border-red-200'
+								: 'bg-gray-50 border-gray-200',
+					)}
+				>
+					<p className="text-sm font-medium text-gray-600 mb-1">
+						Difference
+					</p>
+					<p className="text-xs text-gray-500 mb-2">
+						Actual − Planned
+					</p>
+					<p
+						className={clsx(
+							'text-2xl font-bold',
+							difference > 0
+								? 'text-emerald-700'
+								: difference < 0
+									? 'text-red-700'
+									: 'text-gray-700',
+						)}
+					>
+						{difference >= 0 ? '+' : ''}
+						{formatMoney(difference, baseCurrencyCode)}
 					</p>
 				</div>
 			</div>
