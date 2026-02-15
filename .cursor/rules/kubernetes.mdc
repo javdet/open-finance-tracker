@@ -1,0 +1,180 @@
+---
+globs: helm/*.yaml,helm/**/*.yaml,manifests/**/*.yaml
+alwaysApply: false
+---
+  You are a Senior DevOps Engineer and Backend Solutions Developer with expertise in Kubernetes, Helm, Helmfile, go template.
+  
+# Kubernetes Manifests Standards  
+- One resource per file, or logically grouped (Deployment + Service)
+- Filename: `<kind>-<name>.yaml` lowercase (deployment-api.yaml, service-api.yaml)
+- Use `---` separator for multiple resources in single file
+- Create new chart based on the best practice for example kube-prometheus-stack chart
+
+Every resource must have:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  namespace: production      # always explicit, never rely on context
+  labels:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: platform
+```
+
+## Labels Convention
+Follow kubernetes recommended labels:
+- `app.kubernetes.io/name` - application name
+- `app.kubernetes.io/instance` - instance identifier
+- `app.kubernetes.io/version` - app version
+- `app.kubernetes.io/component` - component within architecture
+- `app.kubernetes.io/part-of` - higher level application
+- `app.kubernetes.io/managed-by` - tool managing resource
+
+## ConfigMaps and Secrets
+- Use `stringData` for Secrets (base64 auto-encoded)
+- Add checksum annotation for pod restart on config change
+- Never commit real secrets, use placeholders or sealed-secrets
+
+## Do NOT
+- Use `latest` tag for images
+- Omit namespace in manifests
+- Set cpu limits without understanding throttling implications
+- Use hostPath volumes in production
+- Run containers as root without explicit reason
+
+# Kubernetes Helm charts Standards  
+## values.yaml
+- Document every value with comments
+- Group related values
+- Use camelCase for keys
+- Provide sensible defaults
+```yaml
+## Whitespace Control
+```yaml
+# Remove whitespace before
+{{- if .Values.enabled }}
+# Remove whitespace after
+{{ .Values.name -}}
+# Remove both
+{{- .Values.name -}}
+```
+
+### Indentation
+Use `nindent` for proper YAML indentation:
+```yaml
+metadata:
+  labels:
+    {{- include "mychart.labels" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+```
+
+### Conditionals
+```yaml
+{{- if .Values.ingress.enabled }}
+# resource here
+{{- end }}
+
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+# nested condition
+{{- end }}
+
+# Default values
+{{ .Values.name | default "myapp" }}
+{{ .Values.port | default 8080 | int }}
+```
+
+### Loops
+```yaml
+{{- range .Values.extraEnvVars }}
+- name: {{ .name }}
+  value: {{ .value | quote }}
+{{- end }}
+
+{{- range $key, $value := .Values.configMap }}
+{{ $key }}: {{ $value | quote }}
+{{- end }}
+```
+
+### Required Values
+```yaml
+{{ required "image.repository is required" .Values.image.repository }}
+```
+
+## _helpers.tpl Patterns
+```yaml
+{{/*
+Chart name truncated to 63 chars
+*/}}
+{{- define "mychart.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Fullname with release
+*/}}
+{{- define "mychart.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "mychart.labels" -}}
+helm.sh/chart: {{ include "mychart.chart" . }}
+{{ include "mychart.selectorLabels" . }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "mychart.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "mychart.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+## Quoting Rules
+```yaml
+# Always quote strings that might be interpreted as numbers/bools
+value: {{ .Values.name | quote }}
+
+# For integers, no quotes but cast explicitly
+port: {{ .Values.port | int }}
+
+# For environment variables, always quote
+- name: MY_VAR
+  value: {{ .Values.myVar | quote }}
+```
+
+## Debug Templates
+```yaml
+# Render template output for debugging
+helm template mychart . --debug
+
+# Show computed values
+helm get values release-name
+```
+
+## Do NOT
+- Hardcode values that should be configurable
+- Use `toYaml` without `nindent`
+- Forget whitespace control causing empty lines
+- Create circular dependencies in helpers
+- Use `required` for values with sensible defaults

@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    shm_size: '256m'
+    environment:
+      - POSTGRES_USER=tracker
+      - POSTGRES_PASSWORD=fdflkj234523jg
+      - POSTGRES_DB=tracker
+    volumes:
+      - ./data:/var/lib/postgresql
+      - ./db/scripts/:/opt/scripts:ro
+    restart: always
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U tracker -d tracker']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "250m"
+        max-file: "3"
+
+  db-init:
+    image: postgres:18
+    container_name: db-init
+    environment:
+      PGPASSWORD: fdflkj234523jg
+    volumes:
+      - ./db/schema.sql:/schema.sql:ro
+    command: psql -h postgres -U tracker -d tracker -f /schema.sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build: .
+    container_name: finance-tracker-app
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgres://tracker:fdflkj234523jg@postgres:5432/tracker
+    ports:
+      - "3001:3001"
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    restart: always

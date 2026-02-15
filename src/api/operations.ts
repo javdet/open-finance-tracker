@@ -1,0 +1,62 @@
+/**
+ * API client for operations (read/write using backend data access layer).
+ */
+import type {
+	CreateOperationInput,
+	Operation,
+	OperationsQuery,
+	UpdateOperationInput,
+} from '@/types'
+import { get, post, patch, del, type ApiOptions } from './client'
+
+export interface ListOperationsResponse {
+	rows: Operation[]
+	total: number
+}
+
+export function fetchOperations(
+	query: OperationsQuery,
+	options?: ApiOptions,
+): Promise<ListOperationsResponse> {
+	const params = new URLSearchParams()
+	params.set('userId', query.userId)
+	if (query.fromTime) params.set('fromTime', query.fromTime)
+	if (query.toTime) params.set('toTime', query.toTime)
+	if (query.accountId) params.set('accountId', query.accountId)
+	if (query.categoryId) params.set('categoryId', query.categoryId)
+	if (query.operationType) params.set('operationType', query.operationType)
+	if (query.limit !== undefined) params.set('limit', String(query.limit))
+	if (query.offset !== undefined) params.set('offset', String(query.offset))
+	const base = options?.userId ? { ...options } : undefined
+	return get<ListOperationsResponse>(
+		`/api/operations?${params.toString()}`,
+		base,
+	)
+}
+
+export function fetchOperationById(
+	id: string,
+	options?: ApiOptions & { userId?: string },
+): Promise<Operation> {
+	const query = options?.userId ? `?userId=${encodeURIComponent(options.userId)}` : ''
+	return get<Operation>(`/api/operations/${encodeURIComponent(id)}${query}`, options)
+}
+
+export function createOperation(
+	data: CreateOperationInput,
+	options?: ApiOptions,
+): Promise<Operation> {
+	return post<Operation>('/api/operations', data, options)
+}
+
+export function updateOperation(
+	id: string,
+	data: UpdateOperationInput,
+	options?: ApiOptions,
+): Promise<Operation> {
+	return patch<Operation>(`/api/operations/${encodeURIComponent(id)}`, data, options)
+}
+
+export function deleteOperation(id: string, options?: ApiOptions): Promise<void> {
+	return del(`/api/operations/${encodeURIComponent(id)}`, options)
+}

@@ -1,0 +1,17 @@
+---
+globs: *.sh,**/*.sh
+alwaysApply: false
+---
+  - Use descriptive names for scripts and variables (e.g., `backup_files.sh` or `log_rotation`).
+  - Write modular scripts with functions to enhance readability and reuse.
+  - Include comments for each major section or function.
+  - Validate all inputs using `getopts` or manual validation logic.
+  - Avoid hardcoding; use environment variables or parameterized inputs.
+  - Ensure portability by using POSIX-compliant syntax.
+  - Use `shellcheck` to lint scripts and improve quality.
+  - Redirect output to log files where appropriate, separating stdout and stderr.
+  - Use `trap` for error handling and cleaning up temporary files.
+  - Apply best practices for automation:
+    - Automate cron jobs securely.
+    - Use SCP/SFTP for remote transfers with key-based authentication.
+  

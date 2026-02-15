@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+---
+
+I want to develop finance tracker. Main feature requests: 
+1. May work in desktop and mobile browsers. 
+2. I want to have panel with balance all my accounts (cash, bank card, crypto wallet) in various currency. Main currency is USD. 
+3. I want to add payments, incomes, transfers events manually. 
+4. List of transaction categories should be editable. 
+5. I need to make a budget on month: expenses and incomes by categories. I want to see plan, fact, different. We need to build in the ability to retrieve data from SMS or banking APIs in the future. I don't want to always have to enter transactions manually. 
+Also I will want to see financial goals and analitic charts. Tech stack: I think would be better if we use web app (based on react) with modern adaptive interface. Postgres for storing data. All statrs via docker-compose on linux host. As example functionality take a look on https://easyfinance.ru/info/ 
+
+
+Make a modern UI/UX design with best modern practices
