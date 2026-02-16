@@ -1,4 +1,5 @@
 # Finance tracker: React frontend + Express API, runs in Docker and connects to Postgres
+# Dependencies are installed during build; host node_modules is not used (.dockerignore).
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -9,7 +10,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Production image: serve built frontend + API
+# Production image: serve built frontend + API (deps installed here, no host node_modules)
 FROM node:20-alpine
 
 WORKDIR /app

@@ -492,15 +492,15 @@ export function CategoriesPage() {
 		loadGroups()
 	}, [])
 
+	// Expand all top-level categories on initial load only (not when user clicks "Collapse all")
 	useEffect(() => {
-		if (expandedSystemCategoryIds.length > 0) return
 		const initialIds = categories
 			.filter((c) => !c.groupId && !c.parentCategoryId)
 			.map((c) => c.id)
 		if (initialIds.length > 0) {
 			setExpandedSystemCategoryIds(initialIds)
 		}
-	}, [categories, expandedSystemCategoryIds.length])
+	}, [categories])
 
 	const handleAddSuccess = useCallback(() => {
 		loadCategories()

@@ -57,32 +57,19 @@ export function ExpenseSection({
 			.finally(() => setIsLoading(false))
 	}, [budgetId])
 
-	// Filter to expense categories only
-	const expenseItems = budgetItems.filter((item) => {
-		const category = categories.find((c) => c.id === item.categoryId)
-		return category?.type === 'expense'
-	})
-
-	// Create map of actual amounts by category (use report's categoryDirection so
-	// we don't depend on categories being loaded yet)
-	const actualByCategory = new Map<string, number>()
-	if (report) {
-		report.rows.forEach((row) => {
-			if (row.categoryDirection === 'expense') {
-				actualByCategory.set(row.categoryId, row.actualAmount)
-			}
-		})
-	}
-
-	// Calculate totals
-	const totalPlanned = expenseItems.reduce(
-		(sum, item) => sum + item.plannedAmount,
-		0,
+	// Use report rows for expenses so we show categories with actuals even without a budget item
+	const expenseRows = report?.rows.filter((r) => r.categoryDirection === 'expense') ?? []
+	const budgetItemsByCategory = new Map(
+		budgetItems.map((item) => [item.categoryId, item]),
 	)
-	const totalActual = expenseItems.reduce(
-		(sum, item) => sum + (actualByCategory.get(item.categoryId) ?? 0),
-		0,
-	)
+
+	// Totals from report when available
+	const totalPlanned = report
+		? report.expenseTotalPlanned
+		: expenseRows.reduce((sum, r) => sum + r.plannedAmount, 0)
+	const totalActual = report
+		? report.expenseTotalActual
+		: expenseRows.reduce((sum, r) => sum + r.actualAmount, 0)
 	const totalDifference = totalPlanned - totalActual
 
 	const currencyCode = report?.baseCurrencyCode ?? 'USD'
@@ -154,7 +141,7 @@ export function ExpenseSection({
 							</tr>
 						</thead>
 						<tbody>
-							{expenseItems.length === 0 ? (
+							{expenseRows.length === 0 ? (
 								<tr>
 									<td
 										colSpan={5}
@@ -165,30 +152,50 @@ export function ExpenseSection({
 									</td>
 								</tr>
 							) : (
-								expenseItems.map((item) => {
-									const category = categories.find(
-										(c) => c.id === item.categoryId,
-									)
-									if (!category) return null
+								expenseRows.map((row) => {
+									const item = budgetItemsByCategory.get(row.categoryId)
+									const category = categories.find((c) => c.id === row.categoryId)
+									if (item && category) {
+										return (
+											<BudgetItemRow
+												key={item.id}
+												item={item}
+												category={category}
+												actualAmount={row.actualAmount}
+												currencyCode={currencyCode}
+												onUpdate={handleItemUpdate}
+												onDelete={handleItemUpdate}
+											/>
+										)
+									}
+									// Actuals-only row (no budget item)
 									return (
-										<BudgetItemRow
-											key={item.id}
-											item={item}
-											category={category}
-											actualAmount={
-												actualByCategory.get(
-													item.categoryId,
-												) ?? 0
-											}
-											currencyCode={currencyCode}
-											onUpdate={handleItemUpdate}
-											onDelete={handleItemUpdate}
-										/>
+										<tr
+											key={row.categoryId}
+											className="border-b border-gray-100 hover:bg-gray-50"
+										>
+											<td
+												className="px-4 py-3 text-gray-800 truncate"
+												title={row.categoryName}
+											>
+												{row.categoryName}
+											</td>
+											<td className="px-4 py-3 text-right text-gray-500">
+												{formatMoney(0, currencyCode)}
+											</td>
+											<td className="px-4 py-3 text-right text-gray-800">
+												{formatMoney(row.actualAmount, currencyCode)}
+											</td>
+											<td className="px-4 py-3 text-right text-red-600 font-medium">
+												{formatMoney(-row.actualAmount, currencyCode)}
+											</td>
+											<td className="px-4 py-3" />
+										</tr>
 									)
 								})
 							)}
 						</tbody>
-						{expenseItems.length > 0 && (
+						{expenseRows.length > 0 && (
 							<tfoot className="bg-gray-50 font-medium">
 								<tr className="border-t-2 border-gray-200">
 									<td className="px-4 py-2 text-gray-900">

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Account, Category } from '@/types'
 import type { OperationType } from '@/types/operation'
 import { fetchCategories, createOperation } from '@/api'
+import { TransactionTypeSelector } from '@/components/transaction-type-selector/transaction-type-selector'
 
 const DEFAULT_USER_ID = '1'
 
@@ -299,22 +300,10 @@ export function AddOperationModal({
 							<label className="block text-xs font-medium text-gray-700 mb-1">
 								Transaction Type:
 							</label>
-							<select
+							<TransactionTypeSelector
 								value={transactionType}
-								onChange={(e) =>
-									setTransactionType(
-										e.target.value as
-											| 'expense'
-											| 'income'
-											| 'transfer',
-									)
-								}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
-							>
-								<option value="expense">Expense</option>
-								<option value="income">Income</option>
-								<option value="transfer">Transfer</option>
-							</select>
+								onChange={setTransactionType}
+							/>
 						</div>
 					</div>
 

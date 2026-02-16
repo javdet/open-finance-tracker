@@ -59,44 +59,17 @@ export async function getBudgetVsActualReport(
 
 	const itemsWithNames =
 		await budgetItemsRepo.getBudgetItemsWithCategoryNames(budgetId, pool)
-	if (itemsWithNames.length === 0) {
-		return {
-			budgetId: budget.id,
-			budgetName: budget.name,
-			startDate: budget.startDate,
-			endDate: budget.endDate,
-			baseCurrencyCode: budget.baseCurrencyCode,
-			rows: [],
-			totalPlanned: 0,
-			totalActual: 0,
-			totalVariance: 0,
-			incomeTotalPlanned: 0,
-			incomeTotalActual: 0,
-			expenseTotalPlanned: 0,
-			expenseTotalActual: 0,
-		}
-	}
 
-	// Operations range: start_date 00:00:00 to end_date 23:59:59.999 (inclusive day)
+	// Operations range: [start_date 00:00:00, end_date+1 00:00:00)
 	const fromTime = `${budget.startDate}T00:00:00.000Z`
 	const toTimeExclusive = new Date(budget.endDate)
 	toTimeExclusive.setUTCDate(toTimeExclusive.getUTCDate() + 1)
 	const toTime = toTimeExclusive.toISOString()
 
-	// Separate items by category direction (income vs expense)
-	const incomeItems = itemsWithNames.filter((item) => item.category_direction === 'income')
-	const expenseItems = itemsWithNames.filter((item) => item.category_direction === 'expense')
-
-	// Ensure exchange rates are cached so the SQL conversion can look them up.
-	// We cache rates for the budget start date; Frankfurter returns the nearest
-	// previous business-day rates when the exact date is unavailable.
 	await ensureRatesForDate(budget.baseCurrencyCode, budget.startDate, pool)
-
 	const baseCurrency = budget.baseCurrencyCode
 
-	// Fetch actuals for both income and expenses (always fetch so totals are
-	// correct even when there are no budget items for that type)
-	const [incomeActuals, expenseActuals] = await Promise.all([
+	const [incomeActuals, expenseActuals, categories] = await Promise.all([
 		operationsRepo.sumAmountInBaseByCategory(
 			userId,
 			fromTime,
@@ -113,6 +86,7 @@ export async function getBudgetVsActualReport(
 			baseCurrency,
 			pool,
 		),
+		categoriesRepo.listCategoriesByUser(userId, pool),
 	])
 
 	const actualByCategory = new Map<string, number>()
@@ -123,6 +97,9 @@ export async function getBudgetVsActualReport(
 		actualByCategory.set(a.category_id, Number(a.actual_amount))
 	})
 
+	const categoryById = new Map(categories.map((c) => [c.id, c]))
+	const budgetItemCategoryIds = new Set(itemsWithNames.map((i) => i.category_id))
+
 	let totalPlanned = 0
 	let totalActual = 0
 	let incomeTotalPlanned = 0
@@ -130,7 +107,10 @@ export async function getBudgetVsActualReport(
 	let expenseTotalPlanned = 0
 	let expenseTotalActual = 0
 
-	const rows: BudgetVsActualRow[] = itemsWithNames.map((item) => {
+	const rows: BudgetVsActualRow[] = []
+
+	// Rows from budget items (planned + actual)
+	for (const item of itemsWithNames) {
 		const planned = Number(item.planned_amount)
 		const actual = actualByCategory.get(item.category_id) ?? 0
 		const direction =
@@ -138,7 +118,6 @@ export async function getBudgetVsActualReport(
 
 		totalPlanned += planned
 		totalActual += actual
-
 		if (direction === 'income') {
 			incomeTotalPlanned += planned
 			incomeTotalActual += actual
@@ -146,8 +125,7 @@ export async function getBudgetVsActualReport(
 			expenseTotalPlanned += planned
 			expenseTotalActual += actual
 		}
-
-		return {
+		rows.push({
 			categoryId: item.category_id,
 			categoryName: item.category_name,
 			categoryDirection: direction as 'income' | 'expense',
@@ -155,8 +133,31 @@ export async function getBudgetVsActualReport(
 			actualAmount: actual,
 			variance: planned - actual,
 			currencyCode: budget.baseCurrencyCode,
+		})
+	}
+
+	// Rows for categories with actual transactions but no budget item
+	for (const [categoryId, actual] of actualByCategory) {
+		if (budgetItemCategoryIds.has(categoryId)) continue
+		const cat = categoryById.get(categoryId)
+		if (!cat) continue
+		const direction = cat.type
+		totalActual += actual
+		if (direction === 'income') {
+			incomeTotalActual += actual
+		} else {
+			expenseTotalActual += actual
 		}
-	})
+		rows.push({
+			categoryId,
+			categoryName: cat.name,
+			categoryDirection: direction as 'income' | 'expense',
+			plannedAmount: 0,
+			actualAmount: actual,
+			variance: -actual,
+			currencyCode: budget.baseCurrencyCode,
+		})
+	}
 
 	return {
 		budgetId: budget.id,
