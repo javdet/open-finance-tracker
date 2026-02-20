@@ -1,9 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { Budget, BudgetVsActualReport } from '@/types'
+import { useNavigate } from 'react-router-dom'
+import type { Budget, BudgetTemplate, BudgetVsActualReport } from '@/types'
 import {
 	findOrCreateMonthlyBudget,
 	fetchBudgetVsActualReport,
 } from '@/api/budgets'
+import {
+	fetchTemplates,
+	applyTemplate,
+} from '@/api/budget-templates'
 import { IncomeSection } from './IncomeSection'
 import { ExpenseSection } from './ExpenseSection'
 import { clsx } from '@/lib/clsx'
@@ -193,13 +198,22 @@ function ChevronRightIcon() {
 }
 
 export function BudgetPage() {
+	const navigate = useNavigate()
 	const now = new Date()
 	const [currentMonth, setCurrentMonth] = useState(now.getMonth() + 1)
 	const [currentYear, setCurrentYear] = useState(now.getFullYear())
 	const [budget, setBudget] = useState<Budget | null>(null)
 	const [report, setReport] = useState<BudgetVsActualReport | null>(null)
+	const [templates, setTemplates] = useState<BudgetTemplate[]>([])
 	const [error, setError] = useState<string | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
+	const [applySuccess, setApplySuccess] = useState(false)
+
+	useEffect(() => {
+		fetchTemplates({ userId: DEFAULT_USER_ID })
+			.then(setTemplates)
+			.catch(() => setTemplates([]))
+	}, [])
 
 	const loadBudget = useCallback(async () => {
 		setIsLoading(true)
@@ -251,10 +265,82 @@ export function BudgetPage() {
 		loadBudget()
 	}
 
+	function handleTemplateSelect(value: string) {
+		if (value === '__create__') {
+			navigate('/budget/templates/new')
+			return
+		}
+		if (value) {
+			navigate(`/budget/templates/${value}`)
+		}
+	}
+
+	async function handleApplyTemplate(templateId: string) {
+		if (!templateId) return
+		setError(null)
+		try {
+			await applyTemplate(templateId, currentMonth, currentYear, {
+				userId: DEFAULT_USER_ID,
+			})
+			await loadBudget()
+			setApplySuccess(true)
+			setTimeout(() => setApplySuccess(false), 2000)
+		} catch (err) {
+			setError((err as Error).message || 'Failed to apply template')
+		}
+	}
+
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<h2 className="text-xl font-semibold text-gray-900">Budget</h2>
+				<div className="flex flex-wrap items-center gap-3">
+					<div className="flex flex-col gap-1">
+						<label htmlFor="budget-template-select" className="text-xs text-gray-500">
+							Template
+						</label>
+						<select
+							id="budget-template-select"
+							value=""
+							onChange={(e) => handleTemplateSelect(e.target.value)}
+							className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+							aria-label="Select or create template"
+						>
+							<option value="">Select...</option>
+							<option value="__create__">Create template</option>
+							{templates.map((t) => (
+								<option key={t.id} value={t.id}>
+									{t.name}
+								</option>
+							))}
+						</select>
+					</div>
+					<div className="flex flex-col gap-1">
+						<label htmlFor="budget-apply-template-select" className="text-xs text-gray-500">
+							Apply template
+						</label>
+						<select
+							id="budget-apply-template-select"
+							value=""
+							onChange={(e) => {
+								const v = e.target.value
+								if (v) handleApplyTemplate(v)
+								e.target.value = ''
+							}}
+							className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+							aria-label="Apply template to current month"
+						>
+							<option value="">Select...</option>
+							{templates.map((t) => (
+								<option key={t.id} value={t.id}>
+									{t.name}
+								</option>
+							))}
+						</select>
+					</div>
+				</div>
+			</div>
+			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-3">
 					<button
 						type="button"
@@ -276,6 +362,11 @@ export function BudgetPage() {
 						<ChevronRightIcon />
 					</button>
 				</div>
+				{applySuccess && (
+					<p className="text-sm text-emerald-600 font-medium">
+						Template applied.
+					</p>
+				)}
 			</div>
 
 			{error && (

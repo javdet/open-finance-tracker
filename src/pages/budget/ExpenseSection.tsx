@@ -3,6 +3,7 @@ import type { BudgetItem, Category, BudgetVsActualReport } from '@/types'
 import { fetchBudgetItems } from '@/api/budgets'
 import { fetchCategories } from '@/api'
 import { BudgetItemRow } from './BudgetItemRow'
+import { ActualsOnlyBudgetRow } from './ActualsOnlyBudgetRow'
 import { AddExpenseItemModal } from './AddExpenseItemModal'
 import { clsx } from '@/lib/clsx'
 
@@ -168,29 +169,14 @@ export function ExpenseSection({
 											/>
 										)
 									}
-									// Actuals-only row (no budget item)
+									// Actuals-only row (no budget item): allow setting a plan
 									return (
-										<tr
+										<ActualsOnlyBudgetRow
 											key={row.categoryId}
-											className="border-b border-gray-100 hover:bg-gray-50"
-										>
-											<td
-												className="px-4 py-3 text-gray-800 truncate"
-												title={row.categoryName}
-											>
-												{row.categoryName}
-											</td>
-											<td className="px-4 py-3 text-right text-gray-500">
-												{formatMoney(0, currencyCode)}
-											</td>
-											<td className="px-4 py-3 text-right text-gray-800">
-												{formatMoney(row.actualAmount, currencyCode)}
-											</td>
-											<td className="px-4 py-3 text-right text-red-600 font-medium">
-												{formatMoney(-row.actualAmount, currencyCode)}
-											</td>
-											<td className="px-4 py-3" />
-										</tr>
+											row={row}
+											budgetId={budgetId}
+											onSuccess={handleItemUpdate}
+										/>
 									)
 								})
 							)}

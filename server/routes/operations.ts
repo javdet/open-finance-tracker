@@ -41,6 +41,22 @@ router.get('/', async (req: Request, res: Response) => {
 	}
 })
 
+router.get('/category-usage', async (req: Request, res: Response) => {
+	try {
+		const userId = getUserId(req)
+		const operationType = req.query.operationType as 'payment' | 'income'
+		if (operationType !== 'payment' && operationType !== 'income') {
+			res.status(400).json({ error: 'operationType must be payment or income' })
+			return
+		}
+		const rows = await operationsRepo.getCategoryUsageCounts(userId, operationType)
+		res.json({ categoryIds: rows.map((r) => r.category_id) })
+	} catch (err) {
+		console.error('getCategoryUsageCounts', err)
+		res.status(500).json({ error: 'Failed to get category usage' })
+	}
+})
+
 router.get('/:id', async (req: Request, res: Response) => {
 	try {
 		const userId = getUserId(req)

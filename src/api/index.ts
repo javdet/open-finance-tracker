@@ -12,11 +12,15 @@ export {
 export {
 	createOperation,
 	deleteOperation,
+	fetchCategoryUsage,
 	fetchOperationById,
 	fetchOperations,
 	updateOperation,
 } from './operations'
-export type { ListOperationsResponse } from './operations'
+export type {
+	CategoryUsageResponse,
+	ListOperationsResponse,
+} from './operations'
 export {
 	createBudget,
 	deleteBudget,
@@ -26,6 +30,18 @@ export {
 	fetchBudgets,
 	updateBudget,
 } from './budgets'
+export {
+	applyTemplate,
+	createTemplate,
+	createTemplateItem,
+	deleteTemplate,
+	deleteTemplateItem,
+	fetchTemplateById,
+	fetchTemplateItems,
+	fetchTemplates,
+	updateTemplate,
+	updateTemplateItem,
+} from './budget-templates'
 export {
 	createCategory,
 	fetchCategories,

@@ -11,6 +11,7 @@ import accountsRoutes from './routes/accounts.js'
 import operationsRoutes from './routes/operations.js'
 import budgetsRoutes from './routes/budgets.js'
 import budgetReportsRoutes from './routes/budget-reports.js'
+import budgetTemplatesRoutes from './routes/budget-templates.js'
 import categoriesRoutes from './routes/categories.js'
 import exchangeRatesRoutes from './routes/exchange-rates.js'
 import { getPool } from './db/client.js'
@@ -26,6 +27,7 @@ app.use('/api/accounts', accountsRoutes)
 app.use('/api/operations', operationsRoutes)
 app.use('/api/budgets', budgetsRoutes)
 app.use('/api/budgets', budgetReportsRoutes)
+app.use('/api/budget-templates', budgetTemplatesRoutes)
 app.use('/api/categories', categoriesRoutes)
 app.use('/api/exchange-rates', exchangeRatesRoutes)
 

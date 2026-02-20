@@ -3,6 +3,7 @@ import { AppLayout } from '@/components/app-layout/AppLayout'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { TransactionsPage } from '@/pages/transactions/TransactionsPage'
 import { BudgetPage } from '@/pages/budget/BudgetPage'
+import { BudgetTemplateEditorPage } from '@/pages/budget/BudgetTemplateEditorPage'
 import { CategoriesPage } from '@/pages/categories/CategoriesPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
 
@@ -14,6 +15,8 @@ function App() {
 				<Route path="dashboard" element={<DashboardPage />} />
 				<Route path="transactions" element={<TransactionsPage />} />
 				<Route path="budget" element={<BudgetPage />} />
+				<Route path="budget/templates/new" element={<BudgetTemplateEditorPage />} />
+				<Route path="budget/templates/:id" element={<BudgetTemplateEditorPage />} />
 				<Route path="categories" element={<CategoriesPage />} />
 				<Route path="settings" element={<SettingsPage />} />
 			</Route>

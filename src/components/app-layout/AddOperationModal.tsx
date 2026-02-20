@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Account, Category } from '@/types'
 import type { OperationType } from '@/types/operation'
-import { fetchCategories, createOperation } from '@/api'
+import { fetchCategories, fetchCategoryUsage, createOperation } from '@/api'
 import { TransactionTypeSelector } from '@/components/transaction-type-selector/transaction-type-selector'
 
 const DEFAULT_USER_ID = '1'
@@ -63,6 +63,7 @@ export function AddOperationModal({
 	const [transactionType, setTransactionType] = useState<'expense' | 'income' | 'transfer'>('expense')
 	const [categoryId, setCategoryId] = useState<string>('')
 	const [categories, setCategories] = useState<Category[]>([])
+	const [popularCategoryIds, setPopularCategoryIds] = useState<string[]>([])
 	const [categorySearch, setCategorySearch] = useState('')
 	const [amount, setAmount] = useState('')
 	const [date, setDate] = useState('')
@@ -95,16 +96,37 @@ export function AddOperationModal({
 			fetchCategories({ userId: DEFAULT_USER_ID })
 				.then(setCategories)
 				.catch(() => setCategories([]))
-			const today = new Date()
-			setDate(
-				[
+			// Only set date to today when empty (first open); otherwise keep previous transaction date
+			setDate((prev) => {
+				if (prev) return prev
+				const today = new Date()
+				return [
 					today.getFullYear(),
 					(today.getMonth() + 1).toString().padStart(2, '0'),
 					today.getDate().toString().padStart(2, '0'),
-				].join('-'),
-			)
+				].join('-')
+			})
 		}
 	}, [isOpen])
+
+	useEffect(() => {
+		if (!isOpen) return
+		if (transactionType === 'expense') {
+			fetchCategoryUsage(DEFAULT_USER_ID, 'payment', {
+				userId: DEFAULT_USER_ID,
+			})
+				.then((res) => setPopularCategoryIds(res.categoryIds))
+				.catch(() => setPopularCategoryIds([]))
+		} else if (transactionType === 'income') {
+			fetchCategoryUsage(DEFAULT_USER_ID, 'income', {
+				userId: DEFAULT_USER_ID,
+			})
+				.then((res) => setPopularCategoryIds(res.categoryIds))
+				.catch(() => setPopularCategoryIds([]))
+		} else {
+			setPopularCategoryIds([])
+		}
+	}, [isOpen, transactionType])
 
 	useEffect(() => {
 		setCategoryId('')
@@ -122,7 +144,7 @@ export function AddOperationModal({
 
 	const resetForm = useCallback(() => {
 		setAmount('')
-		setDate('')
+		// Keep date so next transaction in session uses the same date
 		setNotes('')
 		setError(null)
 		setTransferAccountId('')
@@ -206,12 +228,19 @@ export function AddOperationModal({
 		onClose,
 	])
 
-	const categoryOptions =
+	const baseOrdered =
 		transactionType === 'expense'
 			? orderedCategoriesForType(categories, 'expense')
 			: transactionType === 'income'
 				? orderedCategoriesForType(categories, 'income')
 				: []
+
+	// Top 10 popular first (by usage in last 3 months), then the rest in tree order
+	const popularFirst = popularCategoryIds
+		.map((id) => baseOrdered.find((c) => c.id === id))
+		.filter((c): c is Category => c != null)
+	const rest = baseOrdered.filter((c) => !popularCategoryIds.includes(c.id))
+	const categoryOptions = [...popularFirst, ...rest]
 
 	const showCategory = transactionType === 'expense' || transactionType === 'income'
 
@@ -330,8 +359,8 @@ export function AddOperationModal({
 								<span className="truncate">
 									{categoryId
 										? categoryOptions.find((c) => c.id === categoryId)?.name ??
-											'— Select category —'
-										: '— Select category —'}
+											''
+										: 'Category'}
 								</span>
 								<span
 									className={`shrink-0 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
@@ -358,42 +387,71 @@ export function AddOperationModal({
 											className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 										/>
 									</li>
-									<li
-										role="option"
-										aria-selected={!categoryId}
-										className="cursor-pointer px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
-										onClick={() => {
-											setCategoryId('')
-											setIsCategoryOpen(false)
-											setCategorySearch('')
-										}}
-									>
-										— Select category —
-									</li>
-									{categoryOptions
-										.filter((cat) => {
-											if (!categorySearch.trim()) {
-												return true
-											}
+									{(() => {
+										const filtered = categoryOptions.filter((cat) => {
+											if (!categorySearch.trim()) return true
 											return cat.name
 												.toLowerCase()
 												.includes(categorySearch.toLowerCase())
 										})
-										.map((cat) => (
-											<li
-												key={cat.id}
-												role="option"
-												aria-selected={categoryId === cat.id}
-												className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
-												onClick={() => {
-													setCategoryId(cat.id)
-													setIsCategoryOpen(false)
-													setCategorySearch('')
-												}}
-											>
-												{cat.name}
-											</li>
-										))}
+										const popularFiltered = filtered.filter((c) =>
+											popularCategoryIds.includes(c.id),
+										)
+										const otherFiltered = filtered.filter(
+											(c) => !popularCategoryIds.includes(c.id),
+										)
+										const showSections =
+											!categorySearch.trim() &&
+											popularFiltered.length > 0
+										return (
+											<>
+												{showSections && (
+													<li className="px-2 pt-1.5 pb-0.5 text-xs font-semibold text-gray-500">
+														Frequently used categories
+													</li>
+												)}
+												{showSections
+													? popularFiltered.map((cat) => (
+															<li
+																key={cat.id}
+																role="option"
+																aria-selected={categoryId === cat.id}
+																className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+																onClick={() => {
+																	setCategoryId(cat.id)
+																	setIsCategoryOpen(false)
+																	setCategorySearch('')
+																}}
+															>
+																{cat.name}
+															</li>
+														))
+													: null}
+												{showSections && otherFiltered.length > 0 && (
+													<li className="px-2 pt-2 pb-0.5 text-xs font-semibold text-gray-500">
+														Other categories
+													</li>
+												)}
+												{(showSections ? otherFiltered : filtered).map(
+													(cat) => (
+														<li
+															key={cat.id}
+															role="option"
+															aria-selected={categoryId === cat.id}
+															className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+															onClick={() => {
+																setCategoryId(cat.id)
+																setIsCategoryOpen(false)
+																setCategorySearch('')
+															}}
+														>
+															{cat.name}
+														</li>
+													),
+												)}
+											</>
+										)
+									})()}
 								</ul>
 							)}
 						</div>

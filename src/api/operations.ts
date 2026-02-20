@@ -14,6 +14,24 @@ export interface ListOperationsResponse {
 	total: number
 }
 
+export interface CategoryUsageResponse {
+	categoryIds: string[]
+}
+
+export function fetchCategoryUsage(
+	userId: string,
+	operationType: 'payment' | 'income',
+	options?: ApiOptions,
+): Promise<CategoryUsageResponse> {
+	const params = new URLSearchParams()
+	params.set('userId', userId)
+	params.set('operationType', operationType)
+	return get<CategoryUsageResponse>(
+		`/api/operations/category-usage?${params.toString()}`,
+		options,
+	)
+}
+
 export function fetchOperations(
 	query: OperationsQuery,
 	options?: ApiOptions,

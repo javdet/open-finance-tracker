@@ -11,6 +11,14 @@ export type {
 	UpdateBudgetInput,
 } from './budget'
 export type {
+	BudgetTemplate,
+	BudgetTemplateItem,
+	BudgetTemplateWithItems,
+	CreateBudgetTemplateInput,
+	CreateBudgetTemplateItemInput,
+	UpdateBudgetTemplateInput,
+} from './budget-template'
+export type {
 	Category,
 	CategoryGroup,
 	CategoryType,

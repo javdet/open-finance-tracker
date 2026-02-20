@@ -282,3 +282,30 @@ export async function sumAmountInBaseByCategory(
 	)
 	return result.rows
 }
+
+/** Category usage counts for the last N months (payment or income only). */
+const POPULAR_CATEGORIES_MONTHS = 3
+const POPULAR_CATEGORIES_LIMIT = 10
+
+export async function getCategoryUsageCounts(
+	userId: string,
+	operationType: 'payment' | 'income',
+	pool?: Pool,
+): Promise<{ category_id: string }[]> {
+	const client = pool ?? getPool()
+	const fromTime = new Date()
+	fromTime.setMonth(fromTime.getMonth() - POPULAR_CATEGORIES_MONTHS)
+	const result = await client.query<{ category_id: string }>(
+		`SELECT category_id::text AS category_id
+		 FROM operations
+		 WHERE user_id = $1
+		   AND operation_type = $2
+		   AND operation_time >= $3
+		   AND category_id IS NOT NULL
+		 GROUP BY category_id
+		 ORDER BY COUNT(*) DESC
+		 LIMIT $4`,
+		[userId, operationType, fromTime.toISOString(), POPULAR_CATEGORIES_LIMIT],
+	)
+	return result.rows
+}

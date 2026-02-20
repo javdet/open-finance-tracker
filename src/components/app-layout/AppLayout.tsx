@@ -72,8 +72,37 @@ function PencilIcon() {
 	)
 }
 
+function CalendarPlusIcon() {
+	return (
+		<svg
+			className="w-5 h-5"
+			fill="none"
+			stroke="currentColor"
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-hidden
+		>
+			{/* Calendar */}
+			<path
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				strokeWidth={2}
+				d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+			/>
+			{/* Small plus */}
+			<path
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				strokeWidth={2.5}
+				d="M14 12v4M12 14h4"
+			/>
+		</svg>
+	)
+}
+
 export function AppLayout() {
 	const [isAddOperationOpen, setIsAddOperationOpen] = useState(false)
+	const [isAddRecurringOpen, setIsAddRecurringOpen] = useState(false)
 	const [isAddAccountOpen, setIsAddAccountOpen] = useState(false)
 	const [editingAccount, setEditingAccount] = useState<Account | null>(null)
 	const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
@@ -198,6 +227,14 @@ export function AppLayout() {
 					aria-label="Add Transaction"
 				>
 					+
+				</button>
+				<button
+					type="button"
+					onClick={() => setIsAddRecurringOpen(true)}
+					className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+					aria-label="Add recurring expense to calendar"
+				>
+					<CalendarPlusIcon />
 				</button>
 				{navItems.map(({ to, label }) => (
 					<NavLink
@@ -339,6 +376,30 @@ export function AppLayout() {
 				onSuccess={handleEditSuccess}
 				account={editingAccount}
 			/>
+			{isAddRecurringOpen && (
+				<div
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+					role="dialog"
+					aria-modal="true"
+					aria-label="Add recurring expense"
+				>
+					<div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+						<h2 className="text-lg font-semibold text-gray-900">
+							Add recurring expense
+						</h2>
+						<p className="mt-2 text-sm text-gray-500">
+							Recurring expenses will be available here.
+						</p>
+						<button
+							type="button"
+							onClick={() => setIsAddRecurringOpen(false)}
+							className="mt-4 w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+						>
+							Close
+						</button>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }

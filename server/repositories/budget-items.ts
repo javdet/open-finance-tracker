@@ -116,6 +116,21 @@ export async function deleteBudgetItem(
 }
 
 /**
+ * Delete all budget items for a budget (e.g. before applying a template).
+ */
+export async function deleteBudgetItemsByBudgetId(
+	budgetId: string,
+	pool?: Pool,
+): Promise<number> {
+	const client = pool ?? getPool()
+	const result = await client.query(
+		'DELETE FROM budget_items WHERE budget_id = $1',
+		[budgetId],
+	)
+	return result.rowCount ?? 0
+}
+
+/**
  * Get budget items with category names for a budget (for budget vs actual report).
  */
 export async function getBudgetItemsWithCategoryNames(
