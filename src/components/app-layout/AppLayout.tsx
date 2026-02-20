@@ -270,7 +270,7 @@ export function AppLayout() {
 									<button
 										type="button"
 										onClick={() => setIsAddAccountOpen(true)}
-										className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded border border-emerald-600 bg-emerald-600 text-sm font-medium text-white hover:bg-emerald-700 hover:border-emerald-700"
+										className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded border border-emerald-600 bg-white text-sm font-medium text-emerald-600 hover:bg-emerald-50 hover:border-emerald-700"
 										aria-label="Add account"
 									>
 										+

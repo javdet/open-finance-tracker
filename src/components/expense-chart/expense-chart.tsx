@@ -114,7 +114,8 @@ export function ExpenseChart() {
 					.forEach((c) => expenseCategories.set(c.id, c.name))
 				const byCategory = new Map<string | null, number>()
 				opsRes.rows.forEach((op: Operation) => {
-					const amount = op.amountInBase ?? op.amount
+					const rawAmount = op.amountInBase ?? op.amount
+					const amount = Math.abs(rawAmount)
 					const key = op.categoryId ?? null
 					byCategory.set(key, (byCategory.get(key) ?? 0) + amount)
 				})
@@ -265,9 +266,15 @@ export function ExpenseChart() {
 									))}
 									<LabelList
 										position="outside"
-										formatter={(_value: number, _name: string, props: { payload: ExpenseChartDataItem }) =>
-											`${props.payload.name}: ${props.payload.percentage.toFixed(0)}%`
-										}
+										formatter={(
+											_value: number,
+											_name: string,
+											props: { payload?: ExpenseChartDataItem },
+										) => {
+											const payload = props?.payload
+											if (!payload) return ''
+											return `${payload.name}: ${payload.percentage.toFixed(0)}%`
+										}}
 										className="text-sm fill-gray-600"
 									/>
 								</Pie>
