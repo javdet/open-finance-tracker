@@ -3,13 +3,13 @@ import type { Category, CreateBudgetItemInput } from '@/types'
 import { createBudgetItem } from '@/api/budgets'
 import { fetchCategories } from '@/api'
 
-const DEFAULT_USER_ID = '1'
-
 interface AddIncomeItemModalProps {
 	isOpen: boolean
 	onClose: () => void
 	onSuccess: () => void
 	budgetId: string
+	/** Category IDs already planned in this budget (cannot select again). */
+	excludeCategoryIds?: string[]
 }
 
 export function AddIncomeItemModal({
@@ -17,6 +17,7 @@ export function AddIncomeItemModal({
 	onClose,
 	onSuccess,
 	budgetId,
+	excludeCategoryIds = [],
 }: AddIncomeItemModalProps) {
 	const [categoryId, setCategoryId] = useState<string>('')
 	const [plannedAmount, setPlannedAmount] = useState<string>('')
@@ -29,7 +30,7 @@ export function AddIncomeItemModal({
 
 	useEffect(() => {
 		if (isOpen) {
-			fetchCategories({ userId: DEFAULT_USER_ID })
+			fetchCategories()
 				.then((cats) => {
 					const byType = cats.filter((c) => c.type === 'income')
 					const topLevel = byType
@@ -113,7 +114,7 @@ export function AddIncomeItemModal({
 			categoryId,
 			plannedAmount: Number(trimmedAmount),
 		}
-		createBudgetItem(budgetId, payload, { userId: DEFAULT_USER_ID })
+		createBudgetItem(budgetId, payload)
 			.then(() => {
 				handleClose()
 				onSuccess()
@@ -219,6 +220,9 @@ export function AddIncomeItemModal({
 								</li>
 								{categories
 									.filter((cat) => {
+										if (excludeCategoryIds.includes(cat.id)) {
+											return false
+										}
 										if (!categorySearch.trim()) {
 											return true
 										}

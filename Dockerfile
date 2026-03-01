@@ -8,6 +8,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+RUN npm run test
 RUN npm run build
 
 # Production image: serve built frontend + API (deps installed here, no host node_modules)

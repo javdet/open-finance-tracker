@@ -3,13 +3,14 @@ import type { BudgetItem, Category } from '@/types'
 import { updateBudgetItem, deleteBudgetItem } from '@/api/budgets'
 import { clsx } from '@/lib/clsx'
 
-const DEFAULT_USER_ID = '1'
-
 interface BudgetItemRowProps {
 	item: BudgetItem
 	category: Category
 	actualAmount: number
 	currencyCode: string
+	scheduledAmount?: number
+	/** 'income': actual - plan (negative when plan > actual). 'expense': plan - actual. */
+	categoryDirection: 'income' | 'expense'
 	onUpdate: () => void
 	onDelete: () => void
 }
@@ -55,6 +56,8 @@ export function BudgetItemRow({
 	category,
 	actualAmount,
 	currencyCode,
+	scheduledAmount = 0,
+	categoryDirection,
 	onUpdate,
 	onDelete,
 }: BudgetItemRowProps) {
@@ -62,23 +65,30 @@ export function BudgetItemRow({
 	const [plannedAmount, setPlannedAmount] = useState(item.plannedAmount.toString())
 	const [isSaving, setIsSaving] = useState(false)
 	const [isResetting, setIsResetting] = useState(false)
+	const [minError, setMinError] = useState<string | null>(null)
 
-	const difference = item.plannedAmount - actualAmount
+	const difference =
+		categoryDirection === 'income'
+			? actualAmount - item.plannedAmount
+			: item.plannedAmount - actualAmount
+	const minPlanned = Math.abs(scheduledAmount)
 
 	function handleSave() {
+		setMinError(null)
 		const amount = Number(plannedAmount)
 		if (isNaN(amount) || amount <= 0) {
 			setPlannedAmount(item.plannedAmount.toString())
 			setIsEditing(false)
 			return
 		}
+		if (minPlanned > 0 && amount < minPlanned) {
+			setMinError(
+				`Minimum ${formatMoney(minPlanned, currencyCode)} required by scheduled transactions`,
+			)
+			return
+		}
 		setIsSaving(true)
-		updateBudgetItem(
-			item.budgetId,
-			item.id,
-			{ plannedAmount: amount },
-			{ userId: DEFAULT_USER_ID },
-		)
+		updateBudgetItem(item.budgetId, item.id, { plannedAmount: amount })
 			.then(() => {
 				setIsEditing(false)
 				onUpdate()
@@ -99,7 +109,7 @@ export function BudgetItemRow({
 			return
 		}
 		setIsResetting(true)
-		deleteBudgetItem(item.budgetId, item.id, { userId: DEFAULT_USER_ID })
+		deleteBudgetItem(item.budgetId, item.id)
 			.then(() => {
 				onDelete()
 			})
@@ -110,28 +120,54 @@ export function BudgetItemRow({
 
 	return (
 		<tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors animate-fade-in-slide-up">
-			<td className="px-4 py-3 text-gray-800 truncate" title={category.name}>{category.name}</td>
+			<td className="px-4 py-3 text-gray-800 truncate" title={category.name}>
+				<span>{category.name}</span>
+				{minPlanned > 0 && (
+					<span
+						className="ml-1.5 inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 leading-none"
+						title={`Scheduled: ${formatMoney(minPlanned, currencyCode)}/mo`}
+					>
+						sched {formatMoney(minPlanned, currencyCode)}
+					</span>
+				)}
+			</td>
 			<td className="px-4 py-3 text-right text-gray-800">
 				{isEditing ? (
-					<input
-						type="number"
-						step="0.01"
-						min="0"
-						value={plannedAmount}
-						onChange={(e) => setPlannedAmount(e.target.value)}
-						onBlur={handleSave}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter') {
-								handleSave()
-							} else if (e.key === 'Escape') {
-								setPlannedAmount(item.plannedAmount.toString())
-								setIsEditing(false)
-							}
-						}}
-						className="w-24 text-right rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
-						autoFocus
-						disabled={isSaving}
-					/>
+					<div className="inline-flex flex-col items-end gap-1">
+						<input
+							type="number"
+							step="0.01"
+							min={minPlanned > 0 ? minPlanned : 0}
+							value={plannedAmount}
+							onChange={(e) => {
+								setPlannedAmount(e.target.value)
+								setMinError(null)
+							}}
+							onBlur={handleSave}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									handleSave()
+								} else if (e.key === 'Escape') {
+									setPlannedAmount(item.plannedAmount.toString())
+									setMinError(null)
+									setIsEditing(false)
+								}
+							}}
+							className={clsx(
+								'w-24 text-right rounded border px-2 py-1 text-sm focus:outline-none focus:ring-1',
+								minError
+									? 'border-red-400 focus:ring-red-500 focus:border-red-500'
+									: 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500',
+							)}
+							autoFocus
+							disabled={isSaving}
+						/>
+						{minError && (
+							<span className="text-[10px] text-red-600 max-w-[180px] text-right leading-tight">
+								{minError}
+							</span>
+						)}
+					</div>
 				) : (
 					<button
 						type="button"

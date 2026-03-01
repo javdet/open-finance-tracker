@@ -32,4 +32,11 @@ export type {
 	OperationType,
 	UpdateOperationInput,
 } from './operation'
+export type {
+	CreateScheduledTransactionInput,
+	RecurrencePeriod,
+	ScheduledCategoryTotal,
+	ScheduledTransaction,
+	UpdateScheduledTransactionInput,
+} from './scheduled-transaction'
 export type { Transaction, TransactionType } from './transaction'

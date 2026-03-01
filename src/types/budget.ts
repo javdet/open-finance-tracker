@@ -62,6 +62,8 @@ export interface BudgetVsActualRow {
 	actualAmount: number
 	variance: number
 	currencyCode: string
+	/** Monthly-equivalent total from scheduled transactions for this category. */
+	scheduledAmount: number
 }
 
 export interface BudgetVsActualReport {
@@ -83,4 +85,12 @@ export interface BudgetVsActualReport {
 	/** Expense-only totals. */
 	expenseTotalPlanned: number
 	expenseTotalActual: number
+	/** Total scheduled amount across all categories. */
+	scheduledTotal: number
+	/** Scheduled amount total for income categories only. */
+	incomeScheduledTotal: number
+	/** Scheduled amount total for expense categories only. */
+	expenseScheduledTotal: number
+	/** Sum of all account balances at start of budget period, in base currency. */
+	accountBalanceAtPeriodStart: number
 }

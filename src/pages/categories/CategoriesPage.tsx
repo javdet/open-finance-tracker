@@ -8,8 +8,6 @@ import {
 } from '@/api'
 import { clsx } from '@/lib/clsx'
 
-const DEFAULT_USER_ID = '1'
-
 function PencilIcon() {
 	return (
 		<svg
@@ -110,15 +108,12 @@ function AddCategoryModal({
 		const { groupId, parentCategoryId } = parseSystemCategoryValue(
 			systemCategoryValue,
 		)
-		createCategory(
-			{
-				name: trimmedName,
-				type,
-				groupId: groupId || null,
-				parentCategoryId: parentCategoryId || null,
-			},
-			{ userId: DEFAULT_USER_ID },
-		)
+		createCategory({
+			name: trimmedName,
+			type,
+			groupId: groupId || null,
+			parentCategoryId: parentCategoryId || null,
+		})
 			.then(() => {
 				handleClose()
 				onSuccess()
@@ -318,7 +313,6 @@ function EditCategoryModal({
 				groupId: groupId || null,
 				parentCategoryId: parentCategoryId || null,
 			},
-			{ userId: DEFAULT_USER_ID },
 		)
 			.then(() => {
 				handleClose()
@@ -476,13 +470,13 @@ export function CategoriesPage() {
 	>([])
 
 	function loadCategories() {
-		fetchCategories({ userId: DEFAULT_USER_ID })
+		fetchCategories()
 			.then(setCategories)
 			.catch((err: Error) => setError(err.message))
 	}
 
 	function loadGroups() {
-		fetchCategoryGroups({ userId: DEFAULT_USER_ID })
+		fetchCategoryGroups()
 			.then(setGroups)
 			.catch(() => {})
 	}

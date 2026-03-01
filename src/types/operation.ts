@@ -43,7 +43,7 @@ export interface UpdateOperationInput {
 
 /** List/query params for operations. */
 export interface OperationsQuery {
-	userId: string
+	userId?: string
 	fromTime?: string
 	toTime?: string
 	accountId?: string

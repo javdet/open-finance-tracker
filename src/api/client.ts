@@ -28,6 +28,7 @@ async function request<T>(
 	const res = await fetch(`${BASE_URL}${path}`, {
 		...rest,
 		headers,
+		credentials: 'include',
 	})
 	if (!res.ok) {
 		const body = await res.text()

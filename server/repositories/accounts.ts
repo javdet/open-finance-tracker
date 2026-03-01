@@ -169,3 +169,48 @@ export async function deleteAccount(
 	)
 	return (result.rowCount ?? 0) > 0
 }
+
+export interface AccountBalanceAtDate {
+	id: string
+	currencyCode: string
+	balance: number
+}
+
+/**
+ * Returns active accounts with their balance as of a given date (exclusive).
+ * Balance = initial_balance + operations where operation_time < asOfTime.
+ */
+export async function listAccountBalancesAtDate(
+	userId: string,
+	asOfTime: string,
+	pool?: Pool,
+): Promise<AccountBalanceAtDate[]> {
+	const client = pool ?? getPool()
+	const result = await client.query<{
+		id: string
+		currency_code: string
+		balance: string
+	}>(
+		`SELECT a.id::text AS id, a.currency_code,
+		 (a.initial_balance
+		  + COALESCE((
+		    SELECT SUM(o.amount)::numeric FROM operations o
+		    WHERE o.user_id = $1 AND o.account_id = a.id AND o.operation_time < $2
+		  ), 0)
+		  + COALESCE((
+		    SELECT SUM(-o.amount)::numeric FROM operations o
+		    WHERE o.user_id = $1 AND o.transfer_account_id = a.id
+		      AND o.operation_time < $2
+		  ), 0)
+		 ) AS balance
+		 FROM accounts a
+		 WHERE a.user_id = $1 AND a.is_active = true
+		 ORDER BY a.name`,
+		[userId, asOfTime],
+	)
+	return result.rows.map((r) => ({
+		id: r.id,
+		currencyCode: r.currency_code,
+		balance: Number(r.balance),
+	}))
+}

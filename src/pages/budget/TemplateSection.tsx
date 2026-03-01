@@ -6,8 +6,6 @@ import { TemplateItemRow } from './TemplateItemRow'
 import { AddTemplateItemModal } from './AddTemplateItemModal'
 import type { CategoryType } from '@/types'
 
-const DEFAULT_USER_ID = '1'
-
 interface TemplateSectionProps {
 	templateId: string
 	direction: CategoryType
@@ -45,8 +43,8 @@ export function TemplateSection({
 
 	useEffect(() => {
 		Promise.all([
-			fetchTemplateItems(templateId, { userId: DEFAULT_USER_ID }),
-			fetchCategories({ userId: DEFAULT_USER_ID }),
+			fetchTemplateItems(templateId),
+			fetchCategories(),
 		])
 			.then(([templateItems, cats]) => {
 				setItems(templateItems)
@@ -71,14 +69,14 @@ export function TemplateSection({
 
 	function handleAddSuccess() {
 		setIsAddModalOpen(false)
-		fetchTemplateItems(templateId, { userId: DEFAULT_USER_ID })
+		fetchTemplateItems(templateId)
 			.then(setItems)
 			.catch(() => setItems([]))
 		onRefresh()
 	}
 
 	function handleItemUpdate() {
-		fetchTemplateItems(templateId, { userId: DEFAULT_USER_ID })
+		fetchTemplateItems(templateId)
 			.then(setItems)
 			.catch(() => setItems([]))
 		onRefresh()
@@ -183,6 +181,7 @@ export function TemplateSection({
 				onSuccess={handleAddSuccess}
 				templateId={templateId}
 				direction={direction}
+				excludeCategoryIds={filteredItems.map((i) => i.categoryId)}
 			/>
 		</div>
 	)

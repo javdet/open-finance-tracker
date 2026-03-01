@@ -18,6 +18,42 @@ export interface CategoryUsageResponse {
 	categoryIds: string[]
 }
 
+export interface CategoryTotalsInBaseQuery {
+	userId?: string
+	fromTime: string
+	toTime: string
+	operationType: 'payment' | 'income'
+	baseCurrencyCode?: string
+}
+
+export interface CategoryTotalsInBaseRow {
+	categoryId: string | null
+	actualAmount: number
+}
+
+export interface CategoryTotalsInBaseResponse {
+	rows: CategoryTotalsInBaseRow[]
+}
+
+export function fetchCategoryTotalsInBase(
+	query: CategoryTotalsInBaseQuery,
+	options?: ApiOptions,
+): Promise<CategoryTotalsInBaseResponse> {
+	const params = new URLSearchParams()
+	if (query.userId) params.set('userId', query.userId)
+	params.set('fromTime', query.fromTime)
+	params.set('toTime', query.toTime)
+	params.set('operationType', query.operationType)
+	if (query.baseCurrencyCode) {
+		params.set('baseCurrencyCode', query.baseCurrencyCode)
+	}
+	const base = options?.userId ? { ...options } : undefined
+	return get<CategoryTotalsInBaseResponse>(
+		`/api/operations/category-totals?${params.toString()}`,
+		base,
+	)
+}
+
 export function fetchCategoryUsage(
 	userId: string,
 	operationType: 'payment' | 'income',
@@ -37,7 +73,7 @@ export function fetchOperations(
 	options?: ApiOptions,
 ): Promise<ListOperationsResponse> {
 	const params = new URLSearchParams()
-	params.set('userId', query.userId)
+	if (query.userId) params.set('userId', query.userId)
 	if (query.fromTime) params.set('fromTime', query.fromTime)
 	if (query.toTime) params.set('toTime', query.toTime)
 	if (query.accountId) params.set('accountId', query.accountId)

@@ -33,7 +33,11 @@ services:
       PGPASSWORD: fdflkj234523jg
     volumes:
       - ./db/schema.sql:/schema.sql:ro
-    command: psql -h postgres -U tracker -d tracker -f /schema.sql
+      - ./db/scripts:/opt/scripts:ro
+    command: >
+      sh -c "psql -h postgres -U tracker -d tracker -f /schema.sql &&
+        psql -h postgres -U tracker -d tracker -f /opt/scripts/add-auth-sessions.sql &&
+        psql -h postgres -U tracker -d tracker -f /opt/scripts/add-thb-and-crypto-currencies.sql"
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,9 +50,23 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - DATABASE_URL=postgres://tracker:fdflkj234523jg@postgres:5432/tracker
+      - INITIAL_LOGIN=admin
+      - INITIAL_PASSWORD=${INITIAL_PASSWORD:-changeme}
+      - RESET_CREDENTIALS=${RESET_CREDENTIALS:-false}
+      - SESSION_SECRET=${SESSION_SECRET:-change-this-secret-in-production}
     ports:
       - "3001:3001"
     depends_on:
       db-init:
         condition: service_completed_successfully
+    restart: always
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    profiles:
+      - tunnel
+    depends_on:
+      - app
     restart: always

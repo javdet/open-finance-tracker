@@ -3,8 +3,7 @@ import type { Account, Category } from '@/types'
 import type { OperationType } from '@/types/operation'
 import { fetchCategories, fetchCategoryUsage, createOperation } from '@/api'
 import { TransactionTypeSelector } from '@/components/transaction-type-selector/transaction-type-selector'
-
-const DEFAULT_USER_ID = '1'
+import { useAuth } from '@/contexts/auth-context'
 
 /** Parse amount string: number or sum of numbers (e.g. "12 + 33"). */
 function parseAmount(value: string): number | null {
@@ -60,6 +59,7 @@ export function AddOperationModal({
 	accounts,
 	onSuccess,
 }: AddOperationModalProps) {
+	const { user } = useAuth()
 	const [transactionType, setTransactionType] = useState<'expense' | 'income' | 'transfer'>('expense')
 	const [categoryId, setCategoryId] = useState<string>('')
 	const [categories, setCategories] = useState<Category[]>([])
@@ -93,7 +93,7 @@ export function AddOperationModal({
 
 	useEffect(() => {
 		if (isOpen) {
-			fetchCategories({ userId: DEFAULT_USER_ID })
+			fetchCategories()
 				.then(setCategories)
 				.catch(() => setCategories([]))
 			// Only set date to today when empty (first open); otherwise keep previous transaction date
@@ -112,21 +112,17 @@ export function AddOperationModal({
 	useEffect(() => {
 		if (!isOpen) return
 		if (transactionType === 'expense') {
-			fetchCategoryUsage(DEFAULT_USER_ID, 'payment', {
-				userId: DEFAULT_USER_ID,
-			})
+			fetchCategoryUsage(user?.userId ?? '1', 'payment')
 				.then((res) => setPopularCategoryIds(res.categoryIds))
 				.catch(() => setPopularCategoryIds([]))
 		} else if (transactionType === 'income') {
-			fetchCategoryUsage(DEFAULT_USER_ID, 'income', {
-				userId: DEFAULT_USER_ID,
-			})
+			fetchCategoryUsage(user?.userId ?? '1', 'income')
 				.then((res) => setPopularCategoryIds(res.categoryIds))
 				.catch(() => setPopularCategoryIds([]))
 		} else {
 			setPopularCategoryIds([])
 		}
-	}, [isOpen, transactionType])
+	}, [isOpen, transactionType, user?.userId])
 
 	useEffect(() => {
 		setCategoryId('')
@@ -203,13 +199,12 @@ export function AddOperationModal({
 					currencyCode,
 					notes: notes.trim() || null,
 				},
-				{ userId: DEFAULT_USER_ID },
 			)
 			resetForm()
 			onSuccess?.()
 			onClose()
 			window.dispatchEvent(new CustomEvent('operation-created'))
-		} catch (err) {
+		} catch {
 			setError('Failed to save transaction. Please try again.')
 		} finally {
 			setIsSubmitting(false)

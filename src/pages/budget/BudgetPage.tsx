@@ -13,8 +13,6 @@ import { IncomeSection } from './IncomeSection'
 import { ExpenseSection } from './ExpenseSection'
 import { clsx } from '@/lib/clsx'
 
-const DEFAULT_USER_ID = '1'
-
 function formatMoney(amount: number, currencyCode: string): string {
 	try {
 		return new Intl.NumberFormat('en-US', {
@@ -43,18 +41,20 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 		expenseTotalPlanned,
 		expenseTotalActual,
 		baseCurrencyCode,
+		accountBalanceAtPeriodStart = 0,
 	} = report
 
 	const plannedBalance = incomeTotalPlanned - expenseTotalPlanned
 	const actualBalance = incomeTotalActual - expenseTotalActual
 	const difference = actualBalance - plannedBalance
+	const plannedTotalBalance = plannedBalance + accountBalanceAtPeriodStart
 
 	return (
 		<div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
 			<h3 className="text-base font-semibold text-gray-900 mb-4">
 				Balance Summary
 			</h3>
-			<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 				<div
 					className={clsx(
 						'rounded-lg p-4 border',
@@ -80,6 +80,31 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 						)}
 					>
 						{formatMoney(plannedBalance, baseCurrencyCode)}
+					</p>
+				</div>
+				<div
+					className={clsx(
+						'rounded-lg p-4 border',
+						plannedTotalBalance >= 0
+							? 'bg-emerald-50 border-emerald-200'
+							: 'bg-red-50 border-red-200',
+					)}
+				>
+					<p className="text-sm font-medium text-gray-600 mb-1">
+						Planned Total Balance
+					</p>
+					<p className="text-xs text-gray-500 mb-2">
+						Planned Balance + Accounts at month start
+					</p>
+					<p
+						className={clsx(
+							'text-2xl font-bold',
+							plannedTotalBalance >= 0
+								? 'text-emerald-700'
+								: 'text-red-700',
+						)}
+					>
+						{formatMoney(plannedTotalBalance, baseCurrencyCode)}
 					</p>
 				</div>
 				<div
@@ -210,7 +235,7 @@ export function BudgetPage() {
 	const [applySuccess, setApplySuccess] = useState(false)
 
 	useEffect(() => {
-		fetchTemplates({ userId: DEFAULT_USER_ID })
+		fetchTemplates()
 			.then(setTemplates)
 			.catch(() => setTemplates([]))
 	}, [])
@@ -223,12 +248,9 @@ export function BudgetPage() {
 				currentMonth,
 				currentYear,
 				'USD',
-				{ userId: DEFAULT_USER_ID },
 			)
 			setBudget(budgetData)
-			const reportData = await fetchBudgetVsActualReport(budgetData.id, {
-				userId: DEFAULT_USER_ID,
-			})
+			const reportData = await fetchBudgetVsActualReport(budgetData.id)
 			setReport(reportData)
 		} catch (err) {
 			setError((err as Error).message || 'Failed to load budget')
@@ -279,9 +301,7 @@ export function BudgetPage() {
 		if (!templateId) return
 		setError(null)
 		try {
-			await applyTemplate(templateId, currentMonth, currentYear, {
-				userId: DEFAULT_USER_ID,
-			})
+			await applyTemplate(templateId, currentMonth, currentYear)
 			await loadBudget()
 			setApplySuccess(true)
 			setTimeout(() => setApplySuccess(false), 2000)

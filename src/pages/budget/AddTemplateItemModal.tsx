@@ -3,14 +3,14 @@ import type { Category, CategoryType, CreateBudgetTemplateItemInput } from '@/ty
 import { createTemplateItem } from '@/api/budget-templates'
 import { fetchCategories } from '@/api'
 
-const DEFAULT_USER_ID = '1'
-
 interface AddTemplateItemModalProps {
 	isOpen: boolean
 	onClose: () => void
 	onSuccess: () => void
 	templateId: string
 	direction: CategoryType
+	/** Category IDs already in this template section (cannot select again). */
+	excludeCategoryIds?: string[]
 }
 
 export function AddTemplateItemModal({
@@ -19,6 +19,7 @@ export function AddTemplateItemModal({
 	onSuccess,
 	templateId,
 	direction,
+	excludeCategoryIds = [],
 }: AddTemplateItemModalProps) {
 	const [categoryId, setCategoryId] = useState<string>('')
 	const [plannedAmount, setPlannedAmount] = useState<string>('')
@@ -31,7 +32,7 @@ export function AddTemplateItemModal({
 
 	useEffect(() => {
 		if (isOpen) {
-			fetchCategories({ userId: DEFAULT_USER_ID })
+			fetchCategories()
 				.then((cats) => {
 					const byType = cats.filter((c) => c.type === direction)
 					const topLevel = byType
@@ -119,7 +120,7 @@ export function AddTemplateItemModal({
 			categoryId,
 			plannedAmount: Number(trimmedAmount),
 		}
-		createTemplateItem(templateId, payload, { userId: DEFAULT_USER_ID })
+		createTemplateItem(templateId, payload)
 			.then(() => {
 				handleClose()
 				onSuccess()
@@ -227,6 +228,9 @@ export function AddTemplateItemModal({
 								</li>
 								{categories
 									.filter((cat) => {
+										if (excludeCategoryIds.includes(cat.id)) {
+											return false
+										}
 										if (!categorySearch.trim()) return true
 										return cat.name
 											.toLowerCase()

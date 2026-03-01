@@ -6,10 +6,12 @@
  * is no budget item for that category (planned=0).
  */
 import { getPool } from '../db/client.js'
+import * as accountsRepo from '../repositories/accounts.js'
 import * as budgetsRepo from '../repositories/budgets.js'
 import * as budgetItemsRepo from '../repositories/budget-items.js'
 import * as categoriesRepo from '../repositories/categories.js'
 import * as operationsRepo from '../repositories/operations.js'
+import * as scheduledTxRepo from '../repositories/scheduled-transactions.js'
 import { ensureRatesForDate } from './exchange-rate-cache.js'
 
 export interface BudgetVsActualRow {
@@ -18,6 +20,7 @@ export interface BudgetVsActualRow {
 	categoryDirection: 'income' | 'expense'
 	plannedAmount: number
 	actualAmount: number
+	scheduledAmount: number
 	variance: number
 	currencyCode: string
 }
@@ -32,10 +35,15 @@ export interface BudgetVsActualReport {
 	totalPlanned: number
 	totalActual: number
 	totalVariance: number
+	scheduledTotal: number
+	incomeScheduledTotal: number
+	expenseScheduledTotal: number
 	incomeTotalPlanned: number
 	incomeTotalActual: number
 	expenseTotalPlanned: number
 	expenseTotalActual: number
+	/** Sum of all account balances at start of budget period, in base currency. */
+	accountBalanceAtPeriodStart: number
 }
 
 /**
@@ -69,7 +77,13 @@ export async function getBudgetVsActualReport(
 	await ensureRatesForDate(budget.baseCurrencyCode, budget.startDate, pool)
 	const baseCurrency = budget.baseCurrencyCode
 
-	const [incomeActuals, expenseActuals, categories] = await Promise.all([
+	const [
+		incomeActuals,
+		expenseActuals,
+		categories,
+		scheduledTotals,
+		accountBalancesAtStart,
+	] = await Promise.all([
 		operationsRepo.sumAmountInBaseByCategory(
 			userId,
 			fromTime,
@@ -87,6 +101,8 @@ export async function getBudgetVsActualReport(
 			pool,
 		),
 		categoriesRepo.listCategoriesByUser(userId, pool),
+		scheduledTxRepo.getCategoryTotals(userId, pool),
+		accountsRepo.listAccountBalancesAtDate(userId, fromTime, pool),
 	])
 
 	const actualByCategory = new Map<string, number>()
@@ -97,11 +113,19 @@ export async function getBudgetVsActualReport(
 		actualByCategory.set(a.category_id, Number(a.actual_amount))
 	})
 
+	const scheduledByCategory = new Map<string, number>()
+	for (const st of scheduledTotals) {
+		scheduledByCategory.set(st.categoryId, st.monthlyTotal)
+	}
+
 	const categoryById = new Map(categories.map((c) => [c.id, c]))
 	const budgetItemCategoryIds = new Set(itemsWithNames.map((i) => i.category_id))
 
 	let totalPlanned = 0
 	let totalActual = 0
+	let scheduledTotal = 0
+	let incomeScheduledTotal = 0
+	let expenseScheduledTotal = 0
 	let incomeTotalPlanned = 0
 	let incomeTotalActual = 0
 	let expenseTotalPlanned = 0
@@ -109,21 +133,24 @@ export async function getBudgetVsActualReport(
 
 	const rows: BudgetVsActualRow[] = []
 
-	// Rows from budget items (planned + actual)
 	for (const item of itemsWithNames) {
 		const planned = Number(item.planned_amount)
 		const actual = actualByCategory.get(item.category_id) ?? 0
+		const scheduled = scheduledByCategory.get(item.category_id) ?? 0
 		const direction =
 			item.category_direction === 'income' ? 'income' : 'expense'
 
 		totalPlanned += planned
 		totalActual += actual
+		scheduledTotal += scheduled
 		if (direction === 'income') {
 			incomeTotalPlanned += planned
 			incomeTotalActual += actual
+			incomeScheduledTotal += scheduled
 		} else {
 			expenseTotalPlanned += planned
 			expenseTotalActual += actual
+			expenseScheduledTotal += scheduled
 		}
 		rows.push({
 			categoryId: item.category_id,
@@ -131,22 +158,26 @@ export async function getBudgetVsActualReport(
 			categoryDirection: direction as 'income' | 'expense',
 			plannedAmount: planned,
 			actualAmount: actual,
+			scheduledAmount: scheduled,
 			variance: planned - actual,
 			currencyCode: budget.baseCurrencyCode,
 		})
 	}
 
-	// Rows for categories with actual transactions but no budget item
 	for (const [categoryId, actual] of actualByCategory) {
 		if (budgetItemCategoryIds.has(categoryId)) continue
 		const cat = categoryById.get(categoryId)
 		if (!cat) continue
 		const direction = cat.type
+		const scheduled = scheduledByCategory.get(categoryId) ?? 0
 		totalActual += actual
+		scheduledTotal += scheduled
 		if (direction === 'income') {
 			incomeTotalActual += actual
+			incomeScheduledTotal += scheduled
 		} else {
 			expenseTotalActual += actual
+			expenseScheduledTotal += scheduled
 		}
 		rows.push({
 			categoryId,
@@ -154,10 +185,18 @@ export async function getBudgetVsActualReport(
 			categoryDirection: direction as 'income' | 'expense',
 			plannedAmount: 0,
 			actualAmount: actual,
+			scheduledAmount: scheduled,
 			variance: -actual,
 			currencyCode: budget.baseCurrencyCode,
 		})
 	}
+
+	const accountBalanceAtPeriodStart = await sumAccountBalancesInBase(
+		accountBalancesAtStart,
+		baseCurrency,
+		budget.startDate,
+		pool,
+	)
 
 	return {
 		budgetId: budget.id,
@@ -169,9 +208,71 @@ export async function getBudgetVsActualReport(
 		totalPlanned,
 		totalActual,
 		totalVariance: totalPlanned - totalActual,
+		scheduledTotal,
+		incomeScheduledTotal,
+		expenseScheduledTotal,
 		incomeTotalPlanned,
 		incomeTotalActual,
 		expenseTotalPlanned,
 		expenseTotalActual,
+		accountBalanceAtPeriodStart,
 	}
+}
+
+/**
+ * Converts account balances to base currency and sums them.
+ * Uses exchange_rates for conversion; stablecoins (USDC, USDT) are 1:1 with USD.
+ */
+async function sumAccountBalancesInBase(
+	balances: { currencyCode: string; balance: number }[],
+	baseCurrency: string,
+	rateDate: string,
+	pool: import('pg').Pool,
+): Promise<number> {
+	if (balances.length === 0) return 0
+	const currencies = [...new Set(balances.map((b) => b.currencyCode))]
+	const needsRates = currencies.some((c) => c !== baseCurrency)
+	const rateByCurrency = new Map<string, number>()
+	if (needsRates) {
+		const rates = await pool.query<{
+			counter_currency_code: string
+			rate: string
+		}>(
+			`SELECT DISTINCT ON (counter_currency_code) counter_currency_code, rate
+			 FROM exchange_rates
+			 WHERE base_currency_code = $1 AND counter_currency_code = ANY($2)
+			   AND rate_date <= $3::date
+			 ORDER BY counter_currency_code, rate_date DESC`,
+			[baseCurrency, currencies, rateDate],
+		)
+		for (const r of rates.rows) {
+			if (!rateByCurrency.has(r.counter_currency_code)) {
+				rateByCurrency.set(r.counter_currency_code, Number(r.rate))
+			}
+		}
+	}
+	let total = 0
+	for (const { currencyCode, balance } of balances) {
+		if (balance === 0) continue
+		total += toBase(balance, currencyCode, baseCurrency, rateByCurrency)
+	}
+	return total
+}
+
+function toBase(
+	amount: number,
+	currencyCode: string,
+	baseCurrency: string,
+	rateByCurrency: Map<string, number>,
+): number {
+	if (currencyCode === baseCurrency) return amount
+	const stablecoinPair =
+		(baseCurrency === 'USD' && ['USDC', 'USDT'].includes(currencyCode)) ||
+		(currencyCode === 'USD' && ['USDC', 'USDT'].includes(baseCurrency)) ||
+		(['USDC', 'USDT'].includes(baseCurrency) &&
+			['USDC', 'USDT'].includes(currencyCode))
+	if (stablecoinPair) return amount
+	const rate = rateByCurrency.get(currencyCode)
+	if (!rate) return 0
+	return amount / rate
 }

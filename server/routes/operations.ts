@@ -3,6 +3,7 @@
  */
 import { Router, type Request, type Response } from 'express'
 import * as operationsRepo from '../repositories/operations.js'
+import { ensureRatesForDate } from '../services/exchange-rate-cache.js'
 
 const router = Router()
 
@@ -54,6 +55,42 @@ router.get('/category-usage', async (req: Request, res: Response) => {
 	} catch (err) {
 		console.error('getCategoryUsageCounts', err)
 		res.status(500).json({ error: 'Failed to get category usage' })
+	}
+})
+
+router.get('/category-totals', async (req: Request, res: Response) => {
+	try {
+		const userId = getUserId(req)
+		const fromTime = req.query.fromTime as string
+		const toTime = req.query.toTime as string
+		const operationType = req.query.operationType as 'payment' | 'income'
+		const baseCurrencyCode = (req.query.baseCurrencyCode as string) ?? 'USD'
+		if (!fromTime || !toTime) {
+			res.status(400).json({ error: 'fromTime and toTime are required' })
+			return
+		}
+		if (operationType !== 'payment' && operationType !== 'income') {
+			res.status(400).json({ error: 'operationType must be payment or income' })
+			return
+		}
+		const dateStr = fromTime.slice(0, 10)
+		await ensureRatesForDate(baseCurrencyCode, dateStr)
+		const rows = await operationsRepo.getCategoryTotalsInBase(
+			userId,
+			fromTime,
+			toTime,
+			operationType,
+			baseCurrencyCode,
+		)
+		res.json({
+			rows: rows.map((r) => ({
+				categoryId: r.category_id,
+				actualAmount: Number(r.actual_amount),
+			})),
+		})
+	} catch (err) {
+		console.error('getCategoryTotalsInBase', err)
+		res.status(500).json({ error: 'Failed to get category totals' })
 	}
 })
 

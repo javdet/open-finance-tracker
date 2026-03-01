@@ -237,7 +237,8 @@ export async function deleteOperation(
  * Conversion logic per row:
  *   1. Use amount_in_base when present (already in base currency).
  *   2. If the operation currency matches baseCurrencyCode → ABS(amount).
- *   3. Otherwise divide ABS(amount) by the exchange rate
+ *   3. USD-pegged stablecoins (USDC, USDT) are treated as 1:1 with USD.
+ *   4. Otherwise divide ABS(amount) by the exchange rate
  *      (base→counter, e.g. 1 USD = 33.5 THB → THB/33.5 = USD).
  *      Falls back to NULL (excluded from SUM) when no rate is found.
  */
@@ -260,6 +261,12 @@ export async function sumAmountInBaseByCategory(
 		            o.amount_in_base,
 		            CASE
 		              WHEN o.currency_code = $5 THEN ABS(o.amount)
+		              WHEN $5 = 'USD' AND o.currency_code IN ('USDC', 'USDT')
+		                THEN ABS(o.amount)
+		              WHEN $5 IN ('USDC', 'USDT') AND o.currency_code = 'USD'
+		                THEN ABS(o.amount)
+		              WHEN $5 IN ('USDC', 'USDT') AND o.currency_code IN ('USDC', 'USDT')
+		                THEN ABS(o.amount)
 		              ELSE ABS(o.amount) / NULLIF(
 		                (SELECT er.rate
 		                 FROM exchange_rates er
@@ -277,6 +284,58 @@ export async function sumAmountInBaseByCategory(
 		   AND o.operation_time < $3
 		   AND o.operation_type = $4
 		   AND o.category_id IS NOT NULL
+		 GROUP BY o.category_id`,
+		[userId, fromTime, toTime, operationType, baseCurrencyCode],
+	)
+	return result.rows
+}
+
+/**
+ * Same as sumAmountInBaseByCategory but includes uncategorized operations
+ * (category_id IS NULL). For use in dashboard charts. Returns amounts
+ * in base currency (converted via exchange_rates when amount_in_base is null).
+ */
+export async function getCategoryTotalsInBase(
+	userId: string,
+	fromTime: string,
+	toTime: string,
+	operationType: 'payment' | 'income',
+	baseCurrencyCode: string,
+	pool?: Pool,
+): Promise<{ category_id: string | null; actual_amount: string }[]> {
+	const client = pool ?? getPool()
+	const result = await client.query<{
+		category_id: string | null
+		actual_amount: string
+	}>(
+		`SELECT o.category_id::text AS category_id,
+		        COALESCE(SUM(
+		          COALESCE(
+		            o.amount_in_base,
+		            CASE
+		              WHEN o.currency_code = $5 THEN ABS(o.amount)
+		              WHEN $5 = 'USD' AND o.currency_code IN ('USDC', 'USDT')
+		                THEN ABS(o.amount)
+		              WHEN $5 IN ('USDC', 'USDT') AND o.currency_code = 'USD'
+		                THEN ABS(o.amount)
+		              WHEN $5 IN ('USDC', 'USDT') AND o.currency_code IN ('USDC', 'USDT')
+		                THEN ABS(o.amount)
+		              ELSE ABS(o.amount) / NULLIF(
+		                (SELECT er.rate
+		                 FROM exchange_rates er
+		                 WHERE er.base_currency_code = $5
+		                   AND er.counter_currency_code = o.currency_code
+		                   AND er.rate_date <= o.operation_time::date
+		                 ORDER BY er.rate_date DESC
+		                 LIMIT 1), 0)
+		            END
+		          )
+		        ), 0)::text AS actual_amount
+		 FROM operations o
+		 WHERE o.user_id = $1
+		   AND o.operation_time >= $2
+		   AND o.operation_time <= $3
+		   AND o.operation_type = $4
 		 GROUP BY o.category_id`,
 		[userId, fromTime, toTime, operationType, baseCurrencyCode],
 	)

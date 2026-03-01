@@ -26,8 +26,6 @@ const CRYPTO_CURRENCIES: { value: string; label: string }[] = [
 	{ value: 'USDC', label: 'USDC' },
 ]
 
-const DEFAULT_USER_ID = '1'
-
 interface AddAccountModalProps {
 	isOpen: boolean
 	onClose: () => void
@@ -90,7 +88,7 @@ export function AddAccountModal({
 			initialBalance: Number(initialBalance) || 0,
 			isActive: true,
 		}
-		createAccount(payload, { userId: DEFAULT_USER_ID })
+		createAccount(payload)
 			.then(() => {
 				handleClose()
 				onSuccess()
@@ -320,16 +318,12 @@ export function EditAccountModal({
 		}
 		setError(null)
 		setIsSubmitting(true)
-		updateAccount(
-			account.id,
-			{
-				accountType,
-				name: trimmedName,
-				description: description.trim() || null,
-				currencyCode,
-			},
-			{ userId: DEFAULT_USER_ID },
-		)
+		updateAccount(account.id, {
+			accountType,
+			name: trimmedName,
+			description: description.trim() || null,
+			currencyCode,
+		})
 			.then(() => {
 				handleClose()
 				onSuccess()

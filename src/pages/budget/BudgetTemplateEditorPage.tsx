@@ -8,8 +8,6 @@ import {
 } from '@/api/budget-templates'
 import { TemplateSection } from './TemplateSection'
 
-const DEFAULT_USER_ID = '1'
-
 export function BudgetTemplateEditorPage() {
 	const { id } = useParams<'id'>()
 	const navigate = useNavigate()
@@ -27,7 +25,7 @@ export function BudgetTemplateEditorPage() {
 		setIsLoading(true)
 		setError(null)
 		try {
-			const data = await fetchTemplateById(id, { userId: DEFAULT_USER_ID })
+			const data = await fetchTemplateById(id)
 			setTemplate(data)
 			setName(data.name)
 			setBaseCurrencyCode(data.baseCurrencyCode)
@@ -57,13 +55,10 @@ export function BudgetTemplateEditorPage() {
 		setError(null)
 		setIsSaving(true)
 		try {
-			const created = await createTemplate(
-				{
-					name: trimmedName,
-					baseCurrencyCode: baseCurrencyCode || 'USD',
-				},
-				{ userId: DEFAULT_USER_ID },
-			)
+			const created = await createTemplate({
+				name: trimmedName,
+				baseCurrencyCode: baseCurrencyCode || 'USD',
+			})
 			navigate(`/budget/templates/${created.id}`, { replace: true })
 		} catch (err) {
 			setError((err as Error).message || 'Failed to create template')
@@ -83,11 +78,10 @@ export function BudgetTemplateEditorPage() {
 		setError(null)
 		setIsSaving(true)
 		try {
-			const updated = await updateTemplate(
-				id,
-				{ name: trimmedName, baseCurrencyCode: baseCurrencyCode || 'USD' },
-				{ userId: DEFAULT_USER_ID },
-			)
+			const updated = await updateTemplate(id, {
+				name: trimmedName,
+				baseCurrencyCode: baseCurrencyCode || 'USD',
+			})
 			setTemplate(updated)
 		} catch (err) {
 			setError((err as Error).message || 'Failed to update template')
@@ -98,7 +92,7 @@ export function BudgetTemplateEditorPage() {
 
 	function handleRefresh() {
 		if (template) {
-			fetchTemplateById(template.id, { userId: DEFAULT_USER_ID })
+			fetchTemplateById(template.id)
 				.then(setTemplate)
 				.catch(() => {})
 		}

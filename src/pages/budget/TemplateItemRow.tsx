@@ -3,8 +3,6 @@ import type { BudgetTemplateItem, Category } from '@/types'
 import { updateTemplateItem, deleteTemplateItem } from '@/api/budget-templates'
 import { clsx } from '@/lib/clsx'
 
-const DEFAULT_USER_ID = '1'
-
 interface TemplateItemRowProps {
 	item: BudgetTemplateItem
 	category: Category
@@ -71,12 +69,7 @@ export function TemplateItemRow({
 			return
 		}
 		setIsSaving(true)
-		updateTemplateItem(
-			item.templateId,
-			item.id,
-			{ plannedAmount: amount },
-			{ userId: DEFAULT_USER_ID },
-		)
+		updateTemplateItem(item.templateId, item.id, { plannedAmount: amount })
 			.then(() => {
 				setIsEditing(false)
 				onUpdate()
@@ -91,9 +84,7 @@ export function TemplateItemRow({
 	function handleDelete() {
 		if (!confirm('Remove this item from the template?')) return
 		setIsDeleting(true)
-		deleteTemplateItem(item.templateId, item.id, {
-			userId: DEFAULT_USER_ID,
-		})
+		deleteTemplateItem(item.templateId, item.id)
 			.then(() => onDelete())
 			.catch(() => setIsDeleting(false))
 	}

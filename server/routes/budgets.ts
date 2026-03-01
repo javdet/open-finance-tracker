@@ -4,6 +4,7 @@
 import { Router, type Request, type Response } from 'express'
 import * as budgetsRepo from '../repositories/budgets.js'
 import * as budgetItemsRepo from '../repositories/budget-items.js'
+import * as scheduledTxRepo from '../repositories/scheduled-transactions.js'
 
 const router = Router()
 
@@ -206,6 +207,31 @@ router.patch('/:id/items/:itemId', async (req: Request, res: Response) => {
 			plannedAmount?: number
 			accountId?: string | null
 		}
+
+		if (body.plannedAmount !== undefined) {
+			const existingItem = await budgetItemsRepo.getBudgetItemById(
+				req.params.itemId,
+				req.params.id,
+			)
+			if (!existingItem) {
+				res.status(404).json({ error: 'Budget item not found' })
+				return
+			}
+			const categoryTotals =
+				await scheduledTxRepo.getCategoryTotals(userId)
+			const scheduled = categoryTotals.find(
+				(t) => t.categoryId === existingItem.categoryId,
+			)
+			if (scheduled && body.plannedAmount < scheduled.monthlyTotal) {
+				res.status(400).json({
+					error: `Planned amount cannot be less than scheduled `
+						+ `transactions total (${scheduled.monthlyTotal})`,
+					scheduledMinimum: scheduled.monthlyTotal,
+				})
+				return
+			}
+		}
+
 		const item = await budgetItemsRepo.updateBudgetItem(
 			req.params.itemId,
 			req.params.id,

@@ -3,11 +3,11 @@ import type { BudgetVsActualRow } from '@/types'
 import { createBudgetItem } from '@/api/budgets'
 import { clsx } from '@/lib/clsx'
 
-const DEFAULT_USER_ID = '1'
-
 interface ActualsOnlyBudgetRowProps {
 	row: BudgetVsActualRow
 	budgetId: string
+	/** 'income': actual - plan. 'expense': plan - actual. */
+	categoryDirection: 'income' | 'expense'
 	onSuccess: () => void
 }
 
@@ -31,6 +31,7 @@ function formatMoney(amount: number, currencyCode: string): string {
 export function ActualsOnlyBudgetRow({
 	row,
 	budgetId,
+	categoryDirection,
 	onSuccess,
 }: ActualsOnlyBudgetRowProps) {
 	const [isEditing, setIsEditing] = useState(false)
@@ -38,6 +39,10 @@ export function ActualsOnlyBudgetRow({
 	const [isSaving, setIsSaving] = useState(false)
 
 	const currencyCode = row.currencyCode
+	const difference =
+		categoryDirection === 'income'
+			? row.actualAmount - row.plannedAmount
+			: row.plannedAmount - row.actualAmount
 
 	function handleSave() {
 		const amount = Number(plannedAmount)
@@ -45,11 +50,10 @@ export function ActualsOnlyBudgetRow({
 			return
 		}
 		setIsSaving(true)
-		createBudgetItem(
-			budgetId,
-			{ categoryId: row.categoryId, plannedAmount: amount },
-			{ userId: DEFAULT_USER_ID },
-		)
+		createBudgetItem(budgetId, {
+			categoryId: row.categoryId,
+			plannedAmount: amount,
+		})
 			.then(() => {
 				setIsEditing(false)
 				setPlannedAmount('')
@@ -96,8 +100,17 @@ export function ActualsOnlyBudgetRow({
 				<td className="px-4 py-3 text-right text-gray-800">
 					{formatMoney(row.actualAmount, currencyCode)}
 				</td>
-				<td className="px-4 py-3 text-right text-red-600 font-medium">
-					{formatMoney(-row.actualAmount, currencyCode)}
+				<td
+					className={clsx(
+						'px-4 py-3 text-right font-medium',
+						difference > 0
+							? 'text-emerald-600'
+							: difference < 0
+								? 'text-red-600'
+								: 'text-gray-600',
+					)}
+				>
+					{formatMoney(difference, currencyCode)}
 				</td>
 				<td className="px-4 py-3 flex items-center gap-1">
 					<button
@@ -144,10 +157,14 @@ export function ActualsOnlyBudgetRow({
 			<td
 				className={clsx(
 					'px-4 py-3 text-right font-medium',
-					'text-red-600',
+					difference > 0
+						? 'text-emerald-600'
+						: difference < 0
+							? 'text-red-600'
+							: 'text-gray-600',
 				)}
 			>
-				{formatMoney(-row.actualAmount, currencyCode)}
+				{formatMoney(difference, currencyCode)}
 			</td>
 			<td className="px-4 py-3" />
 		</tr>

@@ -7,12 +7,9 @@ import {
 	Tooltip,
 	LabelList,
 } from 'recharts'
-import type { Operation } from '@/types'
-import { fetchOperations, fetchCategories } from '@/api'
+import { fetchCategoryTotalsInBase, fetchCategories } from '@/api'
 
-const DEFAULT_USER_ID = '1'
 const BASE_CURRENCY = 'USD'
-const OPERATIONS_LIMIT = 2000
 
 const MONTH_NAMES = [
 	'January', 'February', 'March', 'April', 'May', 'June',
@@ -50,7 +47,7 @@ function getMonthRange(month: number, year: number): { fromTime: string; toTime:
 	}
 }
 
-function getMonthOptions(): Array<{ month: number; year: number; label: string }> {
+export function getMonthOptions(): Array<{ month: number; year: number; label: string }> {
 	const now = new Date()
 	const options: Array<{ month: number; year: number; label: string }> = []
 	options.push({
@@ -69,82 +66,195 @@ function getMonthOptions(): Array<{ month: number; year: number; label: string }
 	return options
 }
 
-export interface ExpenseChartDataItem {
+export interface CategoryChartDataItem {
 	name: string
 	value: number
 	categoryId: string | null
 	percentage: number
 }
 
-export function ExpenseChart() {
-	const now = new Date()
-	const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1)
-	const [selectedYear, setSelectedYear] = useState(now.getFullYear())
-	const [chartData, setChartData] = useState<ExpenseChartDataItem[]>([])
+export interface CategoryChartProps {
+	title: string
+	operationType: 'payment' | 'income'
+	selectedMonth: number
+	selectedYear: number
+	emptyMessage?: string
+}
+
+export function CategoryChart({
+	title,
+	operationType,
+	selectedMonth,
+	selectedYear,
+	emptyMessage,
+}: CategoryChartProps) {
+	const [chartData, setChartData] = useState<CategoryChartDataItem[]>([])
 	const [totalAmount, setTotalAmount] = useState(0)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
-	const [isMonthOpen, setIsMonthOpen] = useState(false)
-	const monthDropdownRef = useRef<HTMLDivElement>(null)
-
-	const monthOptions = getMonthOptions()
 
 	const loadData = useCallback(() => {
 		setIsLoading(true)
 		setError(null)
 		const { fromTime, toTime } = getMonthRange(selectedMonth, selectedYear)
-		const opts = { userId: DEFAULT_USER_ID }
+		const opts = {}
+		const categoryType = operationType === 'payment' ? 'expense' : 'income'
 		Promise.all([
-			fetchOperations(
+			fetchCategoryTotalsInBase(
 				{
-					userId: DEFAULT_USER_ID,
 					fromTime,
 					toTime,
-					operationType: 'payment',
-					limit: OPERATIONS_LIMIT,
+					operationType,
+					baseCurrencyCode: BASE_CURRENCY,
 				},
 				opts,
 			),
 			fetchCategories(opts),
 		])
-			.then(([opsRes, categories]) => {
-				const expenseCategories = new Map<string, string>()
+			.then(([totalsRes, categories]) => {
+				const typeCategories = new Map<string, string>()
 				categories
-					.filter((c) => c.type === 'expense')
-					.forEach((c) => expenseCategories.set(c.id, c.name))
-				const byCategory = new Map<string | null, number>()
-				opsRes.rows.forEach((op: Operation) => {
-					const rawAmount = op.amountInBase ?? op.amount
-					const amount = Math.abs(rawAmount)
-					const key = op.categoryId ?? null
-					byCategory.set(key, (byCategory.get(key) ?? 0) + amount)
-				})
-				const total = Array.from(byCategory.values()).reduce((s, v) => s + v, 0)
-				const data: ExpenseChartDataItem[] = Array.from(byCategory.entries())
-					.filter(([, value]) => value > 0)
-					.map(([categoryId, value]) => ({
-						name: categoryId
-							? expenseCategories.get(categoryId) ?? 'Unknown'
+					.filter((c) => c.type === categoryType)
+					.forEach((c) => typeCategories.set(c.id, c.name))
+				const total = totalsRes.rows.reduce((s, r) => s + r.actualAmount, 0)
+				const data: CategoryChartDataItem[] = totalsRes.rows
+					.filter((r) => r.actualAmount > 0)
+					.map((r) => ({
+						name: r.categoryId
+							? typeCategories.get(r.categoryId) ?? 'Unknown'
 							: 'Uncategorized',
-						value,
-						categoryId,
-						percentage: total > 0 ? (value / total) * 100 : 0,
+						value: r.actualAmount,
+						categoryId: r.categoryId,
+						percentage: total > 0 ? (r.actualAmount / total) * 100 : 0,
 					}))
 					.sort((a, b) => b.value - a.value)
 				setChartData(data)
 				setTotalAmount(total)
 			})
 			.catch((err: Error) => {
-				setError(err.message ?? 'Failed to load expenses')
+				setError(err.message ?? `Failed to load ${title.toLowerCase()}`)
 				setChartData([])
 				setTotalAmount(0)
 			})
 			.finally(() => setIsLoading(false))
-	}, [selectedMonth, selectedYear])
+	}, [selectedMonth, selectedYear, operationType, title])
 
 	useEffect(() => {
 		loadData()
 	}, [loadData])
+
+	const defaultEmpty =
+		operationType === 'payment'
+			? 'No expenses for this month.'
+			: 'No revenue for this month.'
+	const emptyMsg = emptyMessage ?? defaultEmpty
+
+	return (
+		<div className="flex flex-col">
+			{error && (
+				<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 mb-3">
+					<p className="text-sm text-red-600">{error}</p>
+				</div>
+			)}
+
+			{isLoading ? (
+				<div
+					className="flex items-center justify-center text-gray-500 text-sm"
+					style={{ minHeight: 280 }}
+				>
+					Loading...
+				</div>
+			) : chartData.length === 0 ? (
+				<div
+					className="flex items-center justify-center text-gray-500 text-sm"
+					style={{ minHeight: 280 }}
+					role="status"
+					aria-live="polite"
+				>
+					{emptyMsg}
+				</div>
+			) : (
+				<>
+					<div
+						className="sr-only"
+						role="status"
+						aria-live="polite"
+					>
+						{title} total {formatMoney(totalAmount, BASE_CURRENCY)}.
+						{chartData.map(
+							(item) =>
+								` ${item.name}: ${item.percentage.toFixed(1)}%.`,
+						)}
+					</div>
+					<div className="relative" style={{ height: 280 }}>
+						<ResponsiveContainer width="100%" height="100%">
+							<PieChart>
+								<Pie
+									data={chartData}
+									dataKey="value"
+									nameKey="name"
+									cx="50%"
+									cy="50%"
+									innerRadius="52%"
+									outerRadius="82%"
+									paddingAngle={1}
+									stroke="none"
+									labelLine
+								>
+									{chartData.map((_, index) => (
+										<Cell
+											key={chartData[index].name + chartData[index].categoryId}
+											fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
+										/>
+									))}
+									<LabelList
+										position="outside"
+										formatter={(
+											_value: number,
+											_name: string,
+											props: { payload?: CategoryChartDataItem },
+										) => {
+											const payload = props?.payload
+											if (!payload) return ''
+											return `${payload.name}: ${payload.percentage.toFixed(0)}%`
+										}}
+										className="text-sm fill-gray-600"
+									/>
+								</Pie>
+								<Tooltip
+									formatter={(value: number) => formatMoney(value, BASE_CURRENCY)}
+									contentStyle={{
+										borderRadius: '8px',
+										border: '1px solid #e5e7eb',
+									}}
+								/>
+							</PieChart>
+						</ResponsiveContainer>
+						<div
+							className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+							aria-hidden="true"
+						>
+							<span className="text-sm font-medium text-gray-600">
+								{title}
+							</span>
+							<span className="text-xl font-bold text-gray-800 mt-1">
+								{formatMoney(totalAmount, BASE_CURRENCY)}
+							</span>
+						</div>
+					</div>
+				</>
+			)}
+		</div>
+	)
+}
+
+export function ExpenseChart() {
+	const now = new Date()
+	const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1)
+	const [selectedYear, setSelectedYear] = useState(now.getFullYear())
+	const [isMonthOpen, setIsMonthOpen] = useState(false)
+	const monthDropdownRef = useRef<HTMLDivElement>(null)
+	const monthOptions = getMonthOptions()
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -167,140 +277,51 @@ export function ExpenseChart() {
 			: `${MONTH_NAMES[selectedMonth - 1]} ${selectedYear}`
 
 	return (
-		<div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-			<div className="flex items-center justify-between mb-4">
-				<h3 className="text-base font-semibold text-gray-900">
-					Expense chart
-				</h3>
-				<div className="relative" ref={monthDropdownRef}>
-					<button
-						type="button"
-						onClick={() => setIsMonthOpen((o) => !o)}
-						className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-						aria-label="Select month"
-						aria-expanded={isMonthOpen}
-						aria-haspopup="listbox"
-					>
-						<CalendarIcon className="w-4 h-4 text-gray-500" />
-						<span>{currentLabel}</span>
-						<ChevronDownIcon className="w-4 h-4 text-gray-500" />
-					</button>
-					{isMonthOpen && (
-						<ul
-							role="listbox"
-							className="absolute right-0 top-full z-10 mt-1 max-h-60 w-48 overflow-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg"
-						>
-							{monthOptions.map((opt) => (
-								<li
-									key={`${opt.year}-${opt.month}`}
-									role="option"
-									aria-selected={
-										opt.month === selectedMonth && opt.year === selectedYear
-									}
-									className="cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-									onClick={() => {
-										setSelectedMonth(opt.month)
-										setSelectedYear(opt.year)
-										setIsMonthOpen(false)
-									}}
-								>
-									{opt.label}
-								</li>
-							))}
-						</ul>
-					)}
-				</div>
-			</div>
-
-			{error && (
-				<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 mb-4">
-					<p className="text-sm text-red-600">{error}</p>
-				</div>
-			)}
-
-			{isLoading ? (
-				<div className="flex items-center justify-center h-80 text-gray-500 text-sm">
-					Loading...
-				</div>
-			) : chartData.length === 0 ? (
-				<div
-					className="flex items-center justify-center h-80 text-gray-500 text-sm"
-					role="status"
-					aria-live="polite"
+		<div className="flex flex-col">
+			<div className="relative inline-flex self-end mb-2" ref={monthDropdownRef}>
+				<button
+					type="button"
+					onClick={() => setIsMonthOpen((o) => !o)}
+					className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+					aria-label="Select month"
+					aria-expanded={isMonthOpen}
+					aria-haspopup="listbox"
 				>
-					No expenses for this month.
-				</div>
-			) : (
-				<>
-					<div
-						className="sr-only"
-						role="status"
-						aria-live="polite"
+					<CalendarIcon className="w-4 h-4 text-gray-500" />
+					<span>{currentLabel}</span>
+					<ChevronDownIcon className="w-4 h-4 text-gray-500" />
+				</button>
+				{isMonthOpen && (
+					<ul
+						role="listbox"
+						className="absolute right-0 top-full z-10 mt-1 max-h-60 w-48 overflow-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg"
 					>
-						Total expenses {formatMoney(totalAmount, BASE_CURRENCY)}.
-						{chartData.map(
-							(item) =>
-								` ${item.name}: ${item.percentage.toFixed(1)}%.`,
-						)}
-					</div>
-					<div className="relative" style={{ height: 320 }}>
-						<ResponsiveContainer width="100%" height="100%">
-							<PieChart>
-								<Pie
-									data={chartData}
-									dataKey="value"
-									nameKey="name"
-									cx="50%"
-									cy="50%"
-									innerRadius="55%"
-									outerRadius="85%"
-									paddingAngle={1}
-									stroke="none"
-									labelLine
-								>
-									{chartData.map((_, index) => (
-										<Cell
-											key={chartData[index].name + chartData[index].categoryId}
-											fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
-										/>
-									))}
-									<LabelList
-										position="outside"
-										formatter={(
-											_value: number,
-											_name: string,
-											props: { payload?: ExpenseChartDataItem },
-										) => {
-											const payload = props?.payload
-											if (!payload) return ''
-											return `${payload.name}: ${payload.percentage.toFixed(0)}%`
-										}}
-										className="text-sm fill-gray-600"
-									/>
-								</Pie>
-								<Tooltip
-									formatter={(value: number) => formatMoney(value, BASE_CURRENCY)}
-									contentStyle={{
-										borderRadius: '8px',
-										border: '1px solid #e5e7eb',
-									}}
-								/>
-							</PieChart>
-						</ResponsiveContainer>
-						<div
-							className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-							aria-hidden="true"
-						>
-							<span className="text-2xl font-bold text-gray-800">
-								{formatMoney(totalAmount, BASE_CURRENCY)}
-							</span>
-							<span className="text-sm text-gray-500 mt-0.5">
-								Total Amount
-							</span>
-						</div>
-					</div>
-				</>
-			)}
+						{monthOptions.map((opt) => (
+							<li
+								key={`${opt.year}-${opt.month}`}
+								role="option"
+								aria-selected={
+									opt.month === selectedMonth && opt.year === selectedYear
+								}
+								className="cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+								onClick={() => {
+									setSelectedMonth(opt.month)
+									setSelectedYear(opt.year)
+									setIsMonthOpen(false)
+								}}
+							>
+								{opt.label}
+							</li>
+						))}
+					</ul>
+				)}
+			</div>
+			<CategoryChart
+				title="Expenses"
+				operationType="payment"
+				selectedMonth={selectedMonth}
+				selectedYear={selectedYear}
+			/>
 		</div>
 	)
 }

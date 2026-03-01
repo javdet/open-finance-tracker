@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import type { Account } from '@/types'
 import { clsx } from '@/lib/clsx'
 import { AddOperationModal } from './AddOperationModal'
 import { AddAccountModal, EditAccountModal } from './AddAccountModal'
+import { ScheduledTransactionCalendar } from '@/components/scheduled-transaction-calendar/scheduled-transaction-calendar'
 import { fetchAccounts, fetchLatestExchangeRates } from '@/api'
+import { useAuth } from '@/contexts/auth-context'
 
 const navItems = [
 	{ to: '/dashboard', label: 'Dashboard' },
@@ -14,8 +16,6 @@ const navItems = [
 	{ to: '/categories', label: 'Categories' },
 	{ to: '/settings', label: 'Settings' },
 ] as const
-
-const DEFAULT_USER_ID = '1'
 
 const BASE_CURRENCY_CODE = 'USD'
 
@@ -101,6 +101,8 @@ function CalendarPlusIcon() {
 }
 
 export function AppLayout() {
+	const { logout } = useAuth()
+	const navigate = useNavigate()
 	const [isAddOperationOpen, setIsAddOperationOpen] = useState(false)
 	const [isAddRecurringOpen, setIsAddRecurringOpen] = useState(false)
 	const [isAddAccountOpen, setIsAddAccountOpen] = useState(false)
@@ -117,7 +119,7 @@ export function AppLayout() {
 	const [, setIsFxLoading] = useState(false)
 
 	function loadAccounts() {
-		fetchAccounts({ userId: DEFAULT_USER_ID })
+		fetchAccounts()
 			.then((data) => {
 				setAccounts(data)
 				setAccountsError(null)
@@ -211,10 +213,20 @@ export function AppLayout() {
 
 	return (
 		<div className="min-h-screen flex flex-col bg-gray-50">
-			<header className="bg-green-50 border-b border-gray-200 px-4 py-3">
+			<header className="bg-green-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
 				<h1 className="text-xl font-semibold text-gray-900">
 					Finance Tracker
 				</h1>
+				<button
+					type="button"
+					onClick={async () => {
+						await logout()
+						navigate('/login')
+					}}
+					className="text-sm text-gray-600 hover:text-gray-900"
+				>
+					Log out
+				</button>
 			</header>
 			<nav
 				className="bg-white border-b border-gray-200 px-2 py-2 flex items-center gap-1 overflow-x-auto"
@@ -376,30 +388,10 @@ export function AppLayout() {
 				onSuccess={handleEditSuccess}
 				account={editingAccount}
 			/>
-			{isAddRecurringOpen && (
-				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-					role="dialog"
-					aria-modal="true"
-					aria-label="Add recurring expense"
-				>
-					<div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
-						<h2 className="text-lg font-semibold text-gray-900">
-							Add recurring expense
-						</h2>
-						<p className="mt-2 text-sm text-gray-500">
-							Recurring expenses will be available here.
-						</p>
-						<button
-							type="button"
-							onClick={() => setIsAddRecurringOpen(false)}
-							className="mt-4 w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-						>
-							Close
-						</button>
-					</div>
-				</div>
-			)}
+			<ScheduledTransactionCalendar
+				isOpen={isAddRecurringOpen}
+				onClose={() => setIsAddRecurringOpen(false)}
+			/>
 		</div>
 	)
 }

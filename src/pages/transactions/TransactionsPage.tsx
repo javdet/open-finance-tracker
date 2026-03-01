@@ -10,8 +10,6 @@ import {
 import { clsx } from '@/lib/clsx'
 import { TransactionTypeSelector } from '@/components/transaction-type-selector/transaction-type-selector'
 
-const DEFAULT_USER_ID = '1'
-
 type DateRangeDays = 1 | 7 | 31
 
 type SortOrder = 'asc' | 'desc' | null
@@ -162,7 +160,7 @@ function EditOperationModal({
 
 	useEffect(() => {
 		if (isOpen && operation) {
-			fetchCategories({ userId: DEFAULT_USER_ID })
+			fetchCategories()
 				.then(setCategories)
 				.catch(() => setCategories([]))
 
@@ -281,7 +279,6 @@ function EditOperationModal({
 					currencyCode,
 					notes: notes.trim() || null,
 				},
-				{ userId: DEFAULT_USER_ID },
 			)
 			handleClose()
 			onSuccess()
@@ -607,15 +604,11 @@ export function TransactionsPage() {
 			endOfToday.getTime() - dateRangeDays * 24 * 60 * 60 * 1000,
 		).toISOString()
 
-		fetchOperations(
-			{
-				userId: DEFAULT_USER_ID,
-				fromTime,
-				toTime,
-				limit: 100,
-			},
-			{ userId: DEFAULT_USER_ID },
-		)
+		fetchOperations({
+			fromTime,
+			toTime,
+			limit: 100,
+		})
 			.then((res) => {
 				setOperations(res.rows)
 				setTotal(res.total)
@@ -624,7 +617,7 @@ export function TransactionsPage() {
 	}, [dateRangeDays])
 
 	useEffect(() => {
-		fetchAccounts({ userId: DEFAULT_USER_ID })
+		fetchAccounts()
 			.then((accountsList) => {
 				const map: Record<string, string> = {}
 				accountsList.forEach((a) => {
@@ -643,7 +636,7 @@ export function TransactionsPage() {
 	}, [])
 
 	useEffect(() => {
-		fetchCategories({ userId: DEFAULT_USER_ID })
+		fetchCategories()
 			.then((categories) => {
 				const map: Record<string, string> = {}
 				categories.forEach((c) => {
@@ -708,7 +701,7 @@ export function TransactionsPage() {
 				return
 			}
 			try {
-				await deleteOperation(operationId, { userId: DEFAULT_USER_ID })
+				await deleteOperation(operationId)
 				loadOperations()
 			} catch (err) {
 				setError(err instanceof Error ? err.message : 'Failed to delete transaction')
