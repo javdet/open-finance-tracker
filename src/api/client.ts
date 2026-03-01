@@ -1,12 +1,20 @@
 /**
  * Base API client for the finance-tracker backend.
- * Uses VITE_API_URL (default http://localhost:3001) and optional X-User-Id.
+ * Uses VITE_API_URL when set. In production (same-origin), uses relative URLs.
+ * In dev, defaults to http://localhost:3001.
  */
 
-const BASE_URL =
-	typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
-		? String(import.meta.env.VITE_API_URL)
-		: 'http://localhost:3001'
+const BASE_URL = (() => {
+	const url =
+		typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
+			? String(import.meta.env.VITE_API_URL)
+			: ''
+	if (url) return url
+	// Production: API is served from same origin as frontend
+	if (typeof import.meta !== 'undefined' && import.meta.env?.PROD) return ''
+	// Dev: Vite dev server and API run on different ports
+	return 'http://localhost:3001'
+})()
 
 export interface ApiOptions {
 	userId?: string
