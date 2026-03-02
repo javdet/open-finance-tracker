@@ -11,6 +11,7 @@
  * Response:
  *   201 -- operation created  { smsImport, operation }
  *   200 -- duplicate detected { smsImport, duplicate: true }
+ *   200 -- no parser matched  { smsImport, skipped: true }
  *   422 -- parse or mapping failure { smsImport, error: string }
  *   400 -- bad request
  *   401 -- invalid API key (handled by middleware)
@@ -67,14 +68,10 @@ router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
 				raw_message: message,
 				sender: senderStr || null,
 				received_at: receivedAt ?? null,
-				status: 'failed',
-				error_message: 'No parser found for this message',
+				status: 'skipped',
 				message_hash: messageHash,
 			})
-			res.status(422).json({
-				smsImport,
-				error: 'No parser found for this message',
-			})
+			res.status(200).json({ smsImport, skipped: true })
 			return
 		}
 

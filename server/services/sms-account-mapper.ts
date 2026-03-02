@@ -59,24 +59,33 @@ async function getAccountCurrency(
 	return result.rows[0]?.currency_code ?? null
 }
 
+const PREFERRED_CATEGORY: Record<'expense' | 'income', string> = {
+	expense: 'Inbox',
+	income: 'Other income',
+}
+
 /**
  * Find the first active category whose direction matches the parsed
  * operation type (payment → expense, income → income).
+ *
+ * Prefers a well-known category name ("Inbox" for expenses, "Other income"
+ * for income) when it exists; otherwise falls back to first alphabetical.
  */
 async function getFallbackCategory(
 	userId: string,
 	direction: 'expense' | 'income',
 	client: Pool,
 ): Promise<string | null> {
+	const preferredName = PREFERRED_CATEGORY[direction]
 	const result = await client.query<{ id: string }>(
 		`SELECT id::text
 		 FROM categories
 		 WHERE user_id = $1
 		   AND direction = $2
 		   AND is_active = TRUE
-		 ORDER BY name
+		 ORDER BY (name = $3) DESC, name
 		 LIMIT 1`,
-		[userId, direction],
+		[userId, direction, preferredName],
 	)
 	return result.rows[0]?.id ?? null
 }

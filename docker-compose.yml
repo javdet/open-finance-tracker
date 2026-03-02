@@ -37,7 +37,8 @@ services:
     command: >
       sh -c "psql -h postgres -U tracker -d tracker -f /schema.sql &&
         psql -h postgres -U tracker -d tracker -f /opt/scripts/add-auth-sessions.sql &&
-        psql -h postgres -U tracker -d tracker -f /opt/scripts/add-thb-and-crypto-currencies.sql"
+        psql -h postgres -U tracker -d tracker -f /opt/scripts/add-thb-and-crypto-currencies.sql &&
+        psql -h postgres -U tracker -d tracker -f /opt/scripts/add-inbox-category.sql"
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,14 +62,4 @@ services:
     depends_on:
       db-init:
         condition: service_completed_successfully
-    restart: always
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
-    profiles:
-      - tunnel
-    depends_on:
-      - app
     restart: always

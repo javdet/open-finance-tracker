@@ -28,7 +28,7 @@ export interface CreateSmsImportRow {
 	parser_used?: string | null
 	parsed_data?: Record<string, unknown> | null
 	operation_id?: string | null
-	status: 'pending' | 'processed' | 'failed' | 'duplicate'
+	status: 'pending' | 'processed' | 'failed' | 'duplicate' | 'skipped'
 	error_message?: string | null
 	message_hash: string
 }
