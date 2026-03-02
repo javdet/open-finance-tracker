@@ -54,6 +54,8 @@ services:
       - INITIAL_PASSWORD=${INITIAL_PASSWORD:-changeme}
       - RESET_CREDENTIALS=${RESET_CREDENTIALS:-false}
       - SESSION_SECRET=${SESSION_SECRET:-change-this-secret-in-production}
+      # Set SESSION_SECURE_COOKIE=false when serving over HTTP (e.g. http://host:3126)
+      - SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE:-}
     ports:
       - "3001:3001"
     depends_on:

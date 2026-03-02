@@ -33,6 +33,11 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 const PgSession = connectPgSimple(session)
 const sessionSecret = process.env.SESSION_SECRET || 'dev-secret-change-in-production'
+// When served over HTTP (no HTTPS), set SESSION_SECURE_COOKIE=false so the browser stores the cookie
+const secureCookie =
+	isProduction &&
+	process.env.SESSION_SECURE_COOKIE !== 'false' &&
+	process.env.SESSION_SECURE_COOKIE !== '0'
 
 app.use(
 	cors({
@@ -52,7 +57,7 @@ app.use(
 		saveUninitialized: false,
 		cookie: {
 			httpOnly: true,
-			secure: isProduction,
+			secure: secureCookie,
 			sameSite: 'lax',
 			maxAge: 24 * 60 * 60 * 1000,
 		},
