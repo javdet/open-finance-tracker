@@ -10,7 +10,7 @@ import {
 import { clsx } from '@/lib/clsx'
 import { TransactionTypeSelector } from '@/components/transaction-type-selector/transaction-type-selector'
 
-type DateRangeDays = 1 | 7 | 31
+type DateRangeDays = 1 | 7 | 31 | 'custom'
 
 type SortOrder = 'asc' | 'desc' | null
 type SortColumn = 'date' | 'account' | 'category' | null
@@ -583,26 +583,37 @@ export function TransactionsPage() {
 	const [accounts, setAccounts] = useState<
 		Array<{ id: string; name: string; currencyCode: string }>
 	>([])
+	const [customFrom, setCustomFrom] = useState('')
+	const [customTo, setCustomTo] = useState('')
+	const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
+	const datePickerRef = useRef<HTMLDivElement>(null)
 	const [sortBy, setSortBy] = useState<SortColumn>('date')
 	const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
 
 	const loadOperations = useCallback(() => {
-		const now = new Date()
-		// Use end of local day for toTime so transactions added "today"
-		// (stored at noon UTC) are always included regardless of timezone.
-		const endOfToday = new Date(
-			now.getFullYear(),
-			now.getMonth(),
-			now.getDate(),
-			23,
-			59,
-			59,
-			999,
-		)
-		const toTime = endOfToday.toISOString()
-		const fromTime = new Date(
-			endOfToday.getTime() - dateRangeDays * 24 * 60 * 60 * 1000,
-		).toISOString()
+		let fromTime: string
+		let toTime: string
+
+		if (dateRangeDays === 'custom') {
+			if (!customFrom || !customTo) return
+			fromTime = new Date(`${customFrom}T00:00:00`).toISOString()
+			toTime = new Date(`${customTo}T23:59:59.999`).toISOString()
+		} else {
+			const now = new Date()
+			const endOfToday = new Date(
+				now.getFullYear(),
+				now.getMonth(),
+				now.getDate(),
+				23,
+				59,
+				59,
+				999,
+			)
+			toTime = endOfToday.toISOString()
+			fromTime = new Date(
+				endOfToday.getTime() - dateRangeDays * 24 * 60 * 60 * 1000,
+			).toISOString()
+		}
 
 		fetchOperations({
 			fromTime,
@@ -614,7 +625,7 @@ export function TransactionsPage() {
 				setTotal(res.total)
 			})
 			.catch((err: Error) => setError(err.message))
-	}, [dateRangeDays])
+	}, [dateRangeDays, customFrom, customTo])
 
 	useEffect(() => {
 		fetchAccounts()
@@ -656,6 +667,20 @@ export function TransactionsPage() {
 		window.addEventListener('operation-created', handler)
 		return () => window.removeEventListener('operation-created', handler)
 	}, [loadOperations])
+
+	useEffect(() => {
+		if (!isDatePickerOpen) return
+		function handleClickOutside(event: MouseEvent) {
+			if (
+				datePickerRef.current &&
+				!datePickerRef.current.contains(event.target as Node)
+			) {
+				setIsDatePickerOpen(false)
+			}
+		}
+		document.addEventListener('mousedown', handleClickOutside)
+		return () => document.removeEventListener('mousedown', handleClickOutside)
+	}, [isDatePickerOpen])
 
 	const sortedOperations = useMemo(() => {
 		if (!sortBy || !sortOrder) {
@@ -725,22 +750,94 @@ export function TransactionsPage() {
 				<h2 className="text-lg font-semibold text-gray-900">
 					Transactions
 				</h2>
-				<div className="flex gap-1">
-					{([1, 7, 31] as const).map((days) => (
-						<button
-							key={days}
-							type="button"
-							onClick={() => setDateRangeDays(days)}
-							className={`rounded px-2.5 py-1 text-sm font-medium transition-colors ${
-								dateRangeDays === days
-									? 'bg-emerald-600 text-white'
-									: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-							}`}
+			<div className="flex items-center gap-1">
+				{([1, 7, 31] as const).map((days) => (
+					<button
+						key={days}
+						type="button"
+						onClick={() => {
+							setCustomFrom('')
+							setCustomTo('')
+							setDateRangeDays(days)
+							setIsDatePickerOpen(false)
+						}}
+						className={`rounded px-2.5 py-1 text-sm font-medium transition-colors ${
+							dateRangeDays === days
+								? 'bg-emerald-600 text-white'
+								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+						}`}
+					>
+						{days}d
+					</button>
+				))}
+				<div ref={datePickerRef} className="relative">
+					<button
+						type="button"
+						onClick={() => setIsDatePickerOpen((prev) => !prev)}
+						className={`rounded px-2 py-1 text-sm font-medium transition-colors ${
+							dateRangeDays === 'custom'
+								? 'bg-emerald-600 text-white'
+								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+						}`}
+						aria-label="Custom date range"
+						aria-expanded={isDatePickerOpen}
+					>
+						<svg
+							className="w-4 h-4"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth={1.5}
+							viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg"
 						>
-							{days}
-						</button>
-					))}
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z"
+							/>
+						</svg>
+					</button>
+					{isDatePickerOpen && (
+						<div className="absolute right-0 top-full mt-2 z-30 w-64 rounded-md border border-gray-200 bg-white p-3 shadow-lg">
+							<div className="space-y-2">
+								<div>
+									<label className="block text-xs font-medium text-gray-700 mb-1">
+										From
+									</label>
+									<input
+										type="date"
+										value={customFrom}
+										onChange={(e) => setCustomFrom(e.target.value)}
+										className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+									/>
+								</div>
+								<div>
+									<label className="block text-xs font-medium text-gray-700 mb-1">
+										To
+									</label>
+									<input
+										type="date"
+										value={customTo}
+										onChange={(e) => setCustomTo(e.target.value)}
+										className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+									/>
+								</div>
+								<button
+									type="button"
+									disabled={!customFrom || !customTo}
+									onClick={() => {
+										setDateRangeDays('custom')
+										setIsDatePickerOpen(false)
+									}}
+									className="w-full rounded bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50 disabled:pointer-events-none"
+								>
+									Apply
+								</button>
+							</div>
+						</div>
+					)}
 				</div>
+			</div>
 			</div>
 			{error && (
 				<p className="mb-2 text-sm text-amber-600">{error}</p>

@@ -35,10 +35,7 @@ services:
       - ./db/schema.sql:/schema.sql:ro
       - ./db/scripts:/opt/scripts:ro
     command: >
-      sh -c "psql -h postgres -U tracker -d tracker -f /schema.sql &&
-        psql -h postgres -U tracker -d tracker -f /opt/scripts/add-auth-sessions.sql &&
-        psql -h postgres -U tracker -d tracker -f /opt/scripts/add-thb-and-crypto-currencies.sql &&
-        psql -h postgres -U tracker -d tracker -f /opt/scripts/add-inbox-category.sql"
+      sh -c "psql -h postgres -U tracker -d tracker -f /schema.sql"
     depends_on:
       postgres:
         condition: service_healthy

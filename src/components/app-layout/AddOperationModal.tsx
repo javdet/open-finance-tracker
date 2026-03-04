@@ -140,7 +140,8 @@ export function AddOperationModal({
 
 	const resetForm = useCallback(() => {
 		setAmount('')
-		// Keep date so next transaction in session uses the same date
+		setCategoryId('')
+		setCategorySearch('')
 		setNotes('')
 		setError(null)
 		setTransferAccountId('')
@@ -202,7 +203,6 @@ export function AddOperationModal({
 			)
 			resetForm()
 			onSuccess?.()
-			onClose()
 			window.dispatchEvent(new CustomEvent('operation-created'))
 		} catch {
 			setError('Failed to save transaction. Please try again.')
@@ -220,7 +220,6 @@ export function AddOperationModal({
 		currencyCode,
 		resetForm,
 		onSuccess,
-		onClose,
 	])
 
 	const baseOrdered =

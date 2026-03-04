@@ -5,7 +5,7 @@ import { fetchCategories } from '@/api'
 import { BudgetItemRow } from './BudgetItemRow'
 import { ActualsOnlyBudgetRow } from './ActualsOnlyBudgetRow'
 import { AddExpenseItemModal } from './AddExpenseItemModal'
-import { ScheduledTransactionCalendar } from '@/components/scheduled-transaction-calendar/scheduled-transaction-calendar'
+
 import { clsx } from '@/lib/clsx'
 
 interface ExpenseSectionProps {
@@ -39,7 +39,7 @@ export function ExpenseSection({
 	const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([])
 	const [categories, setCategories] = useState<Category[]>([])
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-	const [isScheduledModalOpen, setIsScheduledModalOpen] = useState(false)
+
 	const [isLoading, setIsLoading] = useState(true)
 
 	useEffect(() => {
@@ -91,10 +91,6 @@ export function ExpenseSection({
 		onRefresh()
 	}
 
-	function handleScheduledClose() {
-		setIsScheduledModalOpen(false)
-		onRefresh()
-	}
 
 	if (isLoading) {
 		return (
@@ -110,22 +106,13 @@ export function ExpenseSection({
 				<h3 className="text-base font-semibold text-gray-900">
 					Expenses
 				</h3>
-				<div className="flex items-center gap-2">
-					<button
-						type="button"
-						onClick={() => setIsScheduledModalOpen(true)}
-						className="px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 active:scale-95 transition-all duration-150"
-					>
-						+ Scheduled
-					</button>
-					<button
-						type="button"
-						onClick={() => setIsAddModalOpen(true)}
-						className="px-3 py-1.5 text-sm font-medium text-white bg-rose-600 rounded-md hover:bg-rose-700 active:scale-95 transition-all duration-150 shadow-sm hover:shadow"
-					>
-						+ Add Expense
-					</button>
-				</div>
+				<button
+					type="button"
+					onClick={() => setIsAddModalOpen(true)}
+					className="px-3 py-1.5 text-sm font-medium text-white bg-rose-600 rounded-md hover:bg-rose-700 active:scale-95 transition-all duration-150 shadow-sm hover:shadow"
+				>
+					+ Add Expense
+				</button>
 			</div>
 			<div className="rounded-md border border-gray-200 bg-white overflow-hidden">
 				<div className="overflow-x-auto">
@@ -251,10 +238,6 @@ export function ExpenseSection({
 						),
 					)
 					.map((i) => i.categoryId)}
-			/>
-			<ScheduledTransactionCalendar
-				isOpen={isScheduledModalOpen}
-				onClose={handleScheduledClose}
 			/>
 		</div>
 	)
