@@ -1,4 +1,21 @@
 services:
+  traefik:
+    image: traefik:v3.6
+    container_name: proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./proxy/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./proxy/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./certs:/certs:ro
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+
   postgres:
     image: postgres:18
     container_name: postgres
@@ -46,16 +63,15 @@ services:
     container_name: finance-tracker-app
     environment:
       - NODE_ENV=production
-      - PORT=3001
+      - PORT=3126
       - DATABASE_URL=postgres://tracker:fdflkj234523jg@postgres:5432/tracker
       - INITIAL_LOGIN=admin
       - INITIAL_PASSWORD=${INITIAL_PASSWORD:-changeme}
       - RESET_CREDENTIALS=${RESET_CREDENTIALS:-false}
       - SESSION_SECRET=${SESSION_SECRET:-change-this-secret-in-production}
-      # Set SESSION_SECURE_COOKIE=false when serving over HTTP (e.g. http://host:3126)
-      - SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE:-}
-    ports:
-      - "3001:3001"
+      - SESSION_SECURE_COOKIE=true
+    expose:
+      - "3126"
     depends_on:
       db-init:
         condition: service_completed_successfully

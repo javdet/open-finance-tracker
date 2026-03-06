@@ -23,3 +23,8 @@ Thumbs.db
 data/
 .cursor/
 
+# TLS certificates
+certs/*.pem
+certs/*.crt
+certs/*.key
+traefik/dynamic.yml
