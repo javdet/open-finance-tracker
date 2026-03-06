@@ -39,6 +39,10 @@ function hashMessage(text: string): string {
 router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
 	const userId = getUserId(req)
 
+	// #region agent log
+	console.log(`[DBG-e78543] webhook handler entry`, JSON.stringify({ userId, bodyType: typeof req.body, bodyKeys: req.body ? Object.keys(req.body) : null, rawBody: JSON.stringify(req.body).slice(0, 500) }))
+	// #endregion
+
 	const { message, sender, receivedAt } = req.body as {
 		message?: string
 		sender?: string
@@ -46,6 +50,9 @@ router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
 	}
 
 	if (!message || typeof message !== 'string') {
+		// #region agent log
+		console.log(`[DBG-e78543] webhook 400: message missing or not string`, JSON.stringify({ messageType: typeof message, messageValue: message }))
+		// #endregion
 		res.status(400).json({ error: 'message is required' })
 		return
 	}
@@ -55,12 +62,19 @@ router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
 	try {
 		const existing = await smsImportsRepo.findByHash(userId, messageHash)
 		if (existing) {
+			// #region agent log
+			console.log(`[DBG-e78543] webhook 200: duplicate`)
+			// #endregion
 			res.status(200).json({ smsImport: existing, duplicate: true })
 			return
 		}
 
 		const senderStr = sender ?? ''
 		const parser = findParser(senderStr, message)
+
+		// #region agent log
+		console.log(`[DBG-e78543] parser result`, JSON.stringify({ parserFound: !!parser, parserName: parser?.name ?? null, sender: senderStr, messagePreview: message.slice(0, 120) }))
+		// #endregion
 
 		if (!parser) {
 			const smsImport = await smsImportsRepo.create({
@@ -71,11 +85,18 @@ router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
 				status: 'skipped',
 				message_hash: messageHash,
 			})
+			// #region agent log
+			console.log(`[DBG-e78543] webhook 200: skipped (no parser)`)
+			// #endregion
 			res.status(200).json({ smsImport, skipped: true })
 			return
 		}
 
 		const parsed = parser.parse(message)
+
+		// #region agent log
+		console.log(`[DBG-e78543] parsed result`, JSON.stringify({ parsed }))
+		// #endregion
 
 		if (!parsed) {
 			const smsImport = await smsImportsRepo.create({
@@ -149,8 +170,14 @@ router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
 			message_hash: messageHash,
 		})
 
+		// #region agent log
+		console.log(`[DBG-e78543] webhook 201: operation created`, JSON.stringify({ operationId: operation.id }))
+		// #endregion
 		res.status(201).json({ smsImport, operation })
 	} catch (err) {
+		// #region agent log
+		console.log(`[DBG-e78543] webhook CATCH error`, JSON.stringify({ error: err instanceof Error ? err.message : String(err), stack: err instanceof Error ? err.stack?.split('\n').slice(0, 3).join(' | ') : null }))
+		// #endregion
 		console.error('sms-webhook', err)
 
 		try {
