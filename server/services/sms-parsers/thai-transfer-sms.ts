@@ -33,7 +33,7 @@ const INCOME_RE = new RegExp(
 	+ 'of\\s+Bt\\s+' + AMOUNT + '\\s+'
 	+ 'via\\s+([^;]+?)'
 	+ '\\s*(?:;\\s*the\\s+available\\s+balance\\s+is\\s+Bt\\s+' + AMOUNT
-	+ '(?:\\.?@(\\d{1,2}:\\d{2}))?)?'
+	+ '\\.?(?:@(\\d{1,2}:\\d{2}))?)?'
 	+ '\\s*$',
 	'i',
 )
@@ -49,7 +49,7 @@ const EXPENSE_RE = new RegExp(
 	+ 'of\\s+Bt\\s+' + AMOUNT + '\\s+'
 	+ 'via\\s+([^;]+?)'
 	+ '\\s*(?:;\\s*the\\s+available\\s+balance\\s+is\\s+Bt\\s+' + AMOUNT
-	+ '(?:\\.?@(\\d{1,2}:\\d{2}))?)?'
+	+ '\\.?(?:@(\\d{1,2}:\\d{2}))?)?'
 	+ '\\s*$',
 	'i',
 )

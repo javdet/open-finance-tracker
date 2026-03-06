@@ -217,6 +217,20 @@ describe('thaiTransferSmsParser.parse – edge cases', () => {
 		expect(result!.currencyCode).toBe('THB')
 	})
 
+	it('handles trailing period after balance with no time', () => {
+		const msg = 'Withdrawal/transfer/payment from your account X0481 of Bt 52.00 via MOBILE; the available balance is Bt 26,400.52.'
+		const result = thaiTransferSmsParser.parse(msg)
+
+		expect(result).toEqual({
+			operationType: 'payment',
+			accountLast4: '0481',
+			amount: 52,
+			currencyCode: 'THB',
+			merchant: 'MOBILE',
+			balance: 26400.52,
+		})
+	})
+
 	it('parses time after period-at separator (.@) on expense', () => {
 		const msg = 'Withdrawal/transfer/payment from your account X9999 of Bt 200.00 via DBCARD; the available balance is Bt 9,800.00.@23:59'
 		const result = thaiTransferSmsParser.parse(msg)

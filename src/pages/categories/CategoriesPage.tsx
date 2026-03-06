@@ -722,7 +722,12 @@ export function CategoriesPage() {
 								return (
 									<tr
 										key={category.id}
-										className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+										className={clsx(
+											'border-b border-gray-100 transition-colors',
+											isTopLevelSystem
+												? 'bg-gray-100 hover:bg-gray-200/70'
+												: 'hover:bg-gray-50',
+										)}
 										onClick={() => {
 											if (isTopLevelSystem && hasChildren) {
 												handleToggleSystemCategory(
@@ -764,7 +769,9 @@ export function CategoriesPage() {
 																: '+'}
 														</button>
 													)}
-												{category.name}
+												<span className={isTopLevelSystem ? 'font-semibold' : ''}>
+													{category.name}
+												</span>
 											</div>
 										</td>
 										<td className="px-4 py-3 align-top">
