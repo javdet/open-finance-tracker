@@ -7,6 +7,8 @@ export type AccountType =
 	| 'bank'
 	| 'investment'
 	| 'loan'
+	| 'credit_card'
+	| 'mortgage'
 	| 'crypto'
 	| 'other'
 

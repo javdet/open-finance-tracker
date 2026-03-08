@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { NavLink, useNavigate } from 'react-router-dom'
-import type { Account } from '@/types'
+import type { Account, AccountType } from '@/types'
 import { clsx } from '@/lib/clsx'
 import { AddOperationModal } from './AddOperationModal'
 import { AddAccountModal, EditAccountModal } from './AddAccountModal'
@@ -24,6 +24,12 @@ const STABLECOIN_TO_BASE: Record<string, number> = {
 	USDC: 1,
 }
 
+const DEBT_ACCOUNT_TYPES: Set<AccountType> = new Set([
+	'credit_card',
+	'loan',
+	'mortgage',
+])
+
 function getAccountTypeLabel(accountType: Account['accountType']): string {
 	const labels: Record<Account['accountType'], string> = {
 		cash: 'Cash',
@@ -31,6 +37,8 @@ function getAccountTypeLabel(accountType: Account['accountType']): string {
 		bank: 'Bank',
 		investment: 'Investment',
 		loan: 'Loan',
+		credit_card: 'Credit Card',
+		mortgage: 'Mortgage',
 		crypto: 'Crypto',
 		other: 'Other',
 	}
@@ -100,6 +108,74 @@ function CalendarPlusIcon() {
 	)
 }
 
+function AssetsIcon() {
+	return (
+		<svg
+			className="w-5 h-5"
+			viewBox="0 0 24 24"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-hidden
+		>
+			{/* Large green upward arrow */}
+			<path
+				d="M7 4l5-3 5 3v10l-5 3-5-3V4z"
+				fill="none"
+			/>
+			<path
+				d="M8 16l4-12 4 12"
+				stroke="#16a34a"
+				strokeWidth={2.5}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<path
+				d="M9.5 12h5"
+				stroke="#16a34a"
+				strokeWidth={2}
+				strokeLinecap="round"
+			/>
+			{/* Small red down arrow */}
+			<path
+				d="M19 14v5m0 0l-2-2m2 2l2-2"
+				stroke="#dc2626"
+				strokeWidth={1.5}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	)
+}
+
+function DebtsIcon() {
+	return (
+		<svg
+			className="w-5 h-5"
+			viewBox="0 0 24 24"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-hidden
+		>
+			{/* Large red downward arrow */}
+			<path
+				d="M12 3v14m0 0l-5-5m5 5l5-5"
+				stroke="#dc2626"
+				strokeWidth={2.5}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			{/* Small green up arrow */}
+			<path
+				d="M19 10V5m0 0l-2 2m2-2l2 2"
+				stroke="#16a34a"
+				strokeWidth={1.5}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	)
+}
+
 export function AppLayout() {
 	const { logout } = useAuth()
 	const navigate = useNavigate()
@@ -117,6 +193,7 @@ export function AppLayout() {
 	)
 	const [fxError, setFxError] = useState<string | null>(null)
 	const [, setIsFxLoading] = useState(false)
+	const [showDebts, setShowDebts] = useState(false)
 
 	function loadAccounts() {
 		fetchAccounts()
@@ -196,20 +273,31 @@ export function AppLayout() {
 	const accountBalance = (account: Account) =>
 		account.balance ?? account.initialBalance
 
-	const totalBalanceBase = activeAccounts.reduce((sum, account) => {
-		const balance = accountBalance(account)
-		if (account.currencyCode === BASE_CURRENCY_CODE) {
-			return sum + balance
-		}
+	const assetAccounts = activeAccounts.filter(
+		(a) => !DEBT_ACCOUNT_TYPES.has(a.accountType),
+	)
+	const debtAccounts = activeAccounts.filter((a) =>
+		DEBT_ACCOUNT_TYPES.has(a.accountType),
+	)
+	const displayedAccounts = showDebts ? debtAccounts : assetAccounts
 
-		const rateToBase = fxRatesToBase[account.currencyCode]
+	function sumBalanceBase(list: Account[]): number {
+		return list.reduce((sum, account) => {
+			const balance = accountBalance(account)
+			if (account.currencyCode === BASE_CURRENCY_CODE) {
+				return sum + balance
+			}
+			const rateToBase = fxRatesToBase[account.currencyCode]
+			if (rateToBase) {
+				return sum + balance * rateToBase
+			}
+			return sum
+		}, 0)
+	}
 
-		if (rateToBase) {
-			return sum + balance * rateToBase
-		}
-
-		return sum
-	}, 0)
+	const totalAssetsBase = sumBalanceBase(assetAccounts)
+	const totalDebtsBase = sumBalanceBase(debtAccounts)
+	const displayedTotal = showDebts ? totalDebtsBase : totalAssetsBase
 
 	return (
 		<div className="min-h-screen flex flex-col bg-gray-50">
@@ -272,13 +360,38 @@ export function AppLayout() {
 							<div className="flex items-baseline justify-between gap-2">
 								<div>
 									<p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-										Money
+										{showDebts ? 'Debts' : 'Money'}
 									</p>
 									<p className="text-xs text-gray-500">
-										Accounts &amp; balance
+										{showDebts
+											? 'Loans & credit'
+											: 'Accounts & balance'}
 									</p>
 								</div>
 								<div className="flex items-center gap-1">
+									<button
+										type="button"
+										onClick={() =>
+											setShowDebts((prev) => !prev)
+										}
+										className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400"
+										aria-label={
+											showDebts
+												? 'Switch to assets'
+												: 'Switch to debts'
+										}
+										title={
+											showDebts
+												? 'Show assets'
+												: 'Show debts'
+										}
+									>
+										{showDebts ? (
+											<AssetsIcon />
+										) : (
+											<DebtsIcon />
+										)}
+									</button>
 									<button
 										type="button"
 										onClick={() => setIsAddAccountOpen(true)}
@@ -290,12 +403,17 @@ export function AppLayout() {
 									<p
 										className={clsx(
 											'text-base font-semibold',
-											totalBalanceBase < 0
+											showDebts
 												? 'text-red-600'
-												: 'text-emerald-600',
+												: displayedTotal < 0
+													? 'text-red-600'
+													: 'text-emerald-600',
 										)}
 									>
-										{formatCurrency(totalBalanceBase, BASE_CURRENCY_CODE)}
+										{formatCurrency(
+											displayedTotal,
+											BASE_CURRENCY_CODE,
+										)}
 									</p>
 								</div>
 							</div>
@@ -308,7 +426,7 @@ export function AppLayout() {
 								<p className="mt-1 text-xs text-amber-600">{fxError}</p>
 							)}
 							<ul className="mt-4 space-y-2">
-								{activeAccounts.map((account) => {
+								{displayedAccounts.map((account) => {
 									const isSelected = selectedAccountId === account.id
 									return (
 										<li

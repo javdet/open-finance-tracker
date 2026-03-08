@@ -8,7 +8,9 @@ const ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
 	{ value: 'card', label: 'Card' },
 	{ value: 'bank', label: 'Bank' },
 	{ value: 'investment', label: 'Investment' },
+	{ value: 'credit_card', label: 'Credit Card' },
 	{ value: 'loan', label: 'Loan' },
+	{ value: 'mortgage', label: 'Mortgage' },
 	{ value: 'crypto', label: 'Crypto' },
 	{ value: 'other', label: 'Other' },
 ]

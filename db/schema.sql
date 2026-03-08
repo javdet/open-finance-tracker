@@ -23,6 +23,8 @@ BEGIN
 			'investment',
 			'loan',
 			'crypto',
+			'credit_card',
+			'mortgage',
 			'other'
 		);
 	END IF;
