@@ -121,6 +121,7 @@ router.post('/', async (req: Request, res: Response) => {
 			amount: number
 			currencyCode: string
 			amountInBase?: number | null
+			transferAmount?: number | null
 			notes?: string | null
 		}
 		const op = await operationsRepo.createOperation({
@@ -133,6 +134,7 @@ router.post('/', async (req: Request, res: Response) => {
 			amount: body.amount,
 			currency_code: body.currencyCode,
 			amount_in_base: body.amountInBase ?? null,
+			transfer_amount: body.transferAmount ?? null,
 			notes: body.notes ?? null,
 		})
 		res.status(201).json(op)
@@ -153,6 +155,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
 			amount?: number
 			currencyCode?: string
 			amountInBase?: number | null
+			transferAmount?: number | null
 			notes?: string | null
 		}
 		const op = await operationsRepo.updateOperation(
@@ -166,6 +169,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
 				amount: body.amount,
 				currency_code: body.currencyCode,
 				amount_in_base: body.amountInBase,
+				transfer_amount: body.transferAmount,
 				notes: body.notes,
 			},
 		)

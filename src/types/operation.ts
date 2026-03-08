@@ -12,6 +12,7 @@ export interface Operation {
 	transferAccountId: string | null
 	categoryId: string | null
 	amount: number
+	transferAmount: number | null
 	currencyCode: string
 	amountInBase: number | null
 	notes: string | null
@@ -25,6 +26,7 @@ export interface CreateOperationInput {
 	transferAccountId?: string | null
 	categoryId?: string | null
 	amount: number
+	transferAmount?: number | null
 	currencyCode: string
 	amountInBase?: number | null
 	notes?: string | null
@@ -36,6 +38,7 @@ export interface UpdateOperationInput {
 	transferAccountId?: string | null
 	categoryId?: string | null
 	amount?: number
+	transferAmount?: number | null
 	currencyCode?: string
 	amountInBase?: number | null
 	notes?: string | null

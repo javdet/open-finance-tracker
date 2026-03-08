@@ -313,6 +313,7 @@ CREATE TABLE IF NOT EXISTS operations (
 	category_id         BIGINT,
 	amount              NUMERIC(18,2)   NOT NULL,
 	currency_code       VARCHAR(10)     NOT NULL,
+	transfer_amount     NUMERIC(18,2),
 	amount_in_base      NUMERIC(18,2),
 	notes               TEXT,
 	created_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),

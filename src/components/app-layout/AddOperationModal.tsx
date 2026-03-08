@@ -69,6 +69,7 @@ export function AddOperationModal({
 	const [date, setDate] = useState('')
 	const [accountId, setAccountId] = useState('')
 	const [transferAccountId, setTransferAccountId] = useState('')
+	const [transferAmount, setTransferAmount] = useState('')
 	const [notes, setNotes] = useState('')
 	const [error, setError] = useState<string | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -137,6 +138,11 @@ export function AddOperationModal({
 
 	const selectedAccount = accounts.find((a) => a.id === accountId)
 	const currencyCode = selectedAccount?.currencyCode ?? 'USD'
+	const transferAccount = accounts.find((a) => a.id === transferAccountId)
+	const isCrossCurrency =
+		transactionType === 'transfer' &&
+		!!transferAccount &&
+		transferAccount.currencyCode !== currencyCode
 
 	const resetForm = useCallback(() => {
 		setAmount('')
@@ -145,6 +151,7 @@ export function AddOperationModal({
 		setNotes('')
 		setError(null)
 		setTransferAccountId('')
+		setTransferAmount('')
 	}, [])
 
 	const handleSubmit = useCallback(async () => {
@@ -180,6 +187,15 @@ export function AddOperationModal({
 		const apiType: OperationType =
 			transactionType === 'expense' ? 'payment' : transactionType
 		const operationTime = `${date}T12:00:00.000Z`
+
+		const parsedTransferAmount = isCrossCurrency
+			? parseAmount(transferAmount)
+			: null
+		if (isCrossCurrency && (parsedTransferAmount === null || parsedTransferAmount <= 0)) {
+			setError('Please enter the received amount in the destination currency.')
+			return
+		}
+
 		setIsSubmitting(true)
 		try {
 			await createOperation(
@@ -197,6 +213,7 @@ export function AddOperationModal({
 						transactionType === 'income'
 							? Math.abs(amountNum)
 							: -Math.abs(amountNum),
+					transferAmount: parsedTransferAmount ?? null,
 					currencyCode,
 					notes: notes.trim() || null,
 				},
@@ -214,6 +231,8 @@ export function AddOperationModal({
 		date,
 		accountId,
 		transferAccountId,
+		transferAmount,
+		isCrossCurrency,
 		transactionType,
 		categoryId,
 		notes,
@@ -470,6 +489,24 @@ export function AddOperationModal({
 										</option>
 									))}
 							</select>
+						</div>
+					)}
+
+					{isCrossCurrency && (
+						<div>
+							<label className="block text-xs font-medium text-gray-700 mb-1">
+								Received amount ({transferAccount.currencyCode}):
+							</label>
+							<input
+								type="text"
+								value={transferAmount}
+								onChange={(e) => setTransferAmount(e.target.value)}
+								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								placeholder={`Amount in ${transferAccount.currencyCode}`}
+							/>
+							<p className="mt-1 text-[11px] text-gray-500">
+								Amount credited to {transferAccount.name} in {transferAccount.currencyCode}
+							</p>
 						</div>
 					)}
 

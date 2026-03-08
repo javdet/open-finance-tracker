@@ -15,6 +15,7 @@ export interface OperationRow {
 	amount: string
 	currency_code: string
 	amount_in_base: string | null
+	transfer_amount: string | null
 	notes: string | null
 	created_at: Date
 }
@@ -29,6 +30,7 @@ export interface CreateOperationRow {
 	amount: number
 	currency_code: string
 	amount_in_base?: number | null
+	transfer_amount?: number | null
 	notes?: string | null
 }
 
@@ -40,6 +42,7 @@ export interface UpdateOperationRow {
 	amount?: number
 	currency_code?: string
 	amount_in_base?: number | null
+	transfer_amount?: number | null
 	notes?: string | null
 }
 
@@ -68,6 +71,7 @@ function rowToOperation(row: OperationRow) {
 		amount: Number(row.amount),
 		currencyCode: row.currency_code,
 		amountInBase: row.amount_in_base ? Number(row.amount_in_base) : null,
+		transferAmount: row.transfer_amount ? Number(row.transfer_amount) : null,
 		notes: row.notes,
 		createdAt: row.created_at.toISOString(),
 	}
@@ -121,7 +125,7 @@ export async function listOperations(
 	params.push(limit, offset)
 	const result = await client.query<OperationRow>(
 		`SELECT id, user_id, operation_type, operation_time, account_id, transfer_account_id,
-		 category_id, amount, currency_code, amount_in_base, notes, created_at
+		 category_id, amount, currency_code, amount_in_base, transfer_amount, notes, created_at
 		 FROM operations WHERE ${whereClause}
 		 ORDER BY operation_time DESC, id DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
 		params,
@@ -138,7 +142,7 @@ export async function getOperationById(
 	const client = pool ?? getPool()
 	const result = await client.query<OperationRow>(
 		`SELECT id, user_id, operation_type, operation_time, account_id, transfer_account_id,
-		 category_id, amount, currency_code, amount_in_base, notes, created_at
+		 category_id, amount, currency_code, amount_in_base, transfer_amount, notes, created_at
 		 FROM operations WHERE id = $1 AND user_id = $2`,
 		[id, userId],
 	)
@@ -156,9 +160,9 @@ export async function createOperation(
 			? new Date(data.operation_time)
 			: data.operation_time
 	const result = await client.query<OperationRow>(
-		`INSERT INTO operations (user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, notes)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-		 RETURNING id, user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, notes, created_at`,
+		`INSERT INTO operations (user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, transfer_amount, notes)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		 RETURNING id, user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, transfer_amount, notes, created_at`,
 		[
 			data.user_id,
 			data.operation_type,
@@ -169,6 +173,7 @@ export async function createOperation(
 			data.amount,
 			data.currency_code,
 			data.amount_in_base ?? null,
+			data.transfer_amount ?? null,
 			data.notes ?? null,
 		],
 	)
@@ -196,9 +201,10 @@ export async function updateOperation(
 		 amount = COALESCE($7, amount),
 		 currency_code = COALESCE($8, currency_code),
 		 amount_in_base = $9,
-		 notes = COALESCE($10, notes)
+		 transfer_amount = $10,
+		 notes = COALESCE($11, notes)
 		 WHERE id = $1 AND user_id = $2
-		 RETURNING id, user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, notes, created_at`,
+		 RETURNING id, user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, transfer_amount, notes, created_at`,
 		[
 			id,
 			userId,
@@ -209,6 +215,7 @@ export async function updateOperation(
 			data.amount,
 			data.currency_code,
 			data.amount_in_base,
+			data.transfer_amount,
 			data.notes,
 		],
 	)

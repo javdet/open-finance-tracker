@@ -68,7 +68,7 @@ export async function listAccountsByUser(
 		   FROM operations WHERE user_id = $1 GROUP BY account_id
 		 ) out_sum ON out_sum.account_id = a.id
 		 LEFT JOIN (
-		   SELECT transfer_account_id AS account_id, SUM(-amount)::numeric AS total
+		   SELECT transfer_account_id AS account_id, SUM(COALESCE(transfer_amount, -amount))::numeric AS total
 		   FROM operations WHERE transfer_account_id IS NOT NULL AND user_id = $1 GROUP BY transfer_account_id
 		 ) in_sum ON in_sum.account_id = a.id
 		 WHERE a.user_id = $1 ORDER BY a.name`,
@@ -93,7 +93,7 @@ export async function getAccountById(
 		   FROM operations WHERE user_id = $2 AND account_id = $1 GROUP BY account_id
 		 ) out_sum ON out_sum.account_id = a.id
 		 LEFT JOIN (
-		   SELECT transfer_account_id AS account_id, SUM(-amount)::numeric AS total
+		   SELECT transfer_account_id AS account_id, SUM(COALESCE(transfer_amount, -amount))::numeric AS total
 		   FROM operations WHERE transfer_account_id = $1 AND user_id = $2 GROUP BY transfer_account_id
 		 ) in_sum ON in_sum.account_id = a.id
 		 WHERE a.id = $1 AND a.user_id = $2`,
@@ -198,7 +198,7 @@ export async function listAccountBalancesAtDate(
 		    WHERE o.user_id = $1 AND o.account_id = a.id AND o.operation_time < $2
 		  ), 0)
 		  + COALESCE((
-		    SELECT SUM(-o.amount)::numeric FROM operations o
+		    SELECT SUM(COALESCE(o.transfer_amount, -o.amount))::numeric FROM operations o
 		    WHERE o.user_id = $1 AND o.transfer_account_id = a.id
 		      AND o.operation_time < $2
 		  ), 0)

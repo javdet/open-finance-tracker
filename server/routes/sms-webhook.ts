@@ -126,13 +126,17 @@ router.post('/', apiKeyAuth, async (req: Request, res: Response) => {
 			? `SMS: ${parsed.merchant}`
 			: 'SMS import'
 
+		const signedAmount = parsed.operationType === 'income'
+			? Math.abs(parsed.amount)
+			: -Math.abs(parsed.amount)
+
 		const operation = await operationsRepo.createOperation({
 			user_id: userId,
 			operation_type: parsed.operationType,
 			operation_time: operationTime,
 			account_id: mapping.accountId,
 			category_id: mapping.categoryId,
-			amount: parsed.amount,
+			amount: signedAmount,
 			currency_code: mapping.currencyCode,
 			notes,
 		})
