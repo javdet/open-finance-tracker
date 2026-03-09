@@ -3,17 +3,35 @@ import type { AccountType } from '@/types'
 import type { Account, CreateAccountInput } from '@/types'
 import { createAccount, updateAccount } from '@/api'
 
-const ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
+const ASSET_ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
 	{ value: 'cash', label: 'Cash' },
 	{ value: 'card', label: 'Card' },
 	{ value: 'bank', label: 'Bank' },
 	{ value: 'investment', label: 'Investment' },
-	{ value: 'credit_card', label: 'Credit Card' },
-	{ value: 'loan', label: 'Loan' },
-	{ value: 'mortgage', label: 'Mortgage' },
 	{ value: 'crypto', label: 'Crypto' },
 	{ value: 'other', label: 'Other' },
 ]
+
+const DEBT_ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
+	{ value: 'credit_card', label: 'Credit Card' },
+	{ value: 'loan', label: 'Loan' },
+	{ value: 'mortgage', label: 'Mortgage' },
+]
+
+function formatDebtPreview(amount: number, currencyCode: string): string {
+	try {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: currencyCode,
+			maximumFractionDigits: 0,
+		}).format(amount)
+	} catch {
+		const formatted = new Intl.NumberFormat('en-US', {
+			maximumFractionDigits: 0,
+		}).format(amount)
+		return `${currencyCode} ${formatted}`
+	}
+}
 
 const FIAT_CURRENCIES: { value: string; label: string }[] = [
 	{ value: 'USD', label: '$ (USD)' },
@@ -32,14 +50,20 @@ interface AddAccountModalProps {
 	isOpen: boolean
 	onClose: () => void
 	onSuccess: () => void
+	forDebt?: boolean
 }
 
 export function AddAccountModal({
 	isOpen,
 	onClose,
 	onSuccess,
+	forDebt = false,
 }: AddAccountModalProps) {
-	const [accountType, setAccountType] = useState<AccountType>('cash')
+	const accountTypeOptions = forDebt
+		? DEBT_ACCOUNT_TYPES
+		: ASSET_ACCOUNT_TYPES
+	const defaultType = accountTypeOptions[0].value
+	const [accountType, setAccountType] = useState<AccountType>(defaultType)
 	const [name, setName] = useState('')
 	const [description, setDescription] = useState('')
 	const [initialBalance, setInitialBalance] = useState(0)
@@ -60,13 +84,13 @@ export function AddAccountModal({
 	}
 
 	const resetForm = useCallback(() => {
-		setAccountType('cash')
+		setAccountType(defaultType)
 		setName('')
 		setDescription('')
 		setInitialBalance(0)
 		setCurrencyCode('USD')
 		setError(null)
-	}, [])
+	}, [defaultType])
 
 	const handleClose = useCallback(() => {
 		resetForm()
@@ -82,12 +106,16 @@ export function AddAccountModal({
 		}
 		setError(null)
 		setIsSubmitting(true)
+		const rawBalance = Number(initialBalance) || 0
+		const finalBalance = forDebt
+			? -Math.abs(rawBalance)
+			: rawBalance
 		const payload: CreateAccountInput = {
 			accountType,
 			name: trimmedName,
 			description: description.trim() || null,
 			currencyCode,
-			initialBalance: Number(initialBalance) || 0,
+			initialBalance: finalBalance,
 			isActive: true,
 		}
 		createAccount(payload)
@@ -149,7 +177,7 @@ export function AddAccountModal({
 							}
 							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
-							{ACCOUNT_TYPES.map(({ value, label }) => (
+							{accountTypeOptions.map(({ value, label }) => (
 								<option key={value} value={value}>
 									{label}
 								</option>
@@ -197,23 +225,29 @@ export function AddAccountModal({
 							htmlFor="account-balance"
 							className="block text-xs font-medium text-gray-700 mb-1"
 						>
-							Start balance
+							{forDebt ? 'Outstanding debt' : 'Start balance'}
 						</label>
 						<input
 							id="account-balance"
 							type="number"
 							step="any"
+							min="0"
 							value={initialBalance === 0 ? '' : initialBalance}
 							onChange={(e) =>
 								setInitialBalance(
 									e.target.value === ''
 										? 0
-										: Number(e.target.value),
+										: Math.abs(Number(e.target.value)),
 								)
 							}
 							placeholder="0"
 							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						/>
+						{forDebt && initialBalance > 0 && (
+							<p className="mt-1 text-xs text-gray-500">
+								Will be saved as {formatDebtPreview(-initialBalance, currencyCode)}
+							</p>
+						)}
 					</div>
 
 					<div>
@@ -268,6 +302,7 @@ interface EditAccountModalProps {
 	onClose: () => void
 	onSuccess: () => void
 	account: Account | null
+	forDebt?: boolean
 }
 
 export function EditAccountModal({
@@ -275,7 +310,11 @@ export function EditAccountModal({
 	onClose,
 	onSuccess,
 	account,
+	forDebt = false,
 }: EditAccountModalProps) {
+	const accountTypeOptions = forDebt
+		? DEBT_ACCOUNT_TYPES
+		: ASSET_ACCOUNT_TYPES
 	const [accountType, setAccountType] = useState<AccountType>('cash')
 	const [name, setName] = useState('')
 	const [description, setDescription] = useState('')
@@ -382,7 +421,7 @@ export function EditAccountModal({
 							}
 							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
-							{ACCOUNT_TYPES.map(({ value, label }) => (
+							{accountTypeOptions.map(({ value, label }) => (
 								<option key={value} value={value}>
 									{label}
 								</option>

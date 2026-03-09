@@ -270,8 +270,13 @@ export function AppLayout() {
 			})
 	}, [foreignCurrencyCodes.join(',')])
 
-	const accountBalance = (account: Account) =>
-		account.balance ?? account.initialBalance
+	const accountBalance = (account: Account) => {
+		const raw = account.balance ?? account.initialBalance
+		if (DEBT_ACCOUNT_TYPES.has(account.accountType)) {
+			return Math.min(0, raw)
+		}
+		return raw
+	}
 
 	const assetAccounts = activeAccounts.filter(
 		(a) => !DEBT_ACCOUNT_TYPES.has(a.accountType),
@@ -499,12 +504,14 @@ export function AppLayout() {
 				isOpen={isAddAccountOpen}
 				onClose={() => setIsAddAccountOpen(false)}
 				onSuccess={loadAccounts}
+				forDebt={showDebts}
 			/>
 			<EditAccountModal
 				isOpen={editingAccount != null}
 				onClose={() => setEditingAccount(null)}
 				onSuccess={handleEditSuccess}
 				account={editingAccount}
+				forDebt={showDebts}
 			/>
 			<ScheduledTransactionCalendar
 				isOpen={isAddRecurringOpen}
