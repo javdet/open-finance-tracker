@@ -30,6 +30,13 @@ describe('thaiTransferSmsParser.canParse', () => {
 		)).toBe(true)
 	})
 
+	it('matches income messages starting with "Deposit/transfer to your account"', () => {
+		expect(thaiTransferSmsParser.canParse(
+			'BANK',
+			'Deposit/transfer to your account X0481 of Bt 225,943.50 via AUTO; the available balance is Bt 243,634.93.',
+		)).toBe(true)
+	})
+
 	it('is case-insensitive for income prefix', () => {
 		expect(thaiTransferSmsParser.canParse(
 			'BANK',
@@ -90,6 +97,20 @@ describe('thaiTransferSmsParser.parse – income', () => {
 		expect(result!.merchant).toBe('AUTO system')
 		expect(result!.amount).toBe(100000)
 		expect(result!.balance).toBe(250000)
+	})
+
+	it('parses "Deposit/transfer to your account" as income', () => {
+		const msg = 'Deposit/transfer to your account X0481 of Bt 225,943.50 via AUTO; the available balance is Bt 243,634.93.'
+		const result = thaiTransferSmsParser.parse(msg)
+
+		expect(result).toEqual({
+			operationType: 'income',
+			accountLast4: '0481',
+			amount: 225943.50,
+			currencyCode: 'THB',
+			merchant: 'AUTO',
+			balance: 243634.93,
+		})
 	})
 
 	it('handles amounts with multiple comma separators', () => {

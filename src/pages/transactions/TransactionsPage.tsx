@@ -4,11 +4,13 @@ import {
 	fetchOperations,
 	fetchAccounts,
 	fetchCategories,
+	fetchCategoryUsage,
 	deleteOperation,
 	updateOperation,
 } from '@/api'
 import { clsx } from '@/lib/clsx'
 import { TransactionTypeSelector } from '@/components/transaction-type-selector/transaction-type-selector'
+import { useAuth } from '@/contexts/auth-context'
 
 type DateRangeDays = 1 | 7 | 31 | 'custom'
 
@@ -142,11 +144,13 @@ function EditOperationModal({
 	operation,
 	accounts,
 }: EditOperationModalProps) {
+	const { user } = useAuth()
 	const [transactionType, setTransactionType] = useState<
 		'expense' | 'income' | 'transfer'
 	>('expense')
 	const [categoryId, setCategoryId] = useState<string>('')
 	const [categories, setCategories] = useState<Category[]>([])
+	const [popularCategoryIds, setPopularCategoryIds] = useState<string[]>([])
 	const [isCategoryOpen, setIsCategoryOpen] = useState(false)
 	const [categorySearch, setCategorySearch] = useState('')
 	const categoryDropdownRef = useRef<HTMLDivElement>(null)
@@ -199,6 +203,21 @@ function EditOperationModal({
 			setError(null)
 		}
 	}, [isOpen, operation])
+
+	useEffect(() => {
+		if (!isOpen || !operation) return
+		if (transactionType === 'expense') {
+			fetchCategoryUsage(user?.userId ?? '1', 'payment')
+				.then((res) => setPopularCategoryIds(res.categoryIds))
+				.catch(() => setPopularCategoryIds([]))
+		} else if (transactionType === 'income') {
+			fetchCategoryUsage(user?.userId ?? '1', 'income')
+				.then((res) => setPopularCategoryIds(res.categoryIds))
+				.catch(() => setPopularCategoryIds([]))
+		} else {
+			setPopularCategoryIds([])
+		}
+	}, [isOpen, operation, transactionType, user?.userId])
 
 	useEffect(() => {
 		if (transactionType === 'transfer') {
@@ -329,12 +348,18 @@ function EditOperationModal({
 		onSuccess,
 	])
 
-	const categoryOptions =
+	const baseOrdered =
 		transactionType === 'expense'
 			? orderedCategoriesForType(categories, 'expense')
 			: transactionType === 'income'
 				? orderedCategoriesForType(categories, 'income')
 				: []
+
+	const popularFirst = popularCategoryIds
+		.map((id) => baseOrdered.find((c) => c.id === id))
+		.filter((c): c is Category => c != null)
+	const rest = baseOrdered.filter((c) => !popularCategoryIds.includes(c.id))
+	const categoryOptions = [...popularFirst, ...rest]
 
 	const showCategory = transactionType === 'expense' || transactionType === 'income'
 
@@ -481,46 +506,83 @@ function EditOperationModal({
 											className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 										/>
 									</li>
-									<li
-										role="option"
-										aria-selected={!categoryId}
-										className="cursor-pointer px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
-										onClick={() => {
-											setCategoryId('')
-											setIsCategoryOpen(false)
-											setCategorySearch('')
-										}}
-									>
-										— Select category —
-									</li>
-									{categoryOptions
-										.filter((cat) => {
-											if (!categorySearch.trim()) {
-												return true
-											}
-											return cat.name
-												.toLowerCase()
-												.includes(
-													categorySearch.toLowerCase(),
-												)
-										})
-										.map((cat) => (
-											<li
-												key={cat.id}
-												role="option"
-												aria-selected={
-													categoryId === cat.id
-												}
-												className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
-												onClick={() => {
-													setCategoryId(cat.id)
-													setIsCategoryOpen(false)
-													setCategorySearch('')
-												}}
-											>
-												{cat.name}
-											</li>
-										))}
+								<li
+									role="option"
+									aria-selected={!categoryId}
+									className="cursor-pointer px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+									onClick={() => {
+										setCategoryId('')
+										setIsCategoryOpen(false)
+										setCategorySearch('')
+									}}
+								>
+									— Select category —
+								</li>
+								{(() => {
+									const filtered = categoryOptions.filter((cat) => {
+										if (!categorySearch.trim()) return true
+										return cat.name
+											.toLowerCase()
+											.includes(categorySearch.toLowerCase())
+									})
+									const popularFiltered = filtered.filter((c) =>
+										popularCategoryIds.includes(c.id),
+									)
+									const otherFiltered = filtered.filter(
+										(c) => !popularCategoryIds.includes(c.id),
+									)
+									const showSections =
+										!categorySearch.trim() &&
+										popularFiltered.length > 0
+									return (
+										<>
+											{showSections && (
+												<li className="px-2 pt-1.5 pb-0.5 text-xs font-semibold text-gray-500">
+													Frequently used categories
+												</li>
+											)}
+											{showSections
+												? popularFiltered.map((cat) => (
+														<li
+															key={cat.id}
+															role="option"
+															aria-selected={categoryId === cat.id}
+															className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+															onClick={() => {
+																setCategoryId(cat.id)
+																setIsCategoryOpen(false)
+																setCategorySearch('')
+															}}
+														>
+															{cat.name}
+														</li>
+													))
+												: null}
+											{showSections && otherFiltered.length > 0 && (
+												<li className="px-2 pt-2 pb-0.5 text-xs font-semibold text-gray-500">
+													Other categories
+												</li>
+											)}
+											{(showSections ? otherFiltered : filtered).map(
+												(cat) => (
+													<li
+														key={cat.id}
+														role="option"
+														aria-selected={categoryId === cat.id}
+														className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+														onClick={() => {
+															setCategoryId(cat.id)
+															setIsCategoryOpen(false)
+															setCategorySearch('')
+														}}
+													>
+														{cat.name}
+													</li>
+												),
+											)}
+										</>
+									)
+								})()}
 								</ul>
 							)}
 						</div>

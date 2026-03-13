@@ -16,7 +16,7 @@
 
 import type { ParsedSms, SmsParser } from './index.js'
 
-const INCOME_PREFIX_RE = /^Transfer\s+to\s+your\s+account/i
+const INCOME_PREFIX_RE = /^(?:Deposit\/transfer|Transfer)\s+to\s+your\s+account/i
 
 const EXPENSE_PREFIX_RE =
 	/^(?:Withdrawal\/transfer\/payment|Withdrawal|transfer|payment)\s+from\s+your\s+account/i
@@ -29,7 +29,7 @@ const AMOUNT = '([\\d,]+\\.\\d{2})'
  *           [4] balance (optional), [5] time HH:MM (optional)
  */
 const INCOME_RE = new RegExp(
-	'Transfer\\s+to\\s+your\\s+account\\s+X(\\d{4})\\s+'
+	'(?:Deposit/transfer|Transfer)\\s+to\\s+your\\s+account\\s+X(\\d{4})\\s+'
 	+ 'of\\s+Bt\\s+' + AMOUNT + '\\s+'
 	+ 'via\\s+([^;]+?)'
 	+ '\\s*(?:;\\s*the\\s+available\\s+balance\\s+is\\s+Bt\\s+' + AMOUNT

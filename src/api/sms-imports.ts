@@ -12,7 +12,7 @@ export interface SmsImport {
 	parserUsed: string | null
 	parsedData: Record<string, unknown> | null
 	operationId: string | null
-	status: 'pending' | 'processed' | 'failed' | 'duplicate'
+	status: 'pending' | 'processed' | 'failed' | 'duplicate' | 'skipped'
 	errorMessage: string | null
 	messageHash: string
 	createdAt: string

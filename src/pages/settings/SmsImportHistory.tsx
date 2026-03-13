@@ -40,6 +40,10 @@ const STATUS_CONFIG: Record<
 		label: 'Duplicate',
 		className: 'bg-gray-50 text-gray-600 border-gray-200',
 	},
+	skipped: {
+		label: 'Skipped',
+		className: 'bg-orange-50 text-orange-700 border-orange-200',
+	},
 }
 
 function StatusBadge({ status }: { status: SmsImport['status'] }) {

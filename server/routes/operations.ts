@@ -158,20 +158,22 @@ router.patch('/:id', async (req: Request, res: Response) => {
 			transferAmount?: number | null
 			notes?: string | null
 		}
+		const data: operationsRepo.UpdateOperationRow = {}
+		if ('operationTime' in body) data.operation_time = body.operationTime
+		if ('accountId' in body) data.account_id = body.accountId
+		if ('transferAccountId' in body)
+			data.transfer_account_id = body.transferAccountId
+		if ('categoryId' in body) data.category_id = body.categoryId
+		if ('amount' in body) data.amount = body.amount
+		if ('currencyCode' in body) data.currency_code = body.currencyCode
+		if ('amountInBase' in body) data.amount_in_base = body.amountInBase
+		if ('transferAmount' in body) data.transfer_amount = body.transferAmount
+		if ('notes' in body) data.notes = body.notes
+
 		const op = await operationsRepo.updateOperation(
 			req.params.id,
 			userId,
-			{
-				operation_time: body.operationTime,
-				account_id: body.accountId,
-				transfer_account_id: body.transferAccountId,
-				category_id: body.categoryId,
-				amount: body.amount,
-				currency_code: body.currencyCode,
-				amount_in_base: body.amountInBase,
-				transfer_amount: body.transferAmount,
-				notes: body.notes,
-			},
+			data,
 		)
 		if (!op) {
 			res.status(404).json({ error: 'Operation not found' })
@@ -179,7 +181,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
 		}
 		res.json(op)
 	} catch (err) {
-		console.error('updateOperation', err)
+		console.error('updateOperation error:', err)
 		res.status(500).json({ error: 'Failed to update operation' })
 	}
 })

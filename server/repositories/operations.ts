@@ -187,37 +187,48 @@ export async function updateOperation(
 	pool?: Pool,
 ): Promise<ReturnType<typeof rowToOperation> | null> {
 	const client = pool ?? getPool()
-	const opTime = data.operation_time
-		? typeof data.operation_time === 'string'
-			? new Date(data.operation_time)
-			: data.operation_time
-		: undefined
+
+	const setClauses: string[] = []
+	const params: unknown[] = [id, userId]
+	let idx = 3
+
+	function addField(column: string, value: unknown) {
+		setClauses.push(`${column} = $${idx}`)
+		params.push(value)
+		idx += 1
+	}
+
+	if (data.operation_time !== undefined) {
+		const opTime =
+			typeof data.operation_time === 'string'
+				? new Date(data.operation_time)
+				: data.operation_time
+		addField('operation_time', opTime)
+	}
+	if (data.account_id !== undefined) addField('account_id', data.account_id)
+	if (data.transfer_account_id !== undefined)
+		addField('transfer_account_id', data.transfer_account_id)
+	if (data.category_id !== undefined) addField('category_id', data.category_id)
+	if (data.amount !== undefined) addField('amount', data.amount)
+	if (data.currency_code !== undefined)
+		addField('currency_code', data.currency_code)
+	if (data.amount_in_base !== undefined)
+		addField('amount_in_base', data.amount_in_base)
+	if (data.transfer_amount !== undefined)
+		addField('transfer_amount', data.transfer_amount)
+	if (data.notes !== undefined) addField('notes', data.notes)
+
+	if (setClauses.length === 0) {
+		return getOperationById(id, userId, pool)
+	}
+
 	const result = await client.query<OperationRow>(
-		`UPDATE operations SET
-		 operation_time = COALESCE($3, operation_time),
-		 account_id = COALESCE($4, account_id),
-		 transfer_account_id = $5,
-		 category_id = $6,
-		 amount = COALESCE($7, amount),
-		 currency_code = COALESCE($8, currency_code),
-		 amount_in_base = $9,
-		 transfer_amount = $10,
-		 notes = COALESCE($11, notes)
+		`UPDATE operations SET ${setClauses.join(', ')}
 		 WHERE id = $1 AND user_id = $2
-		 RETURNING id, user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, transfer_amount, notes, created_at`,
-		[
-			id,
-			userId,
-			opTime,
-			data.account_id,
-			data.transfer_account_id,
-			data.category_id,
-			data.amount,
-			data.currency_code,
-			data.amount_in_base,
-			data.transfer_amount,
-			data.notes,
-		],
+		 RETURNING id, user_id, operation_type, operation_time, account_id,
+		 transfer_account_id, category_id, amount, currency_code, amount_in_base,
+		 transfer_amount, notes, created_at`,
+		params,
 	)
 	const row = result.rows[0]
 	return row ? rowToOperation(row) : null
