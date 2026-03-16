@@ -33,6 +33,7 @@ export interface CreateOperationInput {
 }
 
 export interface UpdateOperationInput {
+	operationType?: OperationType
 	operationTime?: string
 	accountId?: string
 	transferAccountId?: string | null

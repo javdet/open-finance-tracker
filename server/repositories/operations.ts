@@ -35,6 +35,7 @@ export interface CreateOperationRow {
 }
 
 export interface UpdateOperationRow {
+	operation_type?: string
 	operation_time?: Date | string
 	account_id?: string
 	transfer_account_id?: string | null
@@ -198,6 +199,8 @@ export async function updateOperation(
 		idx += 1
 	}
 
+	if (data.operation_type !== undefined)
+		addField('operation_type', data.operation_type)
 	if (data.operation_time !== undefined) {
 		const opTime =
 			typeof data.operation_time === 'string'
@@ -222,18 +225,12 @@ export async function updateOperation(
 		return getOperationById(id, userId, pool)
 	}
 
-	const sql = `UPDATE operations SET ${setClauses.join(', ')}
+	const result = await client.query<OperationRow>(
+		`UPDATE operations SET ${setClauses.join(', ')}
 		 WHERE id = $1 AND user_id = $2
 		 RETURNING id, user_id, operation_type, operation_time, account_id,
 		 transfer_account_id, category_id, amount, currency_code, amount_in_base,
-		 transfer_amount, notes, created_at`
-	console.log('[updateOperation] SQL:', sql)
-	console.log('[updateOperation] params:', JSON.stringify(params))
-	console.log('[updateOperation] data keys:', Object.keys(data))
-	console.log('[updateOperation] data:', JSON.stringify(data))
-
-	const result = await client.query<OperationRow>(
-		sql,
+		 transfer_amount, notes, created_at`,
 		params,
 	)
 	const row = result.rows[0]
