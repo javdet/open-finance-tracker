@@ -158,6 +158,8 @@ router.patch('/:id', async (req: Request, res: Response) => {
 			transferAmount?: number | null
 			notes?: string | null
 		}
+		console.log('[PATCH /:id] raw body:', JSON.stringify(body))
+
 		const data: operationsRepo.UpdateOperationRow = {}
 		if ('operationTime' in body) data.operation_time = body.operationTime
 		if ('accountId' in body) data.account_id = body.accountId
@@ -169,6 +171,8 @@ router.patch('/:id', async (req: Request, res: Response) => {
 		if ('amountInBase' in body) data.amount_in_base = body.amountInBase
 		if ('transferAmount' in body) data.transfer_amount = body.transferAmount
 		if ('notes' in body) data.notes = body.notes
+
+		console.log('[PATCH /:id] mapped data:', JSON.stringify(data))
 
 		const op = await operationsRepo.updateOperation(
 			req.params.id,

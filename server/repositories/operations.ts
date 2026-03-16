@@ -222,12 +222,18 @@ export async function updateOperation(
 		return getOperationById(id, userId, pool)
 	}
 
-	const result = await client.query<OperationRow>(
-		`UPDATE operations SET ${setClauses.join(', ')}
+	const sql = `UPDATE operations SET ${setClauses.join(', ')}
 		 WHERE id = $1 AND user_id = $2
 		 RETURNING id, user_id, operation_type, operation_time, account_id,
 		 transfer_account_id, category_id, amount, currency_code, amount_in_base,
-		 transfer_amount, notes, created_at`,
+		 transfer_amount, notes, created_at`
+	console.log('[updateOperation] SQL:', sql)
+	console.log('[updateOperation] params:', JSON.stringify(params))
+	console.log('[updateOperation] data keys:', Object.keys(data))
+	console.log('[updateOperation] data:', JSON.stringify(data))
+
+	const result = await client.query<OperationRow>(
+		sql,
 		params,
 	)
 	const row = result.rows[0]
