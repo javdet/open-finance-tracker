@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Account, Category, RecurrencePeriod } from '@/types'
+import { DEBT_ACCOUNT_TYPES } from '@/types'
 import { fetchCategories, fetchAccounts, createScheduledTransaction } from '@/api'
 
 const RECURRENCE_OPTIONS: { value: RecurrencePeriod; label: string }[] = [
@@ -105,10 +106,13 @@ export function AddScheduledTransactionModal({
 				fetchCategories(),
 			])
 				.then(([accs, cats]) => {
-					setAccounts(accs)
+					const filtered = accs.filter(
+						(a) => !DEBT_ACCOUNT_TYPES.has(a.accountType),
+					)
+					setAccounts(filtered)
 					setCategories(cats)
-					if (accs.length > 0 && !accountId) {
-						setAccountId(accs[0].id)
+					if (filtered.length > 0 && !accountId) {
+						setAccountId(filtered[0].id)
 					}
 				})
 				.catch(() => {

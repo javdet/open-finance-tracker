@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { Operation, Category } from '@/types'
+import { DEBT_ACCOUNT_TYPES } from '@/types'
 import {
 	fetchOperations,
 	fetchAccounts,
@@ -665,6 +666,134 @@ function EditOperationModal({
 	)
 }
 
+interface ExportCsvModalProps {
+	isOpen: boolean
+	onClose: () => void
+}
+
+function ExportCsvModal({ isOpen, onClose }: ExportCsvModalProps) {
+	const [allTime, setAllTime] = useState(true)
+	const [fromDate, setFromDate] = useState('')
+	const [toDate, setToDate] = useState('')
+
+	useEffect(() => {
+		if (isOpen) {
+			setAllTime(true)
+			setFromDate('')
+			setToDate('')
+		}
+	}, [isOpen])
+
+	const handleExport = useCallback(() => {
+		const params = new URLSearchParams()
+		if (!allTime && fromDate) {
+			params.set(
+				'fromTime',
+				new Date(`${fromDate}T00:00:00`).toISOString(),
+			)
+		}
+		if (!allTime && toDate) {
+			params.set(
+				'toTime',
+				new Date(`${toDate}T23:59:59.999`).toISOString(),
+			)
+		}
+		const query = params.toString()
+		const url = `/api/operations/export${query ? `?${query}` : ''}`
+		const a = document.createElement('a')
+		a.href = url
+		a.download = 'transactions-export.csv'
+		document.body.appendChild(a)
+		a.click()
+		document.body.removeChild(a)
+		onClose()
+	}, [allTime, fromDate, toDate, onClose])
+
+	if (!isOpen) return null
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center">
+			<div
+				className="absolute inset-0 bg-black/40"
+				onClick={onClose}
+				aria-hidden="true"
+			/>
+			<div className="relative z-10 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-xl">
+				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
+					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+						Export Transactions to CSV
+					</h2>
+					<button
+						type="button"
+						onClick={onClose}
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+						aria-label="Close export modal"
+					>
+						✕
+					</button>
+				</header>
+
+				<div className="px-6 py-4 space-y-4">
+					<label className="flex items-center gap-2 cursor-pointer">
+						<input
+							type="checkbox"
+							checked={allTime}
+							onChange={(e) => setAllTime(e.target.checked)}
+							className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+						/>
+						<span className="text-sm text-gray-700">All time</span>
+					</label>
+
+					{!allTime && (
+						<div className="grid grid-cols-2 gap-4">
+							<div>
+								<label className="block text-xs font-medium text-gray-700 mb-1">
+									From
+								</label>
+								<input
+									type="date"
+									value={fromDate}
+									onChange={(e) => setFromDate(e.target.value)}
+									className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								/>
+							</div>
+							<div>
+								<label className="block text-xs font-medium text-gray-700 mb-1">
+									To
+								</label>
+								<input
+									type="date"
+									value={toDate}
+									onChange={(e) => setToDate(e.target.value)}
+									className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								/>
+							</div>
+						</div>
+					)}
+				</div>
+
+				<footer className="flex items-center justify-end gap-3 px-6 py-3 border-t border-gray-200">
+					<button
+						type="button"
+						onClick={onClose}
+						className="rounded px-4 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 hover:bg-gray-100 transition-colors"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						onClick={handleExport}
+						disabled={!allTime && (!fromDate || !toDate)}
+						className="rounded px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+					>
+						Export
+					</button>
+				</footer>
+			</div>
+		</div>
+	)
+}
+
 export function TransactionsPage() {
 	const [operations, setOperations] = useState<Operation[]>([])
 	const [total, setTotal] = useState(0)
@@ -684,6 +813,7 @@ export function TransactionsPage() {
 	const [customFrom, setCustomFrom] = useState('')
 	const [customTo, setCustomTo] = useState('')
 	const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
+	const [isExportModalOpen, setIsExportModalOpen] = useState(false)
 	const datePickerRef = useRef<HTMLDivElement>(null)
 	const [sortBy, setSortBy] = useState<SortColumn>('date')
 	const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
@@ -734,11 +864,13 @@ export function TransactionsPage() {
 				})
 				setAccountMap(map)
 				setAccounts(
-					accountsList.map((a) => ({
-						id: a.id,
-						name: a.name,
-						currencyCode: a.currencyCode,
-					})),
+					accountsList
+						.filter((a) => !DEBT_ACCOUNT_TYPES.has(a.accountType))
+						.map((a) => ({
+							id: a.id,
+							name: a.name,
+							currencyCode: a.currencyCode,
+						})),
 				)
 			})
 			.catch(() => {})
@@ -935,6 +1067,28 @@ export function TransactionsPage() {
 						</div>
 					)}
 				</div>
+				<button
+					type="button"
+					onClick={() => setIsExportModalOpen(true)}
+					className="rounded px-2 py-1 text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200"
+					aria-label="Export transactions to CSV"
+					title="Export to CSV"
+				>
+					<svg
+						className="w-4 h-4"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth={1.5}
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+						/>
+					</svg>
+				</button>
 			</div>
 			</div>
 			{error && (
@@ -1133,6 +1287,10 @@ export function TransactionsPage() {
 				onSuccess={handleEditSuccess}
 				operation={editingOperation}
 				accounts={accounts}
+			/>
+			<ExportCsvModal
+				isOpen={isExportModalOpen}
+				onClose={() => setIsExportModalOpen(false)}
 			/>
 		</div>
 	)

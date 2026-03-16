@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import type { Account, Category } from '@/types'
+import { DEBT_ACCOUNT_TYPES } from '@/types'
 import type { OperationType } from '@/types/operation'
 import { fetchCategories, fetchCategoryUsage, createOperation } from '@/api'
 import { TransactionTypeSelector } from '@/components/transaction-type-selector/transaction-type-selector'
@@ -76,6 +77,11 @@ export function AddOperationModal({
 	const [isCategoryOpen, setIsCategoryOpen] = useState(false)
 	const categoryDropdownRef = useRef<HTMLDivElement>(null)
 
+	const nonDebtAccounts = useMemo(
+		() => accounts.filter((a) => !DEBT_ACCOUNT_TYPES.has(a.accountType)),
+		[accounts],
+	)
+
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
 			if (
@@ -131,10 +137,10 @@ export function AddOperationModal({
 	}, [transactionType])
 
 	useEffect(() => {
-		if (isOpen && accounts.length > 0 && !accountId) {
-			setAccountId(accounts[0].id)
+		if (isOpen && nonDebtAccounts.length > 0 && !accountId) {
+			setAccountId(nonDebtAccounts[0].id)
 		}
-	}, [isOpen, accounts, accountId])
+	}, [isOpen, nonDebtAccounts, accountId])
 
 	const selectedAccount = accounts.find((a) => a.id === accountId)
 	const currencyCode = selectedAccount?.currencyCode ?? 'USD'
@@ -331,7 +337,7 @@ export function AddOperationModal({
 								onChange={(e) => setAccountId(e.target.value)}
 								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							>
-								{accounts.map((account) => (
+								{nonDebtAccounts.map((account) => (
 									<option key={account.id} value={account.id}>
 										{account.name} ({account.currencyCode})
 									</option>
@@ -481,7 +487,7 @@ export function AddOperationModal({
 								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							>
 								<option value="">— Select account —</option>
-								{accounts
+								{nonDebtAccounts
 									.filter((a) => a.id !== accountId)
 									.map((account) => (
 										<option key={account.id} value={account.id}>

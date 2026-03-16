@@ -12,6 +12,12 @@ export type AccountType =
 	| 'crypto'
 	| 'other'
 
+export const DEBT_ACCOUNT_TYPES: ReadonlySet<AccountType> = new Set<AccountType>([
+	'credit_card',
+	'loan',
+	'mortgage',
+])
+
 export interface Account {
 	id: string
 	userId: string

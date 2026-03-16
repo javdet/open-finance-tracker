@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { NavLink, useNavigate } from 'react-router-dom'
-import type { Account, AccountType } from '@/types'
+import type { Account } from '@/types'
+import { DEBT_ACCOUNT_TYPES } from '@/types'
 import { clsx } from '@/lib/clsx'
 import { AddOperationModal } from './AddOperationModal'
 import { AddAccountModal, EditAccountModal } from './AddAccountModal'
@@ -24,11 +25,6 @@ const STABLECOIN_TO_BASE: Record<string, number> = {
 	USDC: 1,
 }
 
-const DEBT_ACCOUNT_TYPES: Set<AccountType> = new Set([
-	'credit_card',
-	'loan',
-	'mortgage',
-])
 
 function getAccountTypeLabel(accountType: Account['accountType']): string {
 	const labels: Record<Account['accountType'], string> = {

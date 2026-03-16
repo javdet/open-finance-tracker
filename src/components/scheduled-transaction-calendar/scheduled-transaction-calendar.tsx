@@ -406,19 +406,19 @@ export function ScheduledTransactionCalendar({
 											type="button"
 											onClick={() => handleDayClick(cell.dateStr)}
 											className={[
-												'bg-white min-h-[72px] sm:min-h-[88px] p-1 text-left transition-colors hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-emerald-500',
-												!cell.isCurrentMonth && 'bg-gray-50/50',
+												'bg-white min-h-[80px] sm:min-h-[96px] p-1.5 text-left transition-all duration-150 hover:bg-emerald-50/40 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-emerald-500',
+												!cell.isCurrentMonth && 'bg-gray-50/60',
 											]
 												.filter(Boolean)
 												.join(' ')}
 										>
 											<span
 												className={[
-													'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium',
+													'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors',
 													cell.isToday
-														? 'bg-emerald-600 text-white'
+														? 'bg-emerald-600 text-white shadow-sm shadow-emerald-200'
 														: cell.isCurrentMonth
-															? 'text-gray-900'
+															? 'text-gray-800'
 															: 'text-gray-400',
 												]
 													.filter(Boolean)
@@ -426,23 +426,41 @@ export function ScheduledTransactionCalendar({
 											>
 												{cell.day}
 											</span>
-											<div className="mt-0.5 space-y-0.5 overflow-hidden">
+											<div className="mt-1 space-y-1 overflow-hidden">
 												{events.slice(0, 3).map((tx) => (
 													<div
 														key={tx.id}
 														className={[
-															'rounded px-1 py-px text-[10px] leading-tight truncate',
-															tx.operationType === 'payment'
-																? 'bg-red-100 text-red-700'
-																: 'bg-green-100 text-green-700',
+															'flex items-center gap-1 rounded-md border-l-[3px] px-1.5 py-[3px] text-[11px] leading-tight font-medium truncate transition-colors duration-150',
+															tx.operationType === 'income'
+																? 'border-l-sky-400 bg-sky-50 text-sky-700 hover:bg-sky-100'
+																: 'border-l-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
 														].join(' ')}
-														title={`${tx.name} (${tx.recurrencePeriod})`}
+														title={`${tx.name} · ${tx.recurrencePeriod} · ${tx.currencyCode} ${Number(tx.amount).toLocaleString()}`}
 													>
-														{tx.name}
+														<svg
+															className={[
+																'w-3 h-3 flex-shrink-0',
+																tx.operationType === 'income'
+																	? 'text-sky-400'
+																	: 'text-emerald-400',
+															].join(' ')}
+															fill="none"
+															stroke="currentColor"
+															viewBox="0 0 24 24"
+														>
+															<path
+																strokeLinecap="round"
+																strokeLinejoin="round"
+																strokeWidth={2}
+																d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+															/>
+														</svg>
+														<span className="truncate">{tx.name}</span>
 													</div>
 												))}
 												{events.length > 3 && (
-													<div className="text-[10px] text-gray-400 px-1">
+													<div className="text-[10px] text-gray-400 font-medium px-1.5">
 														+{events.length - 3} more
 													</div>
 												)}

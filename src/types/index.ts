@@ -1,4 +1,5 @@
 export type { Account, AccountType, CreateAccountInput, UpdateAccountInput } from './account'
+export { DEBT_ACCOUNT_TYPES } from './account'
 export type {
 	Budget,
 	BudgetItem,

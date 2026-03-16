@@ -363,6 +363,77 @@ export async function getCategoryTotalsInBase(
 	return result.rows
 }
 
+export interface ExportOperationRow {
+	id: string
+	operation_type: string
+	operation_time: Date
+	amount: string
+	currency_code: string
+	amount_in_base: string | null
+	account_id: string
+	account_name: string | null
+	account_currency: string | null
+	transfer_account_id: string | null
+	transfer_account_name: string | null
+	transfer_amount: string | null
+	category_id: string | null
+	category_name: string | null
+	notes: string | null
+}
+
+export interface ListOperationsForExportOptions {
+	userId: string
+	fromTime?: string
+	toTime?: string
+}
+
+/**
+ * Fetches all operations for CSV export with resolved account/category names.
+ * No limit/offset — returns every row matching the filter.
+ */
+export async function listOperationsForExport(
+	options: ListOperationsForExportOptions,
+	pool?: Pool,
+): Promise<ExportOperationRow[]> {
+	const client = pool ?? getPool()
+	const conditions: string[] = ['o.user_id = $1']
+	const params: string[] = [options.userId]
+	let paramIndex = 2
+
+	if (options.fromTime) {
+		conditions.push(`o.operation_time >= $${paramIndex}`)
+		params.push(options.fromTime)
+		paramIndex += 1
+	}
+	if (options.toTime) {
+		conditions.push(`o.operation_time <= $${paramIndex}`)
+		params.push(options.toTime)
+		paramIndex += 1
+	}
+
+	const whereClause = conditions.join(' AND ')
+
+	const result = await client.query<ExportOperationRow>(
+		`SELECT o.id, o.operation_type, o.operation_time, o.amount,
+		        o.currency_code, o.amount_in_base,
+		        o.account_id, a.name AS account_name,
+		        a.currency_code AS account_currency,
+		        o.transfer_account_id, ta.name AS transfer_account_name,
+		        o.transfer_amount,
+		        o.category_id, c.name AS category_name,
+		        o.notes
+		 FROM operations o
+		 LEFT JOIN accounts a ON a.id = o.account_id
+		 LEFT JOIN accounts ta ON ta.id = o.transfer_account_id
+		 LEFT JOIN categories c ON c.id = o.category_id
+		 WHERE ${whereClause}
+		 ORDER BY o.operation_time DESC, o.id DESC`,
+		params,
+	)
+
+	return result.rows
+}
+
 /** Category usage counts for the last N months (payment or income only). */
 const POPULAR_CATEGORIES_MONTHS = 3
 const POPULAR_CATEGORIES_LIMIT = 10

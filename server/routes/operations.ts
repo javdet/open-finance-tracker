@@ -94,6 +94,66 @@ router.get('/category-totals', async (req: Request, res: Response) => {
 	}
 })
 
+router.get('/export', async (req: Request, res: Response) => {
+	try {
+		const userId = getUserId(req)
+		const fromTime = req.query.fromTime as string | undefined
+		const toTime = req.query.toTime as string | undefined
+
+		const rows = await operationsRepo.listOperationsForExport({
+			userId,
+			fromTime,
+			toTime,
+		})
+
+		const csvEscape = (value: string | number | null | undefined): string => {
+			if (value === null || value === undefined) return ''
+			const str = String(value)
+			if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+				return `"${str.replace(/"/g, '""')}"`
+			}
+			return str
+		}
+
+		const header = [
+			'date', 'operation_type', 'amount', 'currency_code',
+			'amount_in_base', 'account_name', 'account_id',
+			'account_currency', 'transfer_account_name',
+			'transfer_account_id', 'transfer_amount', 'category_name',
+			'category_id', 'notes',
+		].join(',')
+
+		const csvRows = rows.map((r) => [
+			csvEscape(r.operation_time.toISOString()),
+			csvEscape(r.operation_type),
+			csvEscape(r.amount),
+			csvEscape(r.currency_code),
+			csvEscape(r.amount_in_base),
+			csvEscape(r.account_name),
+			csvEscape(r.account_id),
+			csvEscape(r.account_currency),
+			csvEscape(r.transfer_account_name),
+			csvEscape(r.transfer_account_id),
+			csvEscape(r.transfer_amount),
+			csvEscape(r.category_name),
+			csvEscape(r.category_id),
+			csvEscape(r.notes),
+		].join(','))
+
+		const csv = [header, ...csvRows].join('\n')
+
+		res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+		res.setHeader(
+			'Content-Disposition',
+			'attachment; filename="transactions-export.csv"',
+		)
+		res.send(csv)
+	} catch (err) {
+		console.error('exportOperations', err)
+		res.status(500).json({ error: 'Failed to export operations' })
+	}
+})
+
 router.get('/:id', async (req: Request, res: Response) => {
 	try {
 		const userId = getUserId(req)
