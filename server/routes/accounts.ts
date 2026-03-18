@@ -3,6 +3,7 @@
  */
 import { Router, type Request, type Response } from 'express'
 import * as accountsRepo from '../repositories/accounts.js'
+import { getBalanceHistory } from '../services/balance-history.js'
 
 const router = Router()
 
@@ -20,6 +21,21 @@ router.get('/', async (req: Request, res: Response) => {
 	} catch (err) {
 		console.error('listAccounts', err)
 		res.status(500).json({ error: 'Failed to list accounts' })
+	}
+})
+
+router.get('/balance-history', async (req: Request, res: Response) => {
+	try {
+		const userId = getUserId(req)
+		const baseCurrency = typeof req.query.baseCurrency === 'string'
+			? req.query.baseCurrency
+			: 'USD'
+		const days = Number(req.query.days) || 30
+		const result = await getBalanceHistory(userId, baseCurrency, days)
+		res.json(result)
+	} catch (err) {
+		console.error('balanceHistory', err)
+		res.status(500).json({ error: 'Failed to fetch balance history' })
 	}
 })
 

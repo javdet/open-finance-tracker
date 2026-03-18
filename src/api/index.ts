@@ -6,8 +6,13 @@ export {
 	deleteAccount,
 	fetchAccountById,
 	fetchAccounts,
+	fetchBalanceHistory,
 	createAccount,
 	updateAccount,
+} from './accounts'
+export type {
+	BalanceHistoryPoint,
+	BalanceHistoryResponse,
 } from './accounts'
 export {
 	createOperation,

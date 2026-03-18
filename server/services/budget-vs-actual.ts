@@ -13,6 +13,7 @@ import * as categoriesRepo from '../repositories/categories.js'
 import * as operationsRepo from '../repositories/operations.js'
 import * as scheduledTxRepo from '../repositories/scheduled-transactions.js'
 import { ensureRatesForDate } from './exchange-rate-cache.js'
+import { sumAccountBalancesInBase } from './currency-conversion.js'
 
 export interface BudgetVsActualRow {
 	categoryId: string
@@ -219,60 +220,3 @@ export async function getBudgetVsActualReport(
 	}
 }
 
-/**
- * Converts account balances to base currency and sums them.
- * Uses exchange_rates for conversion; stablecoins (USDC, USDT) are 1:1 with USD.
- */
-async function sumAccountBalancesInBase(
-	balances: { currencyCode: string; balance: number }[],
-	baseCurrency: string,
-	rateDate: string,
-	pool: import('pg').Pool,
-): Promise<number> {
-	if (balances.length === 0) return 0
-	const currencies = [...new Set(balances.map((b) => b.currencyCode))]
-	const needsRates = currencies.some((c) => c !== baseCurrency)
-	const rateByCurrency = new Map<string, number>()
-	if (needsRates) {
-		const rates = await pool.query<{
-			counter_currency_code: string
-			rate: string
-		}>(
-			`SELECT DISTINCT ON (counter_currency_code) counter_currency_code, rate
-			 FROM exchange_rates
-			 WHERE base_currency_code = $1 AND counter_currency_code = ANY($2)
-			   AND rate_date <= $3::date
-			 ORDER BY counter_currency_code, rate_date DESC`,
-			[baseCurrency, currencies, rateDate],
-		)
-		for (const r of rates.rows) {
-			if (!rateByCurrency.has(r.counter_currency_code)) {
-				rateByCurrency.set(r.counter_currency_code, Number(r.rate))
-			}
-		}
-	}
-	let total = 0
-	for (const { currencyCode, balance } of balances) {
-		if (balance === 0) continue
-		total += toBase(balance, currencyCode, baseCurrency, rateByCurrency)
-	}
-	return total
-}
-
-function toBase(
-	amount: number,
-	currencyCode: string,
-	baseCurrency: string,
-	rateByCurrency: Map<string, number>,
-): number {
-	if (currencyCode === baseCurrency) return amount
-	const stablecoinPair =
-		(baseCurrency === 'USD' && ['USDC', 'USDT'].includes(currencyCode)) ||
-		(currencyCode === 'USD' && ['USDC', 'USDT'].includes(baseCurrency)) ||
-		(['USDC', 'USDT'].includes(baseCurrency) &&
-			['USDC', 'USDT'].includes(currencyCode))
-	if (stablecoinPair) return amount
-	const rate = rateByCurrency.get(currencyCode)
-	if (!rate) return 0
-	return amount / rate
-}

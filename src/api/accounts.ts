@@ -39,3 +39,27 @@ export function updateAccount(
 export function deleteAccount(id: string, options?: ApiOptions): Promise<void> {
 	return del(`/api/accounts/${encodeURIComponent(id)}`, options)
 }
+
+export interface BalanceHistoryPoint {
+	date: string
+	totalBalance: number
+}
+
+export interface BalanceHistoryResponse {
+	points: BalanceHistoryPoint[]
+}
+
+export function fetchBalanceHistory(
+	baseCurrency = 'USD',
+	days = 30,
+	options?: ApiOptions,
+): Promise<BalanceHistoryResponse> {
+	const params = new URLSearchParams({
+		baseCurrency,
+		days: String(days),
+	})
+	return get<BalanceHistoryResponse>(
+		`/api/accounts/balance-history?${params}`,
+		options,
+	)
+}

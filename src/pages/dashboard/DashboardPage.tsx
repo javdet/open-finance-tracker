@@ -4,6 +4,7 @@ import {
 	getMonthOptions,
 } from '@/components/expense-chart/expense-chart'
 import { PlanVsActualScale } from '@/components/plan-vs-actual-scale/plan-vs-actual-scale'
+import { BalanceHistoryChart } from '@/components/balance-history-chart/balance-history-chart'
 import {
 	findOrCreateMonthlyBudget,
 	fetchBudgetVsActualReport,
@@ -60,6 +61,8 @@ export function DashboardPage() {
 	const [isMonthOpen, setIsMonthOpen] = useState(false)
 	const monthDropdownRef = useRef<HTMLDivElement>(null)
 	const monthOptions = getMonthOptions()
+
+	const [showBalanceHistory, setShowBalanceHistory] = useState(false)
 
 	const [planVsActualReport, setPlanVsActualReport] =
 		useState<BudgetVsActualReport | null>(null)
@@ -167,6 +170,23 @@ export function DashboardPage() {
 					selectedYear={selectedYear}
 				/>
 			</div>
+
+			<section aria-labelledby="balance-history-heading">
+				<button
+					type="button"
+					id="balance-history-heading"
+					onClick={() => setShowBalanceHistory((v) => !v)}
+					className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded"
+					aria-expanded={showBalanceHistory}
+				>
+					{showBalanceHistory ? 'Hide Balance Changes' : 'Balance Changes'}
+				</button>
+				{showBalanceHistory && (
+					<div className="mt-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+						<BalanceHistoryChart />
+					</div>
+				)}
+			</section>
 
 			<section aria-labelledby="plan-vs-actual-heading">
 				<h2
