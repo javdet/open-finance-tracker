@@ -68,3 +68,45 @@ export async function sumAccountBalancesInBase(
 	}
 	return total
 }
+
+/**
+ * Converts an array of per-account balances into individual amounts in
+ * `baseCurrency`, returning a map of accountId → converted balance.
+ */
+export async function convertAccountBalancesInBase(
+	balances: { id: string; currencyCode: string; balance: number }[],
+	baseCurrency: string,
+	rateDate: string,
+	pool: Pool,
+): Promise<Map<string, number>> {
+	const result = new Map<string, number>()
+	if (balances.length === 0) return result
+	const currencies = [...new Set(balances.map((b) => b.currencyCode))]
+	const needsRates = currencies.some((c) => c !== baseCurrency)
+	const rateByCurrency = new Map<string, number>()
+	if (needsRates) {
+		const rates = await pool.query<{
+			counter_currency_code: string
+			rate: string
+		}>(
+			`SELECT DISTINCT ON (counter_currency_code) counter_currency_code, rate
+			 FROM exchange_rates
+			 WHERE base_currency_code = $1 AND counter_currency_code = ANY($2)
+			   AND rate_date <= $3::date
+			 ORDER BY counter_currency_code, rate_date DESC`,
+			[baseCurrency, currencies, rateDate],
+		)
+		for (const r of rates.rows) {
+			if (!rateByCurrency.has(r.counter_currency_code)) {
+				rateByCurrency.set(r.counter_currency_code, Number(r.rate))
+			}
+		}
+	}
+	for (const { id, currencyCode, balance } of balances) {
+		const converted = balance === 0
+			? 0
+			: toBase(balance, currencyCode, baseCurrency, rateByCurrency)
+		result.set(id, Math.round(converted * 100) / 100)
+	}
+	return result
+}

@@ -40,12 +40,19 @@ export function deleteAccount(id: string, options?: ApiOptions): Promise<void> {
 	return del(`/api/accounts/${encodeURIComponent(id)}`, options)
 }
 
+export interface AccountMeta {
+	id: string
+	name: string
+}
+
 export interface BalanceHistoryPoint {
 	date: string
 	totalBalance: number
+	accountBalances: Record<string, number>
 }
 
 export interface BalanceHistoryResponse {
+	accounts: AccountMeta[]
 	points: BalanceHistoryPoint[]
 }
 

@@ -11,6 +11,7 @@ export {
 	updateAccount,
 } from './accounts'
 export type {
+	AccountMeta,
 	BalanceHistoryPoint,
 	BalanceHistoryResponse,
 } from './accounts'

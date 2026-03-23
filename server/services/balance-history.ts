@@ -1,25 +1,32 @@
 /**
- * Computes daily aggregate account balances in a single base currency
+ * Computes daily per-account balances in a single base currency
  * over the last N days.  Used by the balance-history chart on the dashboard.
  */
 import type { Pool } from 'pg'
 import { getPool } from '../db/client.js'
 import { listAccountBalancesAtDate } from '../repositories/accounts.js'
 import { ensureRatesForDate } from './exchange-rate-cache.js'
-import { sumAccountBalancesInBase } from './currency-conversion.js'
+import { convertAccountBalancesInBase } from './currency-conversion.js'
+
+export interface AccountMeta {
+	id: string
+	name: string
+}
 
 export interface BalanceHistoryPoint {
 	date: string
 	totalBalance: number
+	accountBalances: Record<string, number>
 }
 
 export interface BalanceHistoryResult {
+	accounts: AccountMeta[]
 	points: BalanceHistoryPoint[]
 }
 
 /**
  * Returns one data point per day for the last `days` days (plus today),
- * each containing the sum of all active account balances converted to
+ * each containing per-account balances and a total, all converted to
  * `baseCurrency` using the closest available exchange rate.
  */
 export async function getBalanceHistory(
@@ -35,13 +42,18 @@ export async function getBalanceHistory(
 		uniqueDates.map((d) => ensureRatesForDate(baseCurrency, d, pool)),
 	)
 
+	const accountMap = new Map<string, string>()
 	const points = await Promise.all(
 		dates.map((d) =>
-			computeDayBalance(userId, d.dateStr, d.asOfTime, baseCurrency, pool),
+			computeDayBalance(userId, d.dateStr, d.asOfTime, baseCurrency, pool, accountMap),
 		),
 	)
 
-	return { points }
+	const accounts: AccountMeta[] = Array.from(accountMap.entries()).map(
+		([id, name]) => ({ id, name }),
+	)
+
+	return { accounts, points }
 }
 
 /**
@@ -75,13 +87,27 @@ async function computeDayBalance(
 	asOfTime: string,
 	baseCurrency: string,
 	pool: Pool,
+	accountMap: Map<string, string>,
 ): Promise<BalanceHistoryPoint> {
 	const balances = await listAccountBalancesAtDate(userId, asOfTime, pool)
-	const totalBalance = await sumAccountBalancesInBase(
+	for (const b of balances) {
+		if (!accountMap.has(b.id)) accountMap.set(b.id, b.name)
+	}
+	const converted = await convertAccountBalancesInBase(
 		balances,
 		baseCurrency,
 		dateStr,
 		pool,
 	)
-	return { date: dateStr, totalBalance: Math.round(totalBalance * 100) / 100 }
+	const accountBalances: Record<string, number> = {}
+	let totalBalance = 0
+	for (const [id, amount] of converted) {
+		accountBalances[id] = amount
+		totalBalance += amount
+	}
+	return {
+		date: dateStr,
+		totalBalance: Math.round(totalBalance * 100) / 100,
+		accountBalances,
+	}
 }

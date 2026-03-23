@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
 	LineChart,
 	Line,
@@ -6,13 +6,19 @@ import {
 	YAxis,
 	CartesianGrid,
 	Tooltip,
+	Legend,
 	ResponsiveContainer,
 } from 'recharts'
 import { fetchBalanceHistory } from '@/api'
-import type { BalanceHistoryPoint } from '@/api'
+import type { AccountMeta, BalanceHistoryPoint } from '@/api'
 
 const BASE_CURRENCY = 'USD'
 const DEFAULT_DAYS = 30
+
+const ACCOUNT_COLORS = [
+	'#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6',
+	'#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1',
+]
 
 function formatDateLabel(dateStr: string): string {
 	const d = new Date(dateStr + 'T00:00:00')
@@ -32,6 +38,11 @@ function formatMoney(amount: number): string {
 	}
 }
 
+interface ChartDataPoint {
+	date: string
+	[key: string]: string | number
+}
+
 export interface BalanceHistoryChartProps {
 	baseCurrency?: string
 	days?: number
@@ -41,7 +52,8 @@ export function BalanceHistoryChart({
 	baseCurrency = BASE_CURRENCY,
 	days = DEFAULT_DAYS,
 }: BalanceHistoryChartProps) {
-	const [data, setData] = useState<BalanceHistoryPoint[]>([])
+	const [points, setPoints] = useState<BalanceHistoryPoint[]>([])
+	const [accounts, setAccounts] = useState<AccountMeta[]>([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
@@ -49,10 +61,14 @@ export function BalanceHistoryChart({
 		setIsLoading(true)
 		setError(null)
 		fetchBalanceHistory(baseCurrency, days)
-			.then((res) => setData(res.points))
+			.then((res) => {
+				setPoints(res.points)
+				setAccounts(res.accounts)
+			})
 			.catch((err: Error) => {
 				setError(err.message ?? 'Failed to load balance history')
-				setData([])
+				setPoints([])
+				setAccounts([])
 			})
 			.finally(() => setIsLoading(false))
 	}, [baseCurrency, days])
@@ -60,6 +76,17 @@ export function BalanceHistoryChart({
 	useEffect(() => {
 		loadData()
 	}, [loadData])
+
+	const chartData = useMemo<ChartDataPoint[]>(() =>
+		points.map((p) => {
+			const row: ChartDataPoint = { date: p.date }
+			for (const acc of accounts) {
+				row[acc.id] = p.accountBalances[acc.id] ?? 0
+			}
+			return row
+		}),
+	[points, accounts],
+	)
 
 	if (error) {
 		return (
@@ -80,7 +107,7 @@ export function BalanceHistoryChart({
 		)
 	}
 
-	if (data.length === 0) {
+	if (points.length === 0) {
 		return (
 			<div
 				className="flex items-center justify-center text-gray-500 text-sm"
@@ -93,6 +120,8 @@ export function BalanceHistoryChart({
 		)
 	}
 
+	const nameById = new Map(accounts.map((a) => [a.id, a.name]))
+
 	return (
 		<div className="flex flex-col">
 			<div
@@ -100,14 +129,17 @@ export function BalanceHistoryChart({
 				role="status"
 				aria-live="polite"
 			>
-				Balance history from {formatDateLabel(data[0].date)} to{' '}
-				{formatDateLabel(data[data.length - 1].date)}.
-				Latest balance: {formatMoney(data[data.length - 1].totalBalance)}.
+				Balance history from {formatDateLabel(points[0].date)} to{' '}
+				{formatDateLabel(points[points.length - 1].date)}.
+				{accounts.map((a) => {
+					const latest = points[points.length - 1].accountBalances[a.id] ?? 0
+					return ` ${a.name}: ${formatMoney(latest)}.`
+				})}
 			</div>
-			<div style={{ height: 300, width: '100%' }}>
+			<div style={{ height: 340, width: '100%' }}>
 				<ResponsiveContainer width="100%" height="100%">
 					<LineChart
-						data={data}
+						data={chartData}
 						margin={{ top: 8, right: 16, left: 8, bottom: 0 }}
 					>
 						<CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -127,10 +159,10 @@ export function BalanceHistoryChart({
 							width={80}
 						/>
 						<Tooltip
-							formatter={(value: number) => [
-								formatMoney(value),
-								'Total Balance',
-							]}
+							formatter={(value: number, _name: string, props: { dataKey?: string }) => {
+								const name = nameById.get(String(props.dataKey)) ?? props.dataKey
+								return [formatMoney(value), name]
+							}}
 							labelFormatter={formatDateLabel}
 							contentStyle={{
 								borderRadius: '8px',
@@ -138,14 +170,27 @@ export function BalanceHistoryChart({
 								fontSize: '14px',
 							}}
 						/>
-						<Line
-							type="monotone"
-							dataKey="totalBalance"
-							stroke="#3b82f6"
-							strokeWidth={2}
-							dot={false}
-							activeDot={{ r: 5, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }}
+						<Legend
+							formatter={(value: string) => nameById.get(value) ?? value}
+							wrapperStyle={{ fontSize: '13px' }}
 						/>
+						{accounts.map((acc, i) => (
+							<Line
+								key={acc.id}
+								type="monotone"
+								dataKey={acc.id}
+								name={acc.id}
+								stroke={ACCOUNT_COLORS[i % ACCOUNT_COLORS.length]}
+								strokeWidth={2}
+								dot={false}
+								activeDot={{
+									r: 5,
+									fill: ACCOUNT_COLORS[i % ACCOUNT_COLORS.length],
+									stroke: '#fff',
+									strokeWidth: 2,
+								}}
+							/>
+						))}
 					</LineChart>
 				</ResponsiveContainer>
 			</div>

@@ -172,6 +172,7 @@ export async function deleteAccount(
 
 export interface AccountBalanceAtDate {
 	id: string
+	name: string
 	currencyCode: string
 	balance: number
 }
@@ -188,10 +189,11 @@ export async function listAccountBalancesAtDate(
 	const client = pool ?? getPool()
 	const result = await client.query<{
 		id: string
+		name: string
 		currency_code: string
 		balance: string
 	}>(
-		`SELECT a.id::text AS id, a.currency_code,
+		`SELECT a.id::text AS id, a.name, a.currency_code,
 		 (a.initial_balance
 		  + COALESCE((
 		    SELECT SUM(o.amount)::numeric FROM operations o
@@ -210,6 +212,7 @@ export async function listAccountBalancesAtDate(
 	)
 	return result.rows.map((r) => ({
 		id: r.id,
+		name: r.name,
 		currencyCode: r.currency_code,
 		balance: Number(r.balance),
 	}))
