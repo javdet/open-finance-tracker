@@ -299,19 +299,19 @@ export function AppLayout() {
 	}
 
 	const totalAssetsBase = sumBalanceBase(assetAccounts)
-	const totalDebtsBase = activeAccounts.reduce((sum, account) => {
-		const raw = account.balance ?? account.initialBalance
-		const debt = Math.min(0, raw)
-		if (debt >= 0) return sum
-		if (account.currencyCode === BASE_CURRENCY_CODE) {
-			return sum + debt
-		}
-		const rateToBase = fxRatesToBase[account.currencyCode]
-		if (rateToBase) {
-			return sum + debt * rateToBase
-		}
-		return sum
-	}, 0)
+	const totalDebtsBase = activeAccounts
+		.filter((a) => DEBT_ACCOUNT_TYPES.has(a.accountType))
+		.reduce((sum, account) => {
+			const balance = accountBalance(account)
+			if (account.currencyCode === BASE_CURRENCY_CODE) {
+				return sum + balance
+			}
+			const rateToBase = fxRatesToBase[account.currencyCode]
+			if (rateToBase) {
+				return sum + balance * rateToBase
+			}
+			return sum
+		}, 0)
 	const displayedTotal = showDebts ? totalDebtsBase : totalAssetsBase
 
 	return (

@@ -1099,12 +1099,6 @@ export function TransactionsPage() {
 					<table className="min-w-full border-collapse text-xs md:text-sm">
 						<thead className="bg-gray-50 sticky top-0 z-10">
 							<tr className="text-left text-gray-600">
-								<th className="w-8 border-b border-gray-200 px-2 py-2">
-									<input
-										type="checkbox"
-										className="h-3 w-3 rounded border-gray-300"
-									/>
-								</th>
 								<th className="border-b border-gray-200 px-2 py-2">
 									<button
 										type="button"
@@ -1201,13 +1195,7 @@ export function TransactionsPage() {
 										onMouseEnter={() => setSelectedTransactionId(op.id)}
 										onMouseLeave={() => setSelectedTransactionId(null)}
 									>
-									<td className="border-b border-gray-100 px-2 py-1.5 align-top">
-										<input
-											type="checkbox"
-											className="h-3 w-3 rounded border-gray-300"
-										/>
-									</td>
-									<td className="border-b border-gray-100 px-2 py-1.5 align-top text-gray-800">
+								<td className="border-b border-gray-100 px-2 py-1.5 align-top text-gray-800">
 										{formatDate(op.operationTime)}
 									</td>
 									<td
