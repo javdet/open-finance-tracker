@@ -210,6 +210,17 @@ export function AppLayout() {
 		return () => window.removeEventListener('operation-created', handler)
 	}, [])
 
+	useEffect(() => {
+		function handleKeyDown(e: KeyboardEvent) {
+			if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+				e.preventDefault()
+				setIsAddOperationOpen(true)
+			}
+		}
+		window.addEventListener('keydown', handleKeyDown)
+		return () => window.removeEventListener('keydown', handleKeyDown)
+	}, [])
+
 	function handleEdit(account: Account) {
 		setEditingAccount(account)
 	}
