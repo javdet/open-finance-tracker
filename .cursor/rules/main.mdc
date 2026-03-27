@@ -10,7 +10,6 @@ I want to develop finance tracker. Main feature requests:
 5. I need to make a budget on month: expenses and incomes by categories. I want to see plan, fact, different. We need to build in the ability to retrieve data from SMS or banking APIs in the future. I don't want to always have to enter transactions manually. 
 Also I will want to see financial goals and analitic charts. Tech stack: I think would be better if we use web app (based on react) with modern adaptive interface. Postgres for storing data. All statrs via docker-compose on linux host. As example functionality take a look on https://easyfinance.ru/info/ 
 
-# Rules
-1. 
-
-Make a modern UI/UX design with best modern practices
+# Important Rules
+1. Make a modern UI/UX design with best modern practices
+1. Don't execute npx, npm on local host

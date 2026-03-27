@@ -87,6 +87,27 @@ export type {
 } from './sms-account-mappings'
 export { fetchSmsImports } from './sms-imports'
 export type { SmsImport, SmsImportsResponse } from './sms-imports'
+export {
+	createWalletWatch,
+	deleteWalletWatch,
+	fetchWalletWatchById,
+	fetchWalletWatches,
+	pollWalletWatchNow,
+	updateWalletWatch,
+} from './wallet-watches'
+export type {
+	Chain,
+	CreateWalletWatchInput,
+	PollNowResponse,
+	UpdateWalletWatchInput,
+	WalletWatch,
+	WalletWatchesResponse,
+} from './wallet-watches'
+export { fetchBlockchainImports } from './blockchain-imports'
+export type {
+	BlockchainImport,
+	BlockchainImportsResponse,
+} from './blockchain-imports'
 export { get, post, patch, del, BASE_URL } from './client'
 export type { ApiOptions } from './client'
 export {

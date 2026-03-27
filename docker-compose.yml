@@ -70,6 +70,9 @@ services:
       - RESET_CREDENTIALS=${RESET_CREDENTIALS:-false}
       - SESSION_SECRET=${SESSION_SECRET:-change-this-secret-in-production}
       - SESSION_SECURE_COOKIE=true
+      - ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY:-}
+      - HELIUS_API_KEY=${HELIUS_API_KEY:-}
+      - BLOCKCHAIN_POLL_INTERVAL_MS=${BLOCKCHAIN_POLL_INTERVAL_MS:-300000}
     expose:
       - "3126"
     depends_on:

@@ -2,6 +2,8 @@ import { ApiKeysSection } from './ApiKeysSection'
 import { ChangeCredentialsSection } from './ChangeCredentialsSection'
 import { SmsMappingsSection } from './SmsMappingsSection'
 import { SmsImportHistory } from './SmsImportHistory'
+import { WalletWatchesSection } from './WalletWatchesSection'
+import { BlockchainImportHistory } from './BlockchainImportHistory'
 import { ShortcutSetupGuide } from './ShortcutSetupGuide'
 
 export function SettingsPage() {
@@ -17,6 +19,10 @@ export function SettingsPage() {
 			<SmsMappingsSection />
 			<hr className="border-gray-200" />
 			<SmsImportHistory />
+			<hr className="border-gray-200" />
+			<WalletWatchesSection />
+			<hr className="border-gray-200" />
+			<BlockchainImportHistory />
 			<hr className="border-gray-200" />
 			<ShortcutSetupGuide />
 		</div>

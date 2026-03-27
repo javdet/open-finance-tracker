@@ -21,11 +21,14 @@ import apiKeysRoutes from './routes/api-keys.js'
 import smsAccountMappingsRoutes from './routes/sms-account-mappings.js'
 import smsImportsRoutes from './routes/sms-imports.js'
 import smsWebhookRoutes from './routes/sms-webhook.js'
+import walletWatchesRoutes from './routes/wallet-watches.js'
+import blockchainImportsRoutes from './routes/blockchain-imports.js'
 import authRoutes from './routes/auth.js'
 import './services/sms-parsers/register.js'
 import { getPool } from './db/client.js'
 import { sessionAuth } from './middleware/session-auth.js'
 import { bootstrapAuth } from './bootstrap/auth.js'
+import { startPoller } from './services/blockchain/poller.js'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3001
@@ -81,6 +84,8 @@ app.use('/api/api-keys', sessionAuth, apiKeysRoutes)
 app.use('/api/sms-account-mappings', sessionAuth, smsAccountMappingsRoutes)
 app.use('/api/sms-imports', sessionAuth, smsImportsRoutes)
 app.use('/api/sms-webhook', smsWebhookRoutes)
+app.use('/api/wallet-watches', sessionAuth, walletWatchesRoutes)
+app.use('/api/blockchain-imports', sessionAuth, blockchainImportsRoutes)
 
 app.get('/api/health', (_req, res) => {
 	res.json({ status: 'ok' })
@@ -105,6 +110,7 @@ async function start() {
 	const host = isProduction ? '0.0.0.0' : 'localhost'
 	app.listen(PORT, host, () => {
 		console.log(`Finance tracker API listening on http://${host}:${PORT}`)
+		startPoller()
 	})
 }
 
