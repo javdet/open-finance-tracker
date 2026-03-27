@@ -159,8 +159,9 @@ export function BalanceHistoryChart({
 							width={80}
 						/>
 						<Tooltip
-							formatter={(value: number, _name: string, props: { dataKey?: string }) => {
-								const name = nameById.get(String(props.dataKey)) ?? props.dataKey
+							formatter={(value: number, _name: string, props: { dataKey?: string | number }) => {
+								const key = String(props.dataKey ?? '')
+								const name = nameById.get(key) ?? key
 								return [formatMoney(value), name]
 							}}
 							labelFormatter={formatDateLabel}
