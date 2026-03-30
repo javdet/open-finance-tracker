@@ -7,6 +7,7 @@ import { BudgetPage } from '@/pages/budget/BudgetPage'
 import { BudgetTemplateEditorPage } from '@/pages/budget/BudgetTemplateEditorPage'
 import { CategoriesPage } from '@/pages/categories/CategoriesPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
+import { AccountPage } from '@/pages/account/AccountPage'
 import { useAuth } from '@/contexts/auth-context'
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -47,6 +48,7 @@ function App() {
 				<Route path="budget/templates/new" element={<BudgetTemplateEditorPage />} />
 				<Route path="budget/templates/:id" element={<BudgetTemplateEditorPage />} />
 				<Route path="categories" element={<CategoriesPage />} />
+				<Route path="account" element={<AccountPage />} />
 				<Route path="settings" element={<SettingsPage />} />
 			</Route>
 			<Route path="*" element={<Navigate to="/dashboard" replace />} />

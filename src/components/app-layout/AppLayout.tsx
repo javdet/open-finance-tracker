@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import type { Account } from '@/types'
 import { DEBT_ACCOUNT_TYPES } from '@/types'
 import { clsx } from '@/lib/clsx'
 import { AddOperationModal } from './AddOperationModal'
 import { AddAccountModal, EditAccountModal } from './AddAccountModal'
 import { ScheduledTransactionCalendar } from '@/components/scheduled-transaction-calendar/scheduled-transaction-calendar'
+import { UserMenu } from '@/components/user-menu/UserMenu'
 import { fetchAccounts, fetchLatestExchangeRates } from '@/api'
-import { useAuth } from '@/contexts/auth-context'
 
 const navItems = [
 	{ to: '/dashboard', label: 'Dashboard' },
@@ -173,8 +173,6 @@ function DebtsIcon() {
 }
 
 export function AppLayout() {
-	const { logout } = useAuth()
-	const navigate = useNavigate()
 	const [isAddOperationOpen, setIsAddOperationOpen] = useState(false)
 	const [isAddRecurringOpen, setIsAddRecurringOpen] = useState(false)
 	const [isAddAccountOpen, setIsAddAccountOpen] = useState(false)
@@ -331,16 +329,7 @@ export function AppLayout() {
 				<h1 className="text-xl font-semibold text-gray-900">
 					Finance Tracker
 				</h1>
-				<button
-					type="button"
-					onClick={async () => {
-						await logout()
-						navigate('/login')
-					}}
-					className="text-sm text-gray-600 hover:text-gray-900"
-				>
-					Log out
-				</button>
+				<UserMenu />
 			</header>
 			<nav
 				className="bg-white border-b border-gray-200 px-2 py-2 flex items-center gap-1 overflow-x-auto"

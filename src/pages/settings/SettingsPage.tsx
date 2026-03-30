@@ -1,5 +1,4 @@
 import { ApiKeysSection } from './ApiKeysSection'
-import { ChangeCredentialsSection } from './ChangeCredentialsSection'
 import { SmsMappingsSection } from './SmsMappingsSection'
 import { SmsImportHistory } from './SmsImportHistory'
 import { BlockchainImportHistory } from './BlockchainImportHistory'
@@ -11,8 +10,6 @@ export function SettingsPage() {
 			<h2 className="text-xl font-semibold text-gray-900">
 				Settings
 			</h2>
-			<ChangeCredentialsSection />
-			<hr className="border-gray-200" />
 			<ApiKeysSection />
 			<hr className="border-gray-200" />
 			<SmsMappingsSection />
