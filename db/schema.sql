@@ -671,12 +671,15 @@ CREATE TABLE IF NOT EXISTS wallet_watches (
 	account_id          BIGINT             NOT NULL,
 	default_category_id BIGINT,
 	is_active           BOOLEAN            NOT NULL DEFAULT TRUE,
+	poll_interval_ms    INTEGER            NOT NULL DEFAULT 3600000,
 	last_checked_at     TIMESTAMPTZ,
 	last_block_number   BIGINT,
 	created_at          TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
 
 	CONSTRAINT wallet_watches_address_not_empty_check
 		CHECK (length(trim(wallet_address)) > 0),
+	CONSTRAINT wallet_watches_poll_interval_check
+		CHECK (poll_interval_ms >= 60000),
 	CONSTRAINT wallet_watches_user_fk
 		FOREIGN KEY (user_id)
 		REFERENCES users (id)
@@ -700,6 +703,9 @@ CREATE INDEX IF NOT EXISTS wallet_watches_active_idx
 
 CREATE UNIQUE INDEX IF NOT EXISTS wallet_watches_user_chain_address_unique
 	ON wallet_watches (user_id, chain, wallet_address);
+
+CREATE UNIQUE INDEX IF NOT EXISTS wallet_watches_account_unique
+	ON wallet_watches (account_id);
 
 -- =========================
 -- Blockchain imports

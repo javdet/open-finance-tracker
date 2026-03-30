@@ -14,6 +14,7 @@ export interface WalletWatchRow {
 	account_id: string
 	default_category_id: string | null
 	is_active: boolean
+	poll_interval_ms: number
 	last_checked_at: Date | null
 	last_block_number: string | null
 	created_at: Date
@@ -26,17 +27,19 @@ export interface CreateWalletWatchRow {
 	account_id: string
 	default_category_id?: string | null
 	is_active?: boolean
+	poll_interval_ms?: number
 }
 
 export interface UpdateWalletWatchRow {
 	account_id?: string
 	default_category_id?: string | null
 	is_active?: boolean
+	poll_interval_ms?: number
 }
 
 const SELECT_COLS = `id, user_id, chain, wallet_address, account_id,
-	default_category_id, is_active, last_checked_at, last_block_number,
-	created_at`
+	default_category_id, is_active, poll_interval_ms, last_checked_at,
+	last_block_number, created_at`
 
 function rowToWalletWatch(row: WalletWatchRow) {
 	return {
@@ -49,6 +52,7 @@ function rowToWalletWatch(row: WalletWatchRow) {
 			? String(row.default_category_id)
 			: null,
 		isActive: row.is_active,
+		pollIntervalMs: row.poll_interval_ms,
 		lastCheckedAt: row.last_checked_at?.toISOString() ?? null,
 		lastBlockNumber: row.last_block_number
 			? Number(row.last_block_number)
@@ -89,6 +93,38 @@ export async function findById(
 	return row ? rowToWalletWatch(row) : null
 }
 
+export async function findByAccountId(
+	accountId: string,
+	userId: string,
+	pool?: Pool,
+): Promise<WalletWatch | null> {
+	const client = pool ?? getPool()
+	const result = await client.query<WalletWatchRow>(
+		`SELECT ${SELECT_COLS}
+		 FROM wallet_watches
+		 WHERE account_id = $1 AND user_id = $2`,
+		[accountId, userId],
+	)
+	const row = result.rows[0]
+	return row ? rowToWalletWatch(row) : null
+}
+
+/** Active watches whose poll interval has elapsed since last check. */
+export async function findReadyToPoll(
+	pool?: Pool,
+): Promise<WalletWatch[]> {
+	const client = pool ?? getPool()
+	const result = await client.query<WalletWatchRow>(
+		`SELECT ${SELECT_COLS}
+		 FROM wallet_watches
+		 WHERE is_active = TRUE
+		   AND (last_checked_at IS NULL
+		        OR last_checked_at + make_interval(secs => poll_interval_ms / 1000.0) <= NOW())
+		 ORDER BY id`,
+	)
+	return result.rows.map(rowToWalletWatch)
+}
+
 export async function listByUser(
 	userId: string,
 	options?: { limit?: number; offset?: number },
@@ -124,8 +160,8 @@ export async function create(
 	const client = pool ?? getPool()
 	const result = await client.query<WalletWatchRow>(
 		`INSERT INTO wallet_watches
-		 (user_id, chain, wallet_address, account_id, default_category_id, is_active)
-		 VALUES ($1, $2, $3, $4, $5, COALESCE($6, TRUE))
+		 (user_id, chain, wallet_address, account_id, default_category_id, is_active, poll_interval_ms)
+		 VALUES ($1, $2, $3, $4, $5, COALESCE($6, TRUE), COALESCE($7, 3600000))
 		 RETURNING ${SELECT_COLS}`,
 		[
 			data.user_id,
@@ -134,6 +170,7 @@ export async function create(
 			data.account_id,
 			data.default_category_id ?? null,
 			data.is_active ?? true,
+			data.poll_interval_ms ?? 3600000,
 		],
 	)
 	return rowToWalletWatch(result.rows[0])
@@ -161,6 +198,10 @@ export async function update(
 	if (data.is_active !== undefined) {
 		sets.push(`is_active = $${idx++}`)
 		values.push(data.is_active)
+	}
+	if (data.poll_interval_ms !== undefined) {
+		sets.push(`poll_interval_ms = $${idx++}`)
+		values.push(data.poll_interval_ms)
 	}
 
 	if (sets.length === 0) {

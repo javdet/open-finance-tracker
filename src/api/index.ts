@@ -90,6 +90,7 @@ export type { SmsImport, SmsImportsResponse } from './sms-imports'
 export {
 	createWalletWatch,
 	deleteWalletWatch,
+	fetchWalletWatchByAccountId,
 	fetchWalletWatchById,
 	fetchWalletWatches,
 	pollWalletWatchNow,

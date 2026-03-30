@@ -37,6 +37,19 @@ function validateWalletAddress(chain: Chain, address: string): string | null {
 router.get('/', async (req: Request, res: Response) => {
 	try {
 		const userId = getUserId(req)
+		const accountId = typeof req.query.accountId === 'string'
+			? req.query.accountId
+			: undefined
+
+		if (accountId) {
+			const watch = await walletWatchesRepo.findByAccountId(
+				accountId,
+				userId,
+			)
+			res.json({ rows: watch ? [watch] : [], total: watch ? 1 : 0 })
+			return
+		}
+
 		const limit = req.query.limit !== undefined
 			? Number(req.query.limit)
 			: undefined
@@ -78,6 +91,7 @@ router.post('/', async (req: Request, res: Response) => {
 			accountId: string
 			defaultCategoryId?: string | null
 			isActive?: boolean
+			pollIntervalMs?: number
 		}
 
 		if (!body.chain || !VALID_CHAINS.includes(body.chain as Chain)) {
@@ -109,6 +123,7 @@ router.post('/', async (req: Request, res: Response) => {
 			account_id: body.accountId,
 			default_category_id: body.defaultCategoryId ?? null,
 			is_active: body.isActive,
+			poll_interval_ms: body.pollIntervalMs,
 		})
 		res.status(201).json(watch)
 	} catch (err) {
@@ -130,12 +145,14 @@ router.patch('/:id', async (req: Request, res: Response) => {
 			accountId?: string
 			defaultCategoryId?: string | null
 			isActive?: boolean
+			pollIntervalMs?: number
 		}
 
 		const data: walletWatchesRepo.UpdateWalletWatchRow = {}
 		if ('accountId' in body) data.account_id = body.accountId
 		if ('defaultCategoryId' in body) data.default_category_id = body.defaultCategoryId
 		if ('isActive' in body) data.is_active = body.isActive
+		if ('pollIntervalMs' in body) data.poll_interval_ms = body.pollIntervalMs
 
 		const watch = await walletWatchesRepo.update(
 			req.params.id,

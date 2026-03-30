@@ -14,6 +14,7 @@ export interface WalletWatch {
 	accountId: string
 	defaultCategoryId: string | null
 	isActive: boolean
+	pollIntervalMs: number
 	lastCheckedAt: string | null
 	lastBlockNumber: number | null
 	createdAt: string
@@ -30,12 +31,14 @@ export interface CreateWalletWatchInput {
 	accountId: string
 	defaultCategoryId?: string | null
 	isActive?: boolean
+	pollIntervalMs?: number
 }
 
 export interface UpdateWalletWatchInput {
 	accountId?: string
 	defaultCategoryId?: string | null
 	isActive?: boolean
+	pollIntervalMs?: number
 }
 
 export interface PollNowResponse {
@@ -69,6 +72,17 @@ export function fetchWalletWatchById(
 		`/api/wallet-watches/${encodeURIComponent(id)}`,
 		options,
 	)
+}
+
+export async function fetchWalletWatchByAccountId(
+	accountId: string,
+	options?: ApiOptions,
+): Promise<WalletWatch | null> {
+	const result = await get<WalletWatchesResponse>(
+		`/api/wallet-watches?accountId=${encodeURIComponent(accountId)}`,
+		options,
+	)
+	return result.rows[0] ?? null
 }
 
 export function createWalletWatch(

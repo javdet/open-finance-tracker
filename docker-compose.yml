@@ -59,7 +59,8 @@ services:
     restart: "no"
 
   app:
-    build: .
+#    build: .
+    image: javdet/finance-tracker:latest
     container_name: finance-tracker-app
     environment:
       - NODE_ENV=production

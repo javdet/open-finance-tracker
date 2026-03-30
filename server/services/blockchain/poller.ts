@@ -21,7 +21,7 @@ import * as blockchainImportsRepo from '../../repositories/blockchain-imports.js
 import * as operationsRepo from '../../repositories/operations.js'
 import { getPool } from '../../db/client.js'
 
-const DEFAULT_POLL_INTERVAL_MS = 300_000 // 5 minutes
+const DEFAULT_TICK_INTERVAL_MS = 60_000 // 1 minute check cycle
 
 let pollTimer: ReturnType<typeof setInterval> | null = null
 
@@ -222,14 +222,14 @@ export async function pollWatch(watch: WalletWatch): Promise<number> {
 	return created
 }
 
-/** Run one full poll cycle across all active watches. */
+/** Run one poll cycle for watches whose interval has elapsed. */
 export async function pollAllWatches(): Promise<void> {
 	let watches: WalletWatch[]
 	try {
-		watches = await walletWatchesRepo.findActive()
+		watches = await walletWatchesRepo.findReadyToPoll()
 	} catch (err) {
 		console.error(
-			'[blockchain-poller] Failed to load active watches:',
+			'[blockchain-poller] Failed to load ready watches:',
 			err instanceof Error ? err.message : err,
 		)
 		return
@@ -240,7 +240,7 @@ export async function pollAllWatches(): Promise<void> {
 	}
 
 	console.log(
-		`[blockchain-poller] Polling ${watches.length} active watch(es)…`,
+		`[blockchain-poller] Polling ${watches.length} ready watch(es)…`,
 	)
 
 	let totalCreated = 0
@@ -263,10 +263,10 @@ export function startPoller(): void {
 	}
 
 	const intervalMs =
-		Number(process.env.BLOCKCHAIN_POLL_INTERVAL_MS) || DEFAULT_POLL_INTERVAL_MS
+		Number(process.env.BLOCKCHAIN_POLL_INTERVAL_MS) || DEFAULT_TICK_INTERVAL_MS
 
 	console.log(
-		`[blockchain-poller] Starting with ${intervalMs / 1000}s interval`,
+		`[blockchain-poller] Starting with ${intervalMs / 1000}s tick interval`,
 	)
 
 	pollAllWatches().catch((err) => {
