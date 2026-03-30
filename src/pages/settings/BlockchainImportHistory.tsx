@@ -322,7 +322,7 @@ export function BlockchainImportHistory() {
 													</p>
 												</div>
 											)}
-											{imp.rawData && (
+											{imp.rawData ? (
 												<div>
 													<p className="text-xs font-medium text-gray-500 mb-1">
 														Raw Data
@@ -335,7 +335,7 @@ export function BlockchainImportHistory() {
 														)}
 													</pre>
 												</div>
-											)}
+											) : null}
 										</div>
 									)}
 								</div>
