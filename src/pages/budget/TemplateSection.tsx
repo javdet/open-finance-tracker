@@ -154,6 +154,7 @@ export function TemplateSection({
 											item={item}
 											category={category}
 											currencyCode={currencyCode}
+											direction={direction}
 											onUpdate={handleItemUpdate}
 											onDelete={handleItemUpdate}
 										/>

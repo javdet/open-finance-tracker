@@ -464,8 +464,8 @@ export function AddScheduledTransactionModal({
 								{categoryId
 									? (categoryOptions.find(
 											(c) => c.id === categoryId,
-										)?.name ?? '-- Select category --')
-									: '-- Select category --'}
+										)?.name ?? 'Category')
+									: 'Category'}
 							</span>
 							<span
 								className={`shrink-0 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}

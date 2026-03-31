@@ -146,7 +146,7 @@ export function ActualsOnlyBudgetRow({
 				<button
 					type="button"
 					onClick={() => setIsEditing(true)}
-					className="hover:text-emerald-600 transition-colors"
+					className={`transition-colors ${categoryDirection === 'expense' ? 'hover:text-red-600' : 'hover:text-emerald-600'}`}
 				>
 					{formatMoney(0, currencyCode)}
 				</button>

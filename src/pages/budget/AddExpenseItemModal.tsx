@@ -182,8 +182,8 @@ export function AddExpenseItemModal({
 							<span className="truncate">
 								{categoryId
 									? categories.find((c) => c.id === categoryId)
-											?.name ?? '— Select category —'
-									: '— Select category —'}
+											?.name ?? 'Category'
+									: 'Category'}
 							</span>
 							<span
 								className={`shrink-0 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
@@ -209,18 +209,6 @@ export function AddExpenseItemModal({
 										placeholder="Type to filter categories…"
 										className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500"
 									/>
-								</li>
-								<li
-									role="option"
-									aria-selected={!categoryId}
-									className="cursor-pointer px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
-									onClick={() => {
-										setCategoryId('')
-										setIsCategoryOpen(false)
-										setCategorySearch('')
-									}}
-								>
-									— Select category —
 								</li>
 								{categories
 									.filter((cat) => {

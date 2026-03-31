@@ -172,7 +172,7 @@ export function BudgetItemRow({
 					<button
 						type="button"
 						onClick={() => setIsEditing(true)}
-						className="text-right hover:text-emerald-600 transition-colors"
+						className={`text-right transition-colors ${categoryDirection === 'expense' ? 'hover:text-red-600' : 'hover:text-emerald-600'}`}
 					>
 						{formatMoney(item.plannedAmount, currencyCode)}
 					</button>

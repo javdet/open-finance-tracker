@@ -7,6 +7,7 @@ interface TemplateItemRowProps {
 	item: BudgetTemplateItem
 	category: Category
 	currencyCode: string
+	direction: 'income' | 'expense'
 	onUpdate: () => void
 	onDelete: () => void
 }
@@ -51,6 +52,7 @@ export function TemplateItemRow({
 	item,
 	category,
 	currencyCode,
+	direction,
 	onUpdate,
 	onDelete,
 }: TemplateItemRowProps) {
@@ -122,7 +124,7 @@ export function TemplateItemRow({
 					<button
 						type="button"
 						onClick={() => setIsEditing(true)}
-						className="text-right hover:text-emerald-600 transition-colors"
+						className={`text-right transition-colors ${direction === 'expense' ? 'hover:text-red-600' : 'hover:text-emerald-600'}`}
 					>
 						{formatMoney(item.plannedAmount, currencyCode)}
 					</button>
