@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import type { Operation, Category } from '@/types'
+import type { Operation, Category, ScheduledTransaction } from '@/types'
 import { DEBT_ACCOUNT_TYPES } from '@/types'
 import {
 	fetchOperations,
 	fetchAccounts,
 	fetchCategories,
 	fetchCategoryUsage,
+	fetchScheduledTransactions,
 	deleteOperation,
 	updateOperation,
 } from '@/api'
@@ -163,12 +164,17 @@ function EditOperationModal({
 	const [notes, setNotes] = useState('')
 	const [error, setError] = useState<string | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([])
+	const [selectedScheduledTxId, setSelectedScheduledTxId] = useState('')
 
 	useEffect(() => {
 		if (isOpen && operation) {
 			fetchCategories()
 				.then(setCategories)
 				.catch(() => setCategories([]))
+			fetchScheduledTransactions(user?.userId ?? '1')
+				.then(setScheduledTransactions)
+				.catch(() => setScheduledTransactions([]))
 
 			// Convert operation type: payment -> expense
 			const uiType: 'expense' | 'income' | 'transfer' =
@@ -201,6 +207,7 @@ function EditOperationModal({
 			)
 			setCategoryId(operation.categoryId || '')
 			setNotes(operation.notes || '')
+			setSelectedScheduledTxId('')
 			setError(null)
 		}
 	}, [isOpen, operation])
@@ -226,6 +233,7 @@ function EditOperationModal({
 		}
 		setCategorySearch('')
 		setIsCategoryOpen(false)
+		setSelectedScheduledTxId('')
 	}, [transactionType])
 
 	useEffect(() => {
@@ -369,6 +377,24 @@ function EditOperationModal({
 	const rest = baseOrdered.filter((c) => !popularCategoryIds.includes(c.id))
 	const categoryOptions = [...popularFirst, ...rest]
 
+	const filteredScheduledTx = useMemo(() => {
+		if (transactionType === 'transfer') return []
+		const apiType = transactionType === 'expense' ? 'payment' : 'income'
+		return scheduledTransactions.filter((st) => st.operationType === apiType)
+	}, [scheduledTransactions, transactionType])
+
+	const handleScheduledTxChange = useCallback(
+		(txId: string) => {
+			setSelectedScheduledTxId(txId)
+			if (!txId) return
+			const tx = scheduledTransactions.find((st) => st.id === txId)
+			if (!tx) return
+			setAmount(Math.abs(tx.amount).toString())
+			setCategoryId(tx.categoryId ?? '')
+		},
+		[scheduledTransactions],
+	)
+
 	const showCategory = transactionType === 'expense' || transactionType === 'income'
 
 	if (!isOpen || !operation) {
@@ -435,7 +461,7 @@ function EditOperationModal({
 						</div>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4">
 						<div>
 							<label className="block text-xs font-medium text-gray-700 mb-1">
 								Account:
@@ -461,6 +487,25 @@ function EditOperationModal({
 								onChange={setTransactionType}
 							/>
 						</div>
+						{transactionType !== 'transfer' && (
+							<div>
+								<label className="block text-xs font-medium text-gray-700 mb-1">
+									Scheduled:
+								</label>
+								<select
+									value={selectedScheduledTxId}
+									onChange={(e) => handleScheduledTxChange(e.target.value)}
+									className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								>
+									<option value="">— None —</option>
+									{filteredScheduledTx.map((st) => (
+										<option key={st.id} value={st.id}>
+											{st.name}
+										</option>
+									))}
+								</select>
+							</div>
+						)}
 					</div>
 
 					{showCategory && (

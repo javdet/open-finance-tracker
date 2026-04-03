@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import type { Account, Category } from '@/types'
+import type { Account, Category, ScheduledTransaction } from '@/types'
 import { DEBT_ACCOUNT_TYPES } from '@/types'
 import type { OperationType } from '@/types/operation'
-import { fetchCategories, fetchCategoryUsage, createOperation } from '@/api'
+import {
+	fetchCategories,
+	fetchCategoryUsage,
+	fetchScheduledTransactions,
+	createOperation,
+} from '@/api'
 import { TransactionTypeSelector } from '@/components/transaction-type-selector/transaction-type-selector'
 import { useAuth } from '@/contexts/auth-context'
 
@@ -75,6 +80,8 @@ export function AddOperationModal({
 	const [error, setError] = useState<string | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+	const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([])
+	const [selectedScheduledTxId, setSelectedScheduledTxId] = useState('')
 	const categoryDropdownRef = useRef<HTMLDivElement>(null)
 
 	const nonDebtAccounts = useMemo(
@@ -103,6 +110,9 @@ export function AddOperationModal({
 			fetchCategories()
 				.then(setCategories)
 				.catch(() => setCategories([]))
+			fetchScheduledTransactions(user?.userId ?? '1')
+				.then(setScheduledTransactions)
+				.catch(() => setScheduledTransactions([]))
 			// Only set date to today when empty (first open); otherwise keep previous transaction date
 			setDate((prev) => {
 				if (prev) return prev
@@ -114,7 +124,7 @@ export function AddOperationModal({
 				].join('-')
 			})
 		}
-	}, [isOpen])
+	}, [isOpen, user?.userId])
 
 	useEffect(() => {
 		if (!isOpen) return
@@ -134,6 +144,7 @@ export function AddOperationModal({
 	useEffect(() => {
 		setCategoryId('')
 		setCategorySearch('')
+		setSelectedScheduledTxId('')
 	}, [transactionType])
 
 	useEffect(() => {
@@ -158,6 +169,7 @@ export function AddOperationModal({
 		setError(null)
 		setTransferAccountId('')
 		setTransferAmount('')
+		setSelectedScheduledTxId('')
 	}, [])
 
 	const handleSubmit = useCallback(async () => {
@@ -261,6 +273,24 @@ export function AddOperationModal({
 	const rest = baseOrdered.filter((c) => !popularCategoryIds.includes(c.id))
 	const categoryOptions = [...popularFirst, ...rest]
 
+	const filteredScheduledTx = useMemo(() => {
+		if (transactionType === 'transfer') return []
+		const apiType = transactionType === 'expense' ? 'payment' : 'income'
+		return scheduledTransactions.filter((st) => st.operationType === apiType)
+	}, [scheduledTransactions, transactionType])
+
+	const handleScheduledTxChange = useCallback(
+		(txId: string) => {
+			setSelectedScheduledTxId(txId)
+			if (!txId) return
+			const tx = scheduledTransactions.find((st) => st.id === txId)
+			if (!tx) return
+			setAmount(Math.abs(tx.amount).toString())
+			setCategoryId(tx.categoryId ?? '')
+		},
+		[scheduledTransactions],
+	)
+
 	const showCategory = transactionType === 'expense' || transactionType === 'income'
 
 	if (!isOpen) {
@@ -327,7 +357,7 @@ export function AddOperationModal({
 						</div>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4">
 						<div>
 							<label className="block text-xs font-medium text-gray-700 mb-1">
 								Account:
@@ -353,6 +383,25 @@ export function AddOperationModal({
 								onChange={setTransactionType}
 							/>
 						</div>
+						{transactionType !== 'transfer' && (
+							<div>
+								<label className="block text-xs font-medium text-gray-700 mb-1">
+									Scheduled:
+								</label>
+								<select
+									value={selectedScheduledTxId}
+									onChange={(e) => handleScheduledTxChange(e.target.value)}
+									className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								>
+									<option value="">— None —</option>
+									{filteredScheduledTx.map((st) => (
+										<option key={st.id} value={st.id}>
+											{st.name}
+										</option>
+									))}
+								</select>
+							</div>
+						)}
 					</div>
 
 					{showCategory && (
