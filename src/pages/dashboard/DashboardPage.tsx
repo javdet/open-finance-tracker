@@ -214,6 +214,7 @@ export function DashboardPage() {
 							plan={planVsActualReport.expenseTotalPlanned}
 							actual={planVsActualReport.expenseTotalActual}
 							currencyCode={planVsActualReport.baseCurrencyCode}
+							showUsage
 						/>
 						<PlanVsActualScale
 							title="Income"

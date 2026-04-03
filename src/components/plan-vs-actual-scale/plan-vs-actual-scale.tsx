@@ -31,6 +31,12 @@ function closenessPercent(plan: number, actual: number): number {
 	return Math.max(0, 100 * (1 - gap / denom))
 }
 
+/** How much of the plan has been used: (actual / plan) * 100. */
+function usagePercent(plan: number, actual: number): number {
+	if (plan === 0) return actual === 0 ? 0 : 100
+	return (actual / plan) * 100
+}
+
 export interface PlanVsActualScaleProps {
 	title: string
 	plan: number
@@ -40,9 +46,15 @@ export interface PlanVsActualScaleProps {
 	signed?: boolean
 	/** Fill color for the "water" in the glass. */
 	fillColor?: string
+	/**
+	 * When true, shows actual/plan usage percentage instead of closeness.
+	 * The bar turns red when actual exceeds the plan (>100%).
+	 */
+	showUsage?: boolean
 }
 
 const DEFAULT_FILL_COLOR = '#22c55e'
+const OVER_BUDGET_COLOR = '#ef4444'
 const GLASS_HEIGHT_PX = 160
 
 export function PlanVsActualScale({
@@ -52,16 +64,24 @@ export function PlanVsActualScale({
 	currencyCode,
 	signed = false,
 	fillColor = DEFAULT_FILL_COLOR,
+	showUsage = false,
 }: PlanVsActualScaleProps) {
-	const fillPct = closenessPercent(plan, actual)
-	const fillHeightPx = (fillPct / 100) * GLASS_HEIGHT_PX
-	const formatVal = signed ? (n: number) => formatSignedMoney(n, currencyCode) : (n: number) => formatMoney(n, currencyCode)
+	const pct = showUsage
+		? usagePercent(plan, actual)
+		: closenessPercent(plan, actual)
+	const isOverBudget = showUsage && pct > 100
+	const visualPct = Math.min(pct, 100)
+	const fillHeightPx = (visualPct / 100) * GLASS_HEIGHT_PX
+	const resolvedFillColor = isOverBudget ? OVER_BUDGET_COLOR : fillColor
+	const formatVal = signed
+		? (n: number) => formatSignedMoney(n, currencyCode)
+		: (n: number) => formatMoney(n, currencyCode)
+	const pctLabel = showUsage ? 'used' : 'match'
 
 	return (
 		<div className="flex flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 			<h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>
 			<div className="flex items-end gap-3">
-				{/* Vertical scale: 100% at top, 0% at bottom */}
 				<div
 					className="flex flex-col justify-between text-xs text-gray-500 shrink-0 py-0.5"
 					style={{ height: GLASS_HEIGHT_PX }}
@@ -74,26 +94,28 @@ export function PlanVsActualScale({
 					style={{ height: GLASS_HEIGHT_PX }}
 					aria-hidden
 				/>
-				{/* Single glass: outline + fill from bottom */}
 				<div className="flex flex-col items-center flex-1">
 					<div
 						className="relative w-full max-w-[48px] rounded-b border-2 border-gray-200 bg-gray-50 overflow-hidden"
-						style={{ height: GLASS_HEIGHT_PX }}
+						style={{
+							height: GLASS_HEIGHT_PX,
+							borderColor: isOverBudget ? OVER_BUDGET_COLOR : undefined,
+						}}
 						role="img"
-						aria-label={`${title}: ${Math.round(fillPct)}% match. Plan ${formatVal(plan)}, actual ${formatVal(actual)}.`}
+						aria-label={`${title}: ${Math.round(pct)}% ${pctLabel}. Plan ${formatVal(plan)}, actual ${formatVal(actual)}.`}
 					>
 						<div
 							className="absolute left-0 right-0 bottom-0 rounded-b transition-all duration-300"
 							style={{
 								height: Math.max(fillHeightPx, 0),
-								backgroundColor: fillColor,
+								backgroundColor: resolvedFillColor,
 							}}
-							title={`${Math.round(fillPct)}% — Plan ${formatVal(plan)}, Actual ${formatVal(actual)}`}
+							title={`${Math.round(pct)}% — Plan ${formatVal(plan)}, Actual ${formatVal(actual)}`}
 						/>
 					</div>
-					<p className="text-xs text-gray-600 mt-2 text-center">
-						<span className="font-medium">{Math.round(fillPct)}%</span>
-						<span className="text-gray-500"> match</span>
+					<p className={`text-xs mt-2 text-center ${isOverBudget ? 'text-red-600' : 'text-gray-600'}`}>
+						<span className="font-medium">{Math.round(pct)}%</span>
+						<span className={isOverBudget ? 'text-red-500' : 'text-gray-500'}> {pctLabel}</span>
 					</p>
 					<p className="text-xs text-gray-500 mt-0.5">
 						Plan {formatVal(plan)} · Actual {formatVal(actual)}
