@@ -27,7 +27,7 @@ router.get('/', async (req: Request, res: Response) => {
 	try {
 		const userId = getUserId(req)
 		const rows = await scheduledTxRepo.listByUser(userId)
-		res.json({ rows })
+		res.json(rows)
 	} catch (err) {
 		console.error('listScheduledTransactions', err)
 		res.status(500).json({ error: 'Failed to list scheduled transactions' })
