@@ -755,5 +755,29 @@ CREATE INDEX IF NOT EXISTS blockchain_imports_user_status_idx
 CREATE INDEX IF NOT EXISTS blockchain_imports_chain_tx_idx
 	ON blockchain_imports (chain, tx_hash);
 
+-- =========================
+-- Password reset tokens
+-- =========================
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+	id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	user_id     BIGINT       NOT NULL,
+	token_hash  TEXT         NOT NULL UNIQUE,
+	expires_at  TIMESTAMPTZ  NOT NULL,
+	used_at     TIMESTAMPTZ,
+	created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+
+	CONSTRAINT password_reset_tokens_user_fk
+		FOREIGN KEY (user_id)
+		REFERENCES users (id)
+		ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_prt_token_hash
+	ON password_reset_tokens (token_hash);
+
+CREATE INDEX IF NOT EXISTS idx_prt_user_expires
+	ON password_reset_tokens (user_id, expires_at);
+
 COMMIT;
 

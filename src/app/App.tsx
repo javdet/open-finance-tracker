@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AppLayout } from '@/components/app-layout/AppLayout'
 import { LoginPage } from '@/pages/login/LoginPage'
+import { ForgotPasswordPage } from '@/pages/forgot-password/ForgotPasswordPage'
+import { ResetPasswordPage } from '@/pages/reset-password/ResetPasswordPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { TransactionsPage } from '@/pages/transactions/TransactionsPage'
 import { BudgetPage } from '@/pages/budget/BudgetPage'
@@ -33,6 +35,8 @@ function App() {
 	return (
 		<Routes>
 			<Route path="/login" element={<LoginPage />} />
+			<Route path="/forgot-password" element={<ForgotPasswordPage />} />
+			<Route path="/reset-password" element={<ResetPasswordPage />} />
 			<Route
 				path="/"
 				element={
