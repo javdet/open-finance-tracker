@@ -152,21 +152,21 @@ export function CategoryChart({
 	return (
 		<div className="flex flex-col">
 			{error && (
-				<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 mb-3">
-					<p className="text-sm text-red-600">{error}</p>
+				<div className="rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3 mb-3">
+					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 				</div>
 			)}
 
 			{isLoading ? (
 				<div
-					className="flex items-center justify-center text-gray-500 text-sm"
+					className="flex items-center justify-center text-muted text-sm"
 					style={{ minHeight: 280 }}
 				>
 					Loading...
 				</div>
 			) : chartData.length === 0 ? (
 				<div
-					className="flex items-center justify-center text-gray-500 text-sm"
+					className="flex items-center justify-center text-muted text-sm"
 					style={{ minHeight: 280 }}
 					role="status"
 					aria-live="polite"
@@ -207,37 +207,40 @@ export function CategoryChart({
 											fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
 										/>
 									))}
-									<LabelList
-										position="outside"
-										formatter={(
-											_value: number,
-											_name: string,
-											props: { payload?: CategoryChartDataItem },
-										) => {
-											const payload = props?.payload
-											if (!payload) return ''
-											return `${payload.name}: ${payload.percentage.toFixed(0)}%`
-										}}
-										className="text-sm fill-gray-600"
-									/>
-								</Pie>
-								<Tooltip
-									formatter={(value: number) => formatMoney(value, BASE_CURRENCY)}
-									contentStyle={{
-										borderRadius: '8px',
-										border: '1px solid #e5e7eb',
+								<LabelList
+									position="outside"
+									formatter={(
+										_value: number,
+										_name: string,
+										props: { payload?: CategoryChartDataItem },
+									) => {
+										const payload = props?.payload
+										if (!payload) return ''
+										return `${payload.name}: ${payload.percentage.toFixed(0)}%`
 									}}
+									style={{ fill: 'var(--chart-label)' }}
+									className="text-sm"
 								/>
+								</Pie>
+							<Tooltip
+								formatter={(value: number) => formatMoney(value, BASE_CURRENCY)}
+								contentStyle={{
+									borderRadius: '8px',
+									border: '1px solid var(--chart-tooltip-border)',
+									backgroundColor: 'var(--chart-tooltip-bg)',
+									color: 'var(--chart-tooltip-text)',
+								}}
+							/>
 							</PieChart>
 						</ResponsiveContainer>
 						<div
 							className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
 							aria-hidden="true"
 						>
-							<span className="text-sm font-medium text-gray-600">
-								{title}
-							</span>
-							<span className="text-xl font-bold text-gray-800 mt-1">
+						<span className="text-sm font-medium text-secondary">
+							{title}
+						</span>
+						<span className="text-xl font-bold text-primary mt-1">
 								{formatMoney(totalAmount, BASE_CURRENCY)}
 							</span>
 						</div>
@@ -282,19 +285,19 @@ export function ExpenseChart() {
 				<button
 					type="button"
 					onClick={() => setIsMonthOpen((o) => !o)}
-					className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+					className="inline-flex items-center gap-2 rounded-lg border border-strong bg-surface-card px-3 py-2 text-sm font-medium text-secondary hover:bg-surface-hover transition-colors"
 					aria-label="Select month"
 					aria-expanded={isMonthOpen}
 					aria-haspopup="listbox"
 				>
-					<CalendarIcon className="w-4 h-4 text-gray-500" />
+					<CalendarIcon className="w-4 h-4 text-muted" />
 					<span>{currentLabel}</span>
-					<ChevronDownIcon className="w-4 h-4 text-gray-500" />
+					<ChevronDownIcon className="w-4 h-4 text-muted" />
 				</button>
 				{isMonthOpen && (
 					<ul
 						role="listbox"
-						className="absolute right-0 top-full z-10 mt-1 max-h-60 w-48 overflow-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+						className="absolute right-0 top-full z-10 mt-1 max-h-60 w-48 overflow-auto rounded-md border bg-surface-card py-1 shadow-lg"
 					>
 						{monthOptions.map((opt) => (
 							<li
@@ -303,7 +306,7 @@ export function ExpenseChart() {
 								aria-selected={
 									opt.month === selectedMonth && opt.year === selectedYear
 								}
-								className="cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+								className="cursor-pointer px-3 py-2 text-sm text-secondary hover:bg-surface-hover"
 								onClick={() => {
 									setSelectedMonth(opt.month)
 									setSelectedYear(opt.year)

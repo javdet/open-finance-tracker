@@ -83,13 +83,13 @@ function MappingForm({
 	return (
 		<form onSubmit={handleSubmit} className="space-y-3">
 			{validationError && (
-				<p className="text-xs text-red-600">{validationError}</p>
+				<p className="text-xs text-red-600 dark:text-red-400">{validationError}</p>
 			)}
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 				<div>
 					<label
 						htmlFor="mapping-card"
-						className="block text-xs font-medium text-gray-700 mb-1"
+						className="block text-xs font-medium text-secondary mb-1"
 					>
 						Card last 4 digits
 					</label>
@@ -106,13 +106,13 @@ function MappingForm({
 						placeholder="1234"
 						maxLength={4}
 						pattern="\d{4}"
-						className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+						className="w-full rounded-lg border border-strong bg-surface-card px-3 py-2 text-sm text-primary placeholder:text-faint focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
 					/>
 				</div>
 				<div>
 					<label
 						htmlFor="mapping-account-last4"
-						className="block text-xs font-medium text-gray-700 mb-1"
+						className="block text-xs font-medium text-secondary mb-1"
 					>
 						Account last 4 digits
 					</label>
@@ -131,14 +131,14 @@ function MappingForm({
 						placeholder="5678"
 						maxLength={4}
 						pattern="\d{4}"
-						className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+						className="w-full rounded-lg border border-strong bg-surface-card px-3 py-2 text-sm text-primary placeholder:text-faint focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
 					/>
 				</div>
 			</div>
 			<div>
 				<label
 					htmlFor="mapping-account"
-					className="block text-xs font-medium text-gray-700 mb-1"
+					className="block text-xs font-medium text-secondary mb-1"
 				>
 					Finance Tracker account *
 				</label>
@@ -151,7 +151,7 @@ function MappingForm({
 							accountId: e.target.value,
 						}))
 					}
-					className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+					className="w-full rounded-lg border border-strong bg-surface-card px-3 py-2 text-sm text-primary focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
 					required
 				>
 					<option value="">Select account...</option>
@@ -165,7 +165,7 @@ function MappingForm({
 			<div>
 				<label
 					htmlFor="mapping-category"
-					className="block text-xs font-medium text-gray-700 mb-1"
+					className="block text-xs font-medium text-secondary mb-1"
 				>
 					Default expense category (optional)
 				</label>
@@ -178,7 +178,7 @@ function MappingForm({
 							defaultCategoryId: e.target.value,
 						}))
 					}
-					className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+					className="w-full rounded-lg border border-strong bg-surface-card px-3 py-2 text-sm text-primary focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
 				>
 					<option value="">None (use first expense category)</option>
 					{expenseCategories.map((cat) => (
@@ -199,7 +199,7 @@ function MappingForm({
 				<button
 					type="button"
 					onClick={onCancel}
-					className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+					className="rounded-lg border border-strong px-4 py-2 text-sm font-medium text-secondary hover:bg-surface-hover transition-colors"
 				>
 					Cancel
 				</button>
@@ -330,17 +330,17 @@ export function SmsMappingsSection() {
 	return (
 		<section aria-labelledby="sms-mappings-heading">
 			<div className="flex items-start gap-3 mb-4">
-				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600">
 					<LinkIcon className="w-5 h-5" />
 				</div>
 				<div className="flex-1">
 					<h3
 						id="sms-mappings-heading"
-						className="text-base font-semibold text-gray-900"
+						className="text-base font-semibold text-primary"
 					>
 						SMS Account Mappings
 					</h3>
-					<p className="text-sm text-gray-500 mt-0.5">
+					<p className="text-sm text-muted mt-0.5">
 						Map bank card/account numbers to Finance Tracker accounts
 						so SMS transactions are booked to the correct account.
 					</p>
@@ -360,14 +360,14 @@ export function SmsMappingsSection() {
 			</div>
 
 			{error && (
-				<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 mb-4">
+				<div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-3 text-sm text-red-800 mb-4">
 					{error}
 				</div>
 			)}
 
 			{isAdding && (
-				<div className="rounded-lg border border-emerald-200 bg-emerald-50/30 p-4 mb-4">
-					<p className="text-sm font-medium text-gray-900 mb-3">
+				<div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/30 p-4 mb-4">
+					<p className="text-sm font-medium text-primary mb-3">
 						New SMS Mapping
 					</p>
 					<MappingForm
@@ -382,12 +382,12 @@ export function SmsMappingsSection() {
 			)}
 
 			{isLoading ? (
-				<p className="text-sm text-gray-500 py-4 text-center">
+				<p className="text-sm text-muted py-4 text-center">
 					Loading mappings...
 				</p>
 			) : mappings.length === 0 && !isAdding ? (
-				<div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-6 text-center">
-					<p className="text-sm text-gray-500">
+				<div className="rounded-lg border bg-surface px-4 py-6 text-center">
+					<p className="text-sm text-muted">
 						No SMS account mappings configured. Add one to link your
 						bank card to a Finance Tracker account.
 					</p>
@@ -397,11 +397,11 @@ export function SmsMappingsSection() {
 					{mappings.map((mapping) => (
 						<div
 							key={mapping.id}
-							className="rounded-lg border border-gray-200 bg-white"
+							className="rounded-lg border bg-surface-card"
 						>
 							{editingId === mapping.id ? (
 								<div className="p-4">
-									<p className="text-sm font-medium text-gray-900 mb-3">
+									<p className="text-sm font-medium text-primary mb-3">
 										Edit Mapping
 									</p>
 									<MappingForm
@@ -420,8 +420,8 @@ export function SmsMappingsSection() {
 									<div className="flex items-center gap-4 min-w-0">
 										<div className="text-sm">
 											{mapping.cardLast4 && (
-												<span className="inline-flex items-center gap-1 text-gray-700">
-													<span className="text-xs text-gray-400">
+												<span className="inline-flex items-center gap-1 text-secondary">
+													<span className="text-xs text-faint">
 														Card
 													</span>
 													<span className="font-mono font-medium">
@@ -431,13 +431,13 @@ export function SmsMappingsSection() {
 											)}
 											{mapping.cardLast4 &&
 												mapping.accountLast4 && (
-												<span className="text-gray-300 mx-2">
+												<span className="text-faint mx-2">
 														/
 												</span>
 											)}
 											{mapping.accountLast4 && (
-												<span className="inline-flex items-center gap-1 text-gray-700">
-													<span className="text-xs text-gray-400">
+												<span className="inline-flex items-center gap-1 text-secondary">
+													<span className="text-xs text-faint">
 														Acct
 													</span>
 													<span className="font-mono font-medium">
@@ -446,19 +446,19 @@ export function SmsMappingsSection() {
 												</span>
 											)}
 										</div>
-										<span className="text-gray-300">
+										<span className="text-faint">
 											&rarr;
 										</span>
 										<div className="text-sm min-w-0">
-											<span className="font-medium text-gray-900 truncate">
+											<span className="font-medium text-primary truncate">
 												{getAccountName(
 													mapping.accountId,
 												)}
 											</span>
-											<span className="text-gray-400 mx-1.5">
+											<span className="text-faint mx-1.5">
 												&middot;
 											</span>
-											<span className="text-gray-500">
+											<span className="text-muted">
 												{getCategoryName(
 													mapping.defaultCategoryId,
 												)}
@@ -472,7 +472,7 @@ export function SmsMappingsSection() {
 												setEditingId(mapping.id)
 												setIsAdding(false)
 											}}
-											className="text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
+											className="text-xs font-medium text-secondary hover:text-primary transition-colors"
 										>
 											Edit
 										</button>
@@ -487,8 +487,8 @@ export function SmsMappingsSection() {
 											className={clsx(
 												'text-xs font-medium transition-colors',
 												deletingId === mapping.id
-													? 'text-gray-400'
-													: 'text-red-600 hover:text-red-800',
+													? 'text-faint'
+													: 'text-red-600 dark:text-red-400 hover:text-red-800',
 											)}
 										>
 											{deletingId === mapping.id

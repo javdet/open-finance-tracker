@@ -94,7 +94,7 @@ export function ExpenseSection({
 
 	if (isLoading) {
 		return (
-			<div className="text-sm text-gray-500 py-4">
+			<div className="text-sm text-muted py-4">
 				Loading expense data...
 			</div>
 		)
@@ -103,7 +103,7 @@ export function ExpenseSection({
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h3 className="text-base font-semibold text-gray-900">
+				<h3 className="text-base font-semibold text-primary">
 					Expenses
 				</h3>
 				<button
@@ -114,7 +114,7 @@ export function ExpenseSection({
 					+ Add Expense
 				</button>
 			</div>
-			<div className="rounded-md border border-gray-200 bg-white overflow-hidden">
+			<div className="rounded-md border bg-surface-card overflow-hidden">
 				<div className="overflow-x-auto">
 					<table className="w-full table-fixed border-collapse text-sm">
 						<colgroup>
@@ -124,21 +124,21 @@ export function ExpenseSection({
 							<col className="w-[17%]" />
 							<col className="w-[48px]" />
 						</colgroup>
-						<thead className="bg-gray-50">
-							<tr className="text-left text-gray-600">
-								<th className="border-b border-gray-200 px-4 py-2 font-medium">
+						<thead className="bg-surface">
+							<tr className="text-left text-secondary">
+								<th className="border-b px-4 py-2 font-medium">
 									Category
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2 text-right font-medium">
+								<th className="border-b px-4 py-2 text-right font-medium">
 									Planned, $
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2 text-right font-medium">
+								<th className="border-b px-4 py-2 text-right font-medium">
 									Actual, $
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2 text-right font-medium">
+								<th className="border-b px-4 py-2 text-right font-medium">
 									Difference, $
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2"></th>
+								<th className="border-b px-4 py-2"></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -146,7 +146,7 @@ export function ExpenseSection({
 								<tr>
 									<td
 										colSpan={5}
-										className="px-4 py-8 text-center text-gray-500"
+										className="px-4 py-8 text-center text-muted"
 									>
 										No expense items yet. Click &quot;+ Add
 										Expense&quot; to get started.
@@ -185,18 +185,18 @@ export function ExpenseSection({
 							)}
 						</tbody>
 						{expenseRows.length > 0 && (
-							<tfoot className="bg-gray-50 font-medium">
-								<tr className="border-t-2 border-gray-200">
-									<td className="px-4 py-2 text-gray-900">
+							<tfoot className="bg-surface font-medium">
+								<tr className="border-t-2">
+									<td className="px-4 py-2 text-primary">
 										Total
 									</td>
-									<td className="px-4 py-2 text-right text-gray-900">
+									<td className="px-4 py-2 text-right text-primary">
 										{formatMoney(
 											totalPlanned,
 											currencyCode,
 										)}
 									</td>
-									<td className="px-4 py-2 text-right text-gray-900">
+									<td className="px-4 py-2 text-right text-primary">
 										{formatMoney(
 											totalActual,
 											currencyCode,
@@ -206,10 +206,10 @@ export function ExpenseSection({
 										className={clsx(
 											'px-4 py-2 text-right',
 											totalDifference > 0
-												? 'text-emerald-600'
+												? 'text-positive'
 												: totalDifference < 0
-													? 'text-red-600'
-													: 'text-gray-900',
+													? 'text-negative'
+													: 'text-primary',
 										)}
 									>
 										{formatMoney(

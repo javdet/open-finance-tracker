@@ -90,8 +90,8 @@ export function BalanceHistoryChart({
 
 	if (error) {
 		return (
-			<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3">
-				<p className="text-sm text-red-600">{error}</p>
+			<div className="rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3">
+				<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 			</div>
 		)
 	}
@@ -99,7 +99,7 @@ export function BalanceHistoryChart({
 	if (isLoading) {
 		return (
 			<div
-				className="flex items-center justify-center text-gray-500 text-sm"
+				className="flex items-center justify-center text-muted text-sm"
 				style={{ minHeight: 300 }}
 			>
 				Loading balance history...
@@ -110,7 +110,7 @@ export function BalanceHistoryChart({
 	if (points.length === 0) {
 		return (
 			<div
-				className="flex items-center justify-center text-gray-500 text-sm"
+				className="flex items-center justify-center text-muted text-sm"
 				style={{ minHeight: 300 }}
 				role="status"
 				aria-live="polite"
@@ -142,20 +142,20 @@ export function BalanceHistoryChart({
 						data={chartData}
 						margin={{ top: 8, right: 16, left: 8, bottom: 0 }}
 					>
-						<CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+						<CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
 						<XAxis
 							dataKey="date"
 							tickFormatter={formatDateLabel}
-							tick={{ fontSize: 12, fill: '#6b7280' }}
+							tick={{ fontSize: 12, fill: 'var(--chart-tick)' }}
 							tickLine={false}
-							axisLine={{ stroke: '#d1d5db' }}
+							axisLine={{ stroke: 'var(--chart-axis)' }}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
 							tickFormatter={(v: number) => formatMoney(v)}
-							tick={{ fontSize: 12, fill: '#6b7280' }}
+							tick={{ fontSize: 12, fill: 'var(--chart-tick)' }}
 							tickLine={false}
-							axisLine={{ stroke: '#d1d5db' }}
+							axisLine={{ stroke: 'var(--chart-axis)' }}
 							width={80}
 						/>
 						<Tooltip
@@ -167,7 +167,9 @@ export function BalanceHistoryChart({
 							labelFormatter={formatDateLabel}
 							contentStyle={{
 								borderRadius: '8px',
-								border: '1px solid #e5e7eb',
+								border: '1px solid var(--chart-tooltip-border)',
+								backgroundColor: 'var(--chart-tooltip-bg)',
+								color: 'var(--chart-tooltip-text)',
 								fontSize: '14px',
 							}}
 						/>

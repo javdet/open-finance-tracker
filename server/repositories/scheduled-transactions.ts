@@ -78,6 +78,9 @@ const SELECT_COLUMNS = `
 `
 
 function rowToScheduledTransaction(row: ScheduledTransactionRow) {
+	const sd = row.start_date instanceof Date
+		? row.start_date.toISOString().slice(0, 10)
+		: String(row.start_date).slice(0, 10)
 	return {
 		id: String(row.id),
 		userId: String(row.user_id),
@@ -91,7 +94,7 @@ function rowToScheduledTransaction(row: ScheduledTransactionRow) {
 		amount: Number(row.amount),
 		currencyCode: row.currency_code,
 		recurrencePeriod: row.recurrence_period,
-		startDate: row.start_date,
+		startDate: sd,
 		notifyPayment: row.notify_payment,
 		isActive: row.is_active,
 		notes: row.notes,

@@ -79,24 +79,24 @@ export function PlanVsActualScale({
 	const pctLabel = showUsage ? 'used' : 'match'
 
 	return (
-		<div className="flex flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-			<h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>
+		<div className="flex flex-col rounded-lg border bg-surface-card p-4 shadow-sm">
+			<h3 className="text-sm font-medium text-secondary mb-3">{title}</h3>
 			<div className="flex items-end gap-3">
 				<div
-					className="flex flex-col justify-between text-xs text-gray-500 shrink-0 py-0.5"
+					className="flex flex-col justify-between text-xs text-muted shrink-0 py-0.5"
 					style={{ height: GLASS_HEIGHT_PX }}
 				>
 					<span>100%</span>
 					<span>0%</span>
 				</div>
 				<div
-					className="w-px bg-gray-200 shrink-0"
+					className="w-px bg-surface-hover shrink-0"
 					style={{ height: GLASS_HEIGHT_PX }}
 					aria-hidden
 				/>
 				<div className="flex flex-col items-center flex-1">
 					<div
-						className="relative w-full max-w-[48px] rounded-b border-2 border-gray-200 bg-gray-50 overflow-hidden"
+						className="relative w-full max-w-[48px] rounded-b border-2 bg-surface overflow-hidden"
 						style={{
 							height: GLASS_HEIGHT_PX,
 							borderColor: isOverBudget ? OVER_BUDGET_COLOR : undefined,
@@ -113,11 +113,11 @@ export function PlanVsActualScale({
 							title={`${Math.round(pct)}% — Plan ${formatVal(plan)}, Actual ${formatVal(actual)}`}
 						/>
 					</div>
-					<p className={`text-xs mt-2 text-center ${isOverBudget ? 'text-red-600' : 'text-gray-600'}`}>
+					<p className={`text-xs mt-2 text-center ${isOverBudget ? 'text-negative' : 'text-secondary'}`}>
 						<span className="font-medium">{Math.round(pct)}%</span>
-						<span className={isOverBudget ? 'text-red-500' : 'text-gray-500'}> {pctLabel}</span>
+						<span className={isOverBudget ? 'text-negative' : 'text-muted'}> {pctLabel}</span>
 					</p>
-					<p className="text-xs text-gray-500 mt-0.5">
+					<p className="text-xs text-muted mt-0.5">
 						Plan {formatVal(plan)} · Actual {formatVal(actual)}
 					</p>
 				</div>

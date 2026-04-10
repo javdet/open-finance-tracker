@@ -117,7 +117,7 @@ export function UserMenu() {
 			<button
 				type="button"
 				onClick={() => setIsOpen((prev) => !prev)}
-				className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
+				className="flex items-center gap-2 rounded-full border border-strong bg-surface-card px-3 py-1.5 text-sm text-secondary hover:bg-surface-hover transition-colors"
 				aria-expanded={isOpen}
 				aria-haspopup="true"
 			>
@@ -129,11 +129,11 @@ export function UserMenu() {
 
 			{isOpen && (
 				<div
-					className="absolute right-0 top-full mt-1 w-56 rounded-lg border border-gray-200 bg-white shadow-lg z-50"
+					className="absolute right-0 top-full mt-1 w-56 rounded-lg border bg-surface-card shadow-lg z-50"
 					role="menu"
 				>
-					<div className="px-4 py-3 border-b border-gray-100">
-						<p className="text-sm font-medium text-gray-900 truncate">
+					<div className="px-4 py-3 border-b border-subtle">
+						<p className="text-sm font-medium text-primary truncate">
 							{user?.login}
 						</p>
 					</div>
@@ -142,7 +142,7 @@ export function UserMenu() {
 						<button
 							type="button"
 							onClick={handleAccountSettings}
-							className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+							className="flex w-full items-center gap-2 px-4 py-2 text-sm text-secondary hover:bg-surface-hover"
 							role="menuitem"
 						>
 							<SettingsIcon />
@@ -150,11 +150,11 @@ export function UserMenu() {
 						</button>
 					</div>
 
-					<div className="border-t border-gray-100 py-1">
+					<div className="border-t border-subtle py-1">
 						<button
 							type="button"
 							onClick={handleLogout}
-							className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+							className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
 							role="menuitem"
 						>
 							<LogoutIcon />

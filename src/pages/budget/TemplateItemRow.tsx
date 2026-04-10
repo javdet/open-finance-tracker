@@ -92,14 +92,14 @@ export function TemplateItemRow({
 	}
 
 	return (
-		<tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors animate-fade-in-slide-up">
+		<tr className="border-b border-subtle hover:bg-surface-hover transition-colors animate-fade-in-slide-up">
 			<td
-				className="px-4 py-3 text-gray-800 truncate"
+				className="px-4 py-3 text-primary truncate"
 				title={category.name}
 			>
 				{category.name}
 			</td>
-			<td className="px-4 py-3 text-right text-gray-800">
+			<td className="px-4 py-3 text-right text-primary">
 				{isEditing ? (
 					<input
 						type="number"
@@ -116,7 +116,7 @@ export function TemplateItemRow({
 								setIsEditing(false)
 							}
 						}}
-						className="w-24 text-right rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+						className="w-24 text-right rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						autoFocus
 						disabled={isSaving}
 					/>
@@ -136,7 +136,7 @@ export function TemplateItemRow({
 					onClick={handleDelete}
 					disabled={isDeleting}
 					className={clsx(
-						'text-gray-400 hover:text-rose-600 transition-colors disabled:opacity-50',
+						'text-faint hover:text-rose-600 transition-colors disabled:opacity-50',
 					)}
 					aria-label="Remove item"
 					title="Remove item"

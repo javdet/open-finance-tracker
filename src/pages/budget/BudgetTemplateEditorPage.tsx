@@ -104,24 +104,24 @@ export function BudgetTemplateEditorPage() {
 				<div className="flex items-center gap-3">
 					<Link
 						to="/budget"
-						className="text-sm font-medium text-gray-600 hover:text-gray-900"
+						className="text-sm font-medium text-secondary hover:text-primary"
 					>
 						← Back to Budget
 					</Link>
 				</div>
-				<h2 className="text-xl font-semibold text-gray-900">
+				<h2 className="text-xl font-semibold text-primary">
 					Create template
 				</h2>
 				{error && (
-					<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3">
-						<p className="text-sm text-red-600">{error}</p>
+					<div className="rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3">
+						<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 					</div>
 				)}
 				<form onSubmit={handleCreateTemplate} className="max-w-md space-y-4">
 					<div>
 						<label
 							htmlFor="template-name-new"
-							className="block text-sm font-medium text-gray-700 mb-1"
+							className="block text-sm font-medium text-secondary mb-1"
 						>
 							Template name <span className="text-red-500">*</span>
 						</label>
@@ -134,13 +134,13 @@ export function BudgetTemplateEditorPage() {
 								setError(null)
 							}}
 							placeholder="e.g. Default monthly"
-							className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+							className="block w-full rounded-md border border-strong bg-surface-card text-primary px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
 						/>
 					</div>
 					<div>
 						<label
 							htmlFor="template-currency-new"
-							className="block text-sm font-medium text-gray-700 mb-1"
+							className="block text-sm font-medium text-secondary mb-1"
 						>
 							Base currency
 						</label>
@@ -151,7 +151,7 @@ export function BudgetTemplateEditorPage() {
 							onChange={(e) =>
 								setBaseCurrencyCode(e.target.value.toUpperCase().slice(0, 10))
 							}
-							className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+							className="block w-full rounded-md border border-strong bg-surface-card text-primary px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
 						/>
 					</div>
 					<div className="flex gap-2">
@@ -164,7 +164,7 @@ export function BudgetTemplateEditorPage() {
 						</button>
 						<Link
 							to="/budget"
-							className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+							className="px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover"
 						>
 							Cancel
 						</Link>
@@ -179,11 +179,11 @@ export function BudgetTemplateEditorPage() {
 			<div className="space-y-6">
 				<Link
 					to="/budget"
-					className="text-sm font-medium text-gray-600 hover:text-gray-900"
+					className="text-sm font-medium text-secondary hover:text-primary"
 				>
 					← Back to Budget
 				</Link>
-				<div className="text-sm text-gray-500 py-8">Loading template...</div>
+				<div className="text-sm text-muted py-8">Loading template...</div>
 			</div>
 		)
 	}
@@ -193,13 +193,13 @@ export function BudgetTemplateEditorPage() {
 			<div className="space-y-6">
 				<Link
 					to="/budget"
-					className="text-sm font-medium text-gray-600 hover:text-gray-900"
+					className="text-sm font-medium text-secondary hover:text-primary"
 				>
 					← Back to Budget
 				</Link>
 				{error && (
-					<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3">
-						<p className="text-sm text-red-600">{error}</p>
+					<div className="rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3">
+						<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 					</div>
 				)}
 			</div>
@@ -211,7 +211,7 @@ export function BudgetTemplateEditorPage() {
 			<div className="flex items-center gap-3">
 				<Link
 					to="/budget"
-					className="text-sm font-medium text-gray-600 hover:text-gray-900"
+					className="text-sm font-medium text-secondary hover:text-primary"
 				>
 					← Back to Budget
 				</Link>
@@ -219,7 +219,7 @@ export function BudgetTemplateEditorPage() {
 			<div className="flex flex-col gap-2">
 				<label
 					htmlFor="template-name-edit"
-					className="text-xs font-medium text-gray-500"
+					className="text-xs font-medium text-muted"
 				>
 					Template name
 				</label>
@@ -234,7 +234,7 @@ export function BudgetTemplateEditorPage() {
 						}}
 						onBlur={handleSaveName}
 						disabled={isSaving}
-						className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:opacity-70 max-w-md"
+						className="rounded-md border border-strong bg-surface-card text-primary px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:opacity-70 max-w-md"
 					/>
 					<input
 						type="text"
@@ -244,14 +244,14 @@ export function BudgetTemplateEditorPage() {
 						}
 						onBlur={handleSaveName}
 						disabled={isSaving}
-						className="w-20 rounded-md border border-gray-300 px-2 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:opacity-70"
+						className="w-20 rounded-md border border-strong bg-surface-card text-primary px-2 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:opacity-70"
 						title="Base currency"
 					/>
 				</div>
 			</div>
 			{error && (
-				<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3">
-					<p className="text-sm text-red-600">{error}</p>
+				<div className="rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3">
+					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 				</div>
 			)}
 			<TemplateSection

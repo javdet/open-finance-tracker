@@ -7,17 +7,17 @@ import { ShortcutSetupGuide } from './ShortcutSetupGuide'
 export function SettingsPage() {
 	return (
 		<div className="space-y-8">
-			<h2 className="text-xl font-semibold text-gray-900">
+			<h2 className="text-xl font-semibold text-primary">
 				Settings
 			</h2>
 			<ApiKeysSection />
-			<hr className="border-gray-200" />
+			<hr />
 			<SmsMappingsSection />
-			<hr className="border-gray-200" />
+			<hr />
 			<SmsImportHistory />
-			<hr className="border-gray-200" />
+			<hr />
 			<BlockchainImportHistory />
-			<hr className="border-gray-200" />
+			<hr />
 			<ShortcutSetupGuide />
 		</div>
 	)

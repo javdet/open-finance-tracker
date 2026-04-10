@@ -133,15 +133,15 @@ function AddCategoryModal({
 				onClick={handleClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-xl mx-4">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-md bg-surface-card border rounded-md shadow-xl mx-4">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						Add new category
 					</h2>
 					<button
 						type="button"
 						onClick={handleClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary"
 						aria-label="Close"
 					>
 						✕
@@ -149,14 +149,14 @@ function AddCategoryModal({
 				</header>
 				<form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
 					{error && (
-						<p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+						<p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 px-3 py-2 rounded">
 							{error}
 						</p>
 					)}
 					<div>
 						<label
 							htmlFor="category-name"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Category name <span className="text-red-500">*</span>
 						</label>
@@ -166,14 +166,14 @@ function AddCategoryModal({
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							placeholder="e.g. Food"
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							autoFocus
 						/>
 					</div>
 					<div>
 						<label
 							htmlFor="category-type"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Type
 						</label>
@@ -183,7 +183,7 @@ function AddCategoryModal({
 							onChange={(e) =>
 								setType(e.target.value as CategoryType)
 							}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							<option value="expense">Expense</option>
 							<option value="income">Income</option>
@@ -192,7 +192,7 @@ function AddCategoryModal({
 					<div>
 						<label
 							htmlFor="category-group"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							System category
 						</label>
@@ -202,7 +202,7 @@ function AddCategoryModal({
 							onChange={(e) =>
 								setSystemCategoryValue(e.target.value)
 							}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							<option value="">— None —</option>
 							{groups
@@ -230,7 +230,7 @@ function AddCategoryModal({
 						<button
 							type="button"
 							onClick={handleClose}
-							className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+							className="flex-1 px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover"
 						>
 							Cancel
 						</button>
@@ -333,15 +333,15 @@ function EditCategoryModal({
 				onClick={handleClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-xl mx-4">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-md bg-surface-card border rounded-md shadow-xl mx-4">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						Edit category
 					</h2>
 					<button
 						type="button"
 						onClick={handleClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary"
 						aria-label="Close"
 					>
 						✕
@@ -349,14 +349,14 @@ function EditCategoryModal({
 				</header>
 				<form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
 					{error && (
-						<p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+						<p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 px-3 py-2 rounded">
 							{error}
 						</p>
 					)}
 					<div>
 						<label
 							htmlFor="edit-category-name"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Category name <span className="text-red-500">*</span>
 						</label>
@@ -365,14 +365,14 @@ function EditCategoryModal({
 							type="text"
 							value={name}
 							onChange={(e) => setName(e.target.value)}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							autoFocus
 						/>
 					</div>
 					<div>
 						<label
 							htmlFor="edit-category-type"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Type
 						</label>
@@ -382,7 +382,7 @@ function EditCategoryModal({
 							onChange={(e) =>
 								setType(e.target.value as CategoryType)
 							}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							<option value="expense">Expense</option>
 							<option value="income">Income</option>
@@ -391,7 +391,7 @@ function EditCategoryModal({
 					<div>
 						<label
 							htmlFor="edit-category-group"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							System category
 						</label>
@@ -401,7 +401,7 @@ function EditCategoryModal({
 							onChange={(e) =>
 								setSystemCategoryValue(e.target.value)
 							}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							<option value="">— None —</option>
 							{groups
@@ -432,7 +432,7 @@ function EditCategoryModal({
 						<button
 							type="button"
 							onClick={handleClose}
-							className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+							className="flex-1 px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover"
 						>
 							Cancel
 						</button>
@@ -615,7 +615,7 @@ export function CategoriesPage() {
 	return (
 		<div className="flex flex-col h-full space-y-4">
 			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-semibold text-gray-900">
+				<h2 className="text-xl font-semibold text-primary">
 					Categories
 				</h2>
 				<div className="flex items-center gap-3">
@@ -623,7 +623,7 @@ export function CategoriesPage() {
 						<button
 							type="button"
 							onClick={handleCollapseExpandAll}
-							className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+							className="px-3 py-1.5 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover transition-colors"
 						>
 							{allSystemCategoriesExpanded
 								? 'Collapse all'
@@ -640,19 +640,19 @@ export function CategoriesPage() {
 				</div>
 			</div>
 			{error && (
-				<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3">
-					<p className="text-sm text-red-600">{error}</p>
+				<div className="rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3">
+					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 				</div>
 			)}
-			<div className="flex-1 overflow-hidden rounded-md border border-gray-200 bg-white">
+			<div className="flex-1 overflow-hidden rounded-md border bg-surface-card">
 				<div className="max-h-[calc(100vh-220px)] overflow-auto">
 					<table className="min-w-full border-collapse text-sm">
-						<thead className="bg-gray-50 sticky top-0 z-10">
-							<tr className="text-left text-gray-600">
-								<th className="border-b border-gray-200 px-4 py-2 font-medium">
+						<thead className="bg-surface sticky top-0 z-10">
+							<tr className="text-left text-secondary">
+								<th className="border-b px-4 py-2 font-medium">
 									Category
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2 font-medium">
+								<th className="border-b px-4 py-2 font-medium">
 									<button
 										type="button"
 										onClick={handleTypeHeaderClick}
@@ -675,10 +675,10 @@ export function CategoriesPage() {
 										)}
 									</button>
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2 font-medium">
+								<th className="border-b px-4 py-2 font-medium">
 									System Category
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2 w-24 font-medium">
+								<th className="border-b px-4 py-2 w-24 font-medium">
 									{/* Actions */}
 								</th>
 							</tr>
@@ -688,7 +688,7 @@ export function CategoriesPage() {
 								<tr>
 									<td
 										colSpan={4}
-										className="px-4 py-8 text-center text-gray-500"
+										className="px-4 py-8 text-center text-muted"
 									>
 										No categories yet. Click &quot;+ Add Category&quot; to get
 										started.
@@ -723,10 +723,10 @@ export function CategoriesPage() {
 									<tr
 										key={category.id}
 										className={clsx(
-											'border-b border-gray-100 transition-colors',
+											'border-b border-subtle transition-colors',
 											isTopLevelSystem
-												? 'bg-gray-100 hover:bg-gray-200/70'
-												: 'hover:bg-gray-50',
+												? 'bg-surface-hover hover:bg-surface-hover'
+												: 'hover:bg-surface-hover',
 										)}
 										onClick={() => {
 											if (isTopLevelSystem && hasChildren) {
@@ -736,7 +736,7 @@ export function CategoriesPage() {
 											}
 										}}
 									>
-										<td className="px-4 py-3 align-top text-gray-800">
+										<td className="px-4 py-3 align-top text-primary">
 											<div
 												className={clsx(
 													'flex items-center gap-1',
@@ -753,7 +753,7 @@ export function CategoriesPage() {
 																	category.id,
 																)
 															}}
-															className="inline-flex h-5 w-5 items-center justify-center rounded border border-gray-300 bg-white text-[10px] leading-none text-gray-600 mr-1"
+															className="inline-flex h-5 w-5 items-center justify-center rounded border border-strong bg-surface-card text-[10px] leading-none text-secondary mr-1"
 															aria-label={
 																expandedSystemCategoryIds.includes(
 																	category.id,
@@ -779,14 +779,14 @@ export function CategoriesPage() {
 												className={clsx(
 													'font-medium',
 													category.type === 'expense'
-														? 'text-red-600'
-														: 'text-emerald-600',
+														? 'text-red-600 dark:text-red-400'
+														: 'text-emerald-600 dark:text-emerald-400',
 												)}
 											>
 												{getTypeDisplay(category.type)}
 											</span>
 										</td>
-										<td className="px-4 py-3 align-top text-gray-800">
+										<td className="px-4 py-3 align-top text-primary">
 											{getSystemCategoryDisplay(category)}
 										</td>
 										<td className="px-4 py-3 align-top">
@@ -797,7 +797,7 @@ export function CategoriesPage() {
 														e.stopPropagation()
 														handleEdit(category)
 													}}
-													className="text-gray-400 hover:text-emerald-600 transition-colors p-1 rounded"
+													className="text-faint hover:text-emerald-600 transition-colors p-1 rounded"
 													aria-label="Edit category"
 												>
 													<PencilIcon />
@@ -810,7 +810,7 @@ export function CategoriesPage() {
 															category.id,
 														)
 													}}
-													className="text-gray-400 hover:text-red-600 transition-colors p-1 rounded disabled:opacity-50"
+													className="text-faint hover:text-red-600 transition-colors p-1 rounded disabled:opacity-50"
 													aria-label="Delete category"
 												>
 													<TrashIcon />

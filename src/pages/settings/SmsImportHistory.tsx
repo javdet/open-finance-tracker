@@ -26,11 +26,11 @@ const STATUS_CONFIG: Record<
 > = {
 	processed: {
 		label: 'Processed',
-		className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+		className: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
 	},
 	failed: {
 		label: 'Failed',
-		className: 'bg-red-50 text-red-700 border-red-200',
+		className: 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
 	},
 	pending: {
 		label: 'Pending',
@@ -38,7 +38,7 @@ const STATUS_CONFIG: Record<
 	},
 	duplicate: {
 		label: 'Duplicate',
-		className: 'bg-gray-50 text-gray-600 border-gray-200',
+		className: 'bg-surface text-secondary',
 	},
 	skipped: {
 		label: 'Skipped',
@@ -114,41 +114,41 @@ export function SmsImportHistory() {
 	return (
 		<section aria-labelledby="sms-history-heading">
 			<div className="flex items-start gap-3 mb-4">
-				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600">
 					<InboxIcon className="w-5 h-5" />
 				</div>
 				<div className="flex-1">
 					<h3
 						id="sms-history-heading"
-						className="text-base font-semibold text-gray-900"
+						className="text-base font-semibold text-primary"
 					>
 						SMS Import History
 					</h3>
-					<p className="text-sm text-gray-500 mt-0.5">
+					<p className="text-sm text-muted mt-0.5">
 						View all SMS messages received by the webhook, their
 						parse status, and any errors.
 					</p>
 				</div>
 				{total > 0 && (
-					<span className="shrink-0 text-xs text-gray-400 mt-1">
+					<span className="shrink-0 text-xs text-faint mt-1">
 						{total} total
 					</span>
 				)}
 			</div>
 
 			{error && (
-				<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 mb-4">
+				<div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-3 text-sm text-red-800 mb-4">
 					{error}
 				</div>
 			)}
 
 			{isLoading && imports.length === 0 ? (
-				<p className="text-sm text-gray-500 py-4 text-center">
+				<p className="text-sm text-muted py-4 text-center">
 					Loading import history...
 				</p>
 			) : imports.length === 0 ? (
-				<div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-6 text-center">
-					<p className="text-sm text-gray-500">
+				<div className="rounded-lg border bg-surface px-4 py-6 text-center">
+					<p className="text-sm text-muted">
 						No SMS imports yet. Messages will appear here once the
 						webhook receives its first SMS.
 					</p>
@@ -161,7 +161,7 @@ export function SmsImportHistory() {
 							return (
 								<div
 									key={sms.id}
-									className="rounded-lg border border-gray-200 bg-white overflow-hidden"
+									className="rounded-lg border bg-surface-card overflow-hidden"
 								>
 									<button
 										type="button"
@@ -170,19 +170,19 @@ export function SmsImportHistory() {
 												isExpanded ? null : sms.id,
 											)
 										}
-										className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+										className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-hover transition-colors"
 										aria-expanded={isExpanded}
 									>
 										<StatusBadge status={sms.status} />
-										<span className="flex-1 text-sm text-gray-700 truncate font-mono">
+										<span className="flex-1 text-sm text-secondary truncate font-mono">
 											{truncate(sms.rawMessage, 80)}
 										</span>
-										<span className="shrink-0 text-xs text-gray-400">
+										<span className="shrink-0 text-xs text-faint">
 											{formatDate(sms.createdAt)}
 										</span>
 										<svg
 											className={clsx(
-												'w-4 h-4 text-gray-400 transition-transform shrink-0',
+												'w-4 h-4 text-faint transition-transform shrink-0',
 												isExpanded && 'rotate-180',
 											)}
 											fill="none"
@@ -198,45 +198,45 @@ export function SmsImportHistory() {
 										</svg>
 									</button>
 									{isExpanded && (
-										<div className="border-t border-gray-100 px-4 py-3 space-y-3 bg-gray-50/50">
+										<div className="border-t border-subtle px-4 py-3 space-y-3 bg-surface/50">
 											<div>
-												<p className="text-xs font-medium text-gray-500 mb-1">
+												<p className="text-xs font-medium text-muted mb-1">
 													Raw Message
 												</p>
-												<pre className="text-xs text-gray-800 font-mono whitespace-pre-wrap break-all bg-white rounded-md border border-gray-200 px-3 py-2">
+												<pre className="text-xs text-primary font-mono whitespace-pre-wrap break-all bg-surface-card rounded-md border px-3 py-2">
 													{sms.rawMessage}
 												</pre>
 											</div>
 											<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
 												<div>
-													<span className="text-gray-500 block">
+													<span className="text-muted block">
 														Sender
 													</span>
-													<span className="text-gray-800 font-medium">
+													<span className="text-primary font-medium">
 														{sms.sender || '—'}
 													</span>
 												</div>
 												<div>
-													<span className="text-gray-500 block">
+													<span className="text-muted block">
 														Parser
 													</span>
-													<span className="text-gray-800 font-medium">
+													<span className="text-primary font-medium">
 														{sms.parserUsed || '—'}
 													</span>
 												</div>
 												<div>
-													<span className="text-gray-500 block">
+													<span className="text-muted block">
 														Operation ID
 													</span>
-													<span className="text-gray-800 font-medium">
+													<span className="text-primary font-medium">
 														{sms.operationId || '—'}
 													</span>
 												</div>
 												<div>
-													<span className="text-gray-500 block">
+													<span className="text-muted block">
 														Received
 													</span>
-													<span className="text-gray-800 font-medium">
+													<span className="text-primary font-medium">
 														{sms.receivedAt
 															? formatDate(
 																sms.receivedAt,
@@ -246,21 +246,21 @@ export function SmsImportHistory() {
 												</div>
 											</div>
 											{sms.errorMessage && (
-												<div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-													<p className="text-xs font-medium text-red-700">
+												<div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-3 py-2">
+													<p className="text-xs font-medium text-red-700 dark:text-red-300">
 														Error
 													</p>
-													<p className="text-xs text-red-600 mt-0.5">
+													<p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
 														{sms.errorMessage}
 													</p>
 												</div>
 											)}
 											{sms.parsedData && (
 												<div>
-													<p className="text-xs font-medium text-gray-500 mb-1">
+													<p className="text-xs font-medium text-muted mb-1">
 														Parsed Data
 													</p>
-													<pre className="text-xs text-gray-700 font-mono whitespace-pre-wrap break-all bg-white rounded-md border border-gray-200 px-3 py-2">
+													<pre className="text-xs text-secondary font-mono whitespace-pre-wrap break-all bg-surface-card rounded-md border px-3 py-2">
 														{JSON.stringify(
 															sms.parsedData,
 															null,
@@ -282,11 +282,11 @@ export function SmsImportHistory() {
 								type="button"
 								onClick={() => setPage((p) => Math.max(0, p - 1))}
 								disabled={page === 0}
-								className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+								className="rounded-lg border border-strong px-3 py-1.5 text-xs font-medium text-secondary hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 							>
 								Previous
 							</button>
-							<span className="text-xs text-gray-500">
+							<span className="text-xs text-muted">
 								Page {page + 1} of {totalPages}
 							</span>
 							<button
@@ -297,7 +297,7 @@ export function SmsImportHistory() {
 									)
 								}
 								disabled={page >= totalPages - 1}
-								className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+								className="rounded-lg border border-strong px-3 py-1.5 text-xs font-medium text-secondary hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 							>
 								Next
 							</button>

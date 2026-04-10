@@ -304,15 +304,15 @@ export function AddOperationModal({
 				onClick={onClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-3xl bg-white border border-gray-200 rounded-md shadow-xl">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-3xl bg-surface-card border rounded-md shadow-xl">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						Add Transaction
 					</h2>
 					<button
 						type="button"
 						onClick={onClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary"
 						aria-label="Close add transaction window"
 					>
 						✕
@@ -322,7 +322,7 @@ export function AddOperationModal({
 				<div className="px-6 py-4 space-y-4">
 					{error && (
 						<div
-							className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+							className="rounded border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-3 py-2 text-sm text-red-700 dark:text-red-300"
 							role="alert"
 						>
 							{error}
@@ -330,42 +330,42 @@ export function AddOperationModal({
 					)}
 					<div className="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4 items-start">
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Amount:
 							</label>
 							<input
 								type="text"
 								value={amount}
 								onChange={(e) => setAmount(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card px-2 py-1 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								placeholder="e.g. 100 or 12 + 33"
 							/>
-							<p className="mt-1 text-[11px] text-gray-500">
+							<p className="mt-1 text-[11px] text-muted">
 								Example: 12 + 33 + 45
 							</p>
 						</div>
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Date:
 							</label>
 							<input
 								type="date"
 								value={date}
 								onChange={(e) => setDate(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card px-2 py-1 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							/>
 						</div>
 					</div>
 
 					<div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4">
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Account:
 							</label>
 							<select
 								value={accountId}
 								onChange={(e) => setAccountId(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card px-2 py-1 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							>
 								{nonDebtAccounts.map((account) => (
 									<option key={account.id} value={account.id}>
@@ -375,7 +375,7 @@ export function AddOperationModal({
 							</select>
 						</div>
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Transaction Type:
 							</label>
 							<TransactionTypeSelector
@@ -385,13 +385,13 @@ export function AddOperationModal({
 						</div>
 						{transactionType !== 'transfer' && (
 							<div>
-								<label className="block text-xs font-medium text-gray-700 mb-1">
+								<label className="block text-xs font-medium text-secondary mb-1">
 									Scheduled:
 								</label>
 								<select
 									value={selectedScheduledTxId}
 									onChange={(e) => handleScheduledTxChange(e.target.value)}
-									className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+									className="block w-full rounded border border-strong bg-surface-card px-2 py-1 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								>
 									<option value="">— None —</option>
 									{filteredScheduledTx.map((st) => (
@@ -406,7 +406,7 @@ export function AddOperationModal({
 
 					{showCategory && (
 						<div ref={categoryDropdownRef} className="relative">
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Category:
 							</label>
 							<button
@@ -419,7 +419,7 @@ export function AddOperationModal({
 										setIsCategoryOpen(true)
 									}
 								}}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
+								className="block w-full rounded border border-strong bg-surface-card px-2 py-1 text-sm text-primary shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
 								aria-haspopup="listbox"
 								aria-expanded={isCategoryOpen}
 								aria-label="Select category"
@@ -431,7 +431,7 @@ export function AddOperationModal({
 										: 'Category'}
 								</span>
 								<span
-									className={`shrink-0 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
+									className={`shrink-0 text-faint transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
 									aria-hidden
 								>
 									▾
@@ -440,7 +440,7 @@ export function AddOperationModal({
 							{isCategoryOpen && (
 								<ul
 									role="listbox"
-									className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border border-gray-200 bg-white py-1 shadow-lg"
+									className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border bg-surface-card py-1 shadow-lg"
 									aria-label="Category options"
 								>
 									<li className="px-2 pb-1">
@@ -452,7 +452,7 @@ export function AddOperationModal({
 											}
 											autoFocus
 											placeholder="Type to filter categories…"
-											className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+											className="w-full rounded border border-strong bg-surface-card px-2 py-1 text-xs text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 										/>
 									</li>
 									{(() => {
@@ -474,7 +474,7 @@ export function AddOperationModal({
 										return (
 											<>
 												{showSections && (
-													<li className="px-2 pt-1.5 pb-0.5 text-xs font-semibold text-gray-500">
+													<li className="px-2 pt-1.5 pb-0.5 text-xs font-semibold text-muted">
 														Frequently used categories
 													</li>
 												)}
@@ -484,7 +484,7 @@ export function AddOperationModal({
 																key={cat.id}
 																role="option"
 																aria-selected={categoryId === cat.id}
-																className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+																className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-surface-hover ${categoryId === cat.id ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'text-secondary'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
 																onClick={() => {
 																	setCategoryId(cat.id)
 																	setIsCategoryOpen(false)
@@ -496,7 +496,7 @@ export function AddOperationModal({
 														))
 													: null}
 												{showSections && otherFiltered.length > 0 && (
-													<li className="px-2 pt-2 pb-0.5 text-xs font-semibold text-gray-500">
+													<li className="px-2 pt-2 pb-0.5 text-xs font-semibold text-muted">
 														Other categories
 													</li>
 												)}
@@ -506,7 +506,7 @@ export function AddOperationModal({
 															key={cat.id}
 															role="option"
 															aria-selected={categoryId === cat.id}
-															className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+															className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-surface-hover ${categoryId === cat.id ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'text-secondary'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
 															onClick={() => {
 																setCategoryId(cat.id)
 																setIsCategoryOpen(false)
@@ -527,13 +527,13 @@ export function AddOperationModal({
 
 					{transactionType === 'transfer' && (
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Transfer to account:
 							</label>
 							<select
 								value={transferAccountId}
 								onChange={(e) => setTransferAccountId(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card px-2 py-1 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							>
 								<option value="">— Select account —</option>
 								{nonDebtAccounts
@@ -549,44 +549,44 @@ export function AddOperationModal({
 
 					{isCrossCurrency && (
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Received amount ({transferAccount.currencyCode}):
 							</label>
 							<input
 								type="text"
 								value={transferAmount}
 								onChange={(e) => setTransferAmount(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card px-2 py-1 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								placeholder={`Amount in ${transferAccount.currencyCode}`}
 							/>
-							<p className="mt-1 text-[11px] text-gray-500">
+							<p className="mt-1 text-[11px] text-muted">
 								Amount credited to {transferAccount.name} in {transferAccount.currencyCode}
 							</p>
 						</div>
 					)}
 
 					<div>
-						<label className="block text-xs font-medium text-gray-700 mb-1">
+						<label className="block text-xs font-medium text-secondary mb-1">
 							Comments:
 						</label>
 						<textarea
 							rows={3}
 							value={notes}
 							onChange={(e) => setNotes(e.target.value)}
-							className="block w-full resize-none rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full resize-none rounded border border-strong bg-surface-card px-2 py-1 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						/>
 					</div>
 				</div>
 
-				<footer className="flex items-center justify-between px-6 py-3 border-t border-gray-200">
-					<p className="text-[11px] text-gray-500">
+				<footer className="flex items-center justify-between px-6 py-3 border-t">
+					<p className="text-[11px] text-muted">
 						Confirm transaction with Ctrl+Enter
 					</p>
 					<div className="flex items-center gap-3">
 						<button
 							type="button"
 							onClick={onClose}
-							className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100"
+							className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-strong text-secondary hover:bg-surface-hover"
 							aria-label="Cancel transaction creation"
 						>
 							✕

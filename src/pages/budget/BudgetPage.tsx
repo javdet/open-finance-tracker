@@ -50,8 +50,8 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 	const plannedTotalBalance = plannedBalance + accountBalanceAtPeriodStart
 
 	return (
-		<div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-			<h3 className="text-base font-semibold text-gray-900 mb-4">
+		<div className="rounded-lg border bg-surface-card p-5 shadow-sm">
+			<h3 className="text-base font-semibold text-primary mb-4">
 				Balance Summary
 			</h3>
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -59,14 +59,14 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 					className={clsx(
 						'rounded-lg p-4 border',
 						plannedBalance >= 0
-							? 'bg-emerald-50 border-emerald-200'
-							: 'bg-red-50 border-red-200',
+							? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-200'
+							: 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800',
 					)}
 				>
-					<p className="text-sm font-medium text-gray-600 mb-1">
+					<p className="text-sm font-medium text-secondary mb-1">
 						Planned Balance
 					</p>
-					<p className="text-xs text-gray-500 mb-2">
+					<p className="text-xs text-muted mb-2">
 						Income {formatMoney(incomeTotalPlanned, baseCurrencyCode)}
 						{' \u2212 '}
 						Expenses {formatMoney(expenseTotalPlanned, baseCurrencyCode)}
@@ -76,7 +76,7 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 							'text-2xl font-bold',
 							plannedBalance >= 0
 								? 'text-emerald-700'
-								: 'text-red-700',
+								: 'text-red-700 dark:text-red-300',
 						)}
 					>
 						{formatMoney(plannedBalance, baseCurrencyCode)}
@@ -86,14 +86,14 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 					className={clsx(
 						'rounded-lg p-4 border',
 						plannedTotalBalance >= 0
-							? 'bg-emerald-50 border-emerald-200'
-							: 'bg-red-50 border-red-200',
+							? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-200'
+							: 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800',
 					)}
 				>
-					<p className="text-sm font-medium text-gray-600 mb-1">
+					<p className="text-sm font-medium text-secondary mb-1">
 						Planned Total Balance
 					</p>
-					<p className="text-xs text-gray-500 mb-2">
+					<p className="text-xs text-muted mb-2">
 						Planned Balance + Accounts at month start
 					</p>
 					<p
@@ -101,7 +101,7 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 							'text-2xl font-bold',
 							plannedTotalBalance >= 0
 								? 'text-emerald-700'
-								: 'text-red-700',
+								: 'text-red-700 dark:text-red-300',
 						)}
 					>
 						{formatMoney(plannedTotalBalance, baseCurrencyCode)}
@@ -111,14 +111,14 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 					className={clsx(
 						'rounded-lg p-4 border',
 						actualBalance >= 0
-							? 'bg-emerald-50 border-emerald-200'
-							: 'bg-red-50 border-red-200',
+							? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-200'
+							: 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800',
 					)}
 				>
-					<p className="text-sm font-medium text-gray-600 mb-1">
+					<p className="text-sm font-medium text-secondary mb-1">
 						Actual Balance
 					</p>
-					<p className="text-xs text-gray-500 mb-2">
+					<p className="text-xs text-muted mb-2">
 						Income {formatMoney(incomeTotalActual, baseCurrencyCode)}
 						{' \u2212 '}
 						Expenses {formatMoney(expenseTotalActual, baseCurrencyCode)}
@@ -128,7 +128,7 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 							'text-2xl font-bold',
 							actualBalance >= 0
 								? 'text-emerald-700'
-								: 'text-red-700',
+								: 'text-red-700 dark:text-red-300',
 						)}
 					>
 						{formatMoney(actualBalance, baseCurrencyCode)}
@@ -138,16 +138,16 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 					className={clsx(
 						'rounded-lg p-4 border',
 						difference > 0
-							? 'bg-emerald-50 border-emerald-200'
+							? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-200'
 							: difference < 0
-								? 'bg-red-50 border-red-200'
-								: 'bg-gray-50 border-gray-200',
+								? 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+								: 'bg-surface',
 					)}
 				>
-					<p className="text-sm font-medium text-gray-600 mb-1">
+					<p className="text-sm font-medium text-secondary mb-1">
 						Difference
 					</p>
-					<p className="text-xs text-gray-500 mb-2">
+					<p className="text-xs text-muted mb-2">
 						Actual − Planned
 					</p>
 					<p
@@ -156,8 +156,8 @@ function BalanceSummary({ report }: BalanceSummaryProps) {
 							difference > 0
 								? 'text-emerald-700'
 								: difference < 0
-									? 'text-red-700'
-									: 'text-gray-700',
+									? 'text-red-700 dark:text-red-300'
+									: 'text-secondary',
 						)}
 					>
 						{difference >= 0 ? '+' : ''}
@@ -313,17 +313,17 @@ export function BudgetPage() {
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-				<h2 className="text-xl font-semibold text-gray-900">Budget</h2>
+				<h2 className="text-xl font-semibold text-primary">Budget</h2>
 				<div className="flex flex-wrap items-center gap-3">
 					<div className="flex flex-col gap-1">
-						<label htmlFor="budget-template-select" className="text-xs text-gray-500">
+						<label htmlFor="budget-template-select" className="text-xs text-muted">
 							Template
 						</label>
 						<select
 							id="budget-template-select"
 							value=""
 							onChange={(e) => handleTemplateSelect(e.target.value)}
-							className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+							className="rounded-md border border-strong bg-surface-card px-3 py-1.5 text-sm text-primary focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
 							aria-label="Select or create template"
 						>
 							<option value="">Select...</option>
@@ -336,7 +336,7 @@ export function BudgetPage() {
 						</select>
 					</div>
 					<div className="flex flex-col gap-1">
-						<label htmlFor="budget-apply-template-select" className="text-xs text-gray-500">
+						<label htmlFor="budget-apply-template-select" className="text-xs text-muted">
 							Apply template
 						</label>
 						<select
@@ -347,7 +347,7 @@ export function BudgetPage() {
 								if (v) handleApplyTemplate(v)
 								e.target.value = ''
 							}}
-							className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+							className="rounded-md border border-strong bg-surface-card px-3 py-1.5 text-sm text-primary focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
 							aria-label="Apply template to current month"
 						>
 							<option value="">Select...</option>
@@ -365,18 +365,18 @@ export function BudgetPage() {
 					<button
 						type="button"
 						onClick={handlePreviousMonth}
-						className="p-1.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+						className="p-1.5 rounded-md text-secondary hover:bg-surface-hover hover:text-primary transition-colors"
 						aria-label="Previous month"
 					>
 						<ChevronLeftIcon />
 					</button>
-					<div className="text-lg font-semibold text-gray-900 min-w-[180px] text-center">
+					<div className="text-lg font-semibold text-primary min-w-[180px] text-center">
 						{MONTH_NAMES[currentMonth - 1]} {currentYear}
 					</div>
 					<button
 						type="button"
 						onClick={handleNextMonth}
-						className="p-1.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+						className="p-1.5 rounded-md text-secondary hover:bg-surface-hover hover:text-primary transition-colors"
 						aria-label="Next month"
 					>
 						<ChevronRightIcon />
@@ -390,13 +390,13 @@ export function BudgetPage() {
 			</div>
 
 			{error && (
-				<div className="rounded-md bg-red-50 border border-red-200 px-4 py-3">
-					<p className="text-sm text-red-600">{error}</p>
+				<div className="rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3">
+					<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 				</div>
 			)}
 
 		{isLoading ? (
-			<div className="text-sm text-gray-500 py-8 text-center">
+			<div className="text-sm text-muted py-8 text-center">
 				Loading budget...
 			</div>
 		) : budget ? (

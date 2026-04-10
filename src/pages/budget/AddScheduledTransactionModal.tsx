@@ -277,15 +277,15 @@ export function AddScheduledTransactionModal({
 				onClick={handleClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-lg bg-white border border-gray-200 rounded-md shadow-xl mx-4 transform transition-all duration-200 scale-100 animate-scale-in">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-lg bg-surface-card border rounded-md shadow-xl mx-4 transform transition-all duration-200 scale-100 animate-scale-in">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						Add Scheduled Transaction
 					</h2>
 					<button
 						type="button"
 						onClick={handleClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary transition-colors"
 						aria-label="Close"
 					>
 						✕
@@ -295,7 +295,7 @@ export function AddScheduledTransactionModal({
 				<form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
 					{error && (
 						<p
-							className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded animate-fade-in"
+							className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 px-3 py-2 rounded animate-fade-in"
 							role="alert"
 						>
 							{error}
@@ -305,7 +305,7 @@ export function AddScheduledTransactionModal({
 					<div>
 						<label
 							htmlFor="sched-name"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Name <span className="text-red-500">*</span>
 						</label>
@@ -315,12 +315,12 @@ export function AddScheduledTransactionModal({
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							placeholder="e.g. Netflix subscription"
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						/>
 					</div>
 
 					<div>
-						<label className="block text-xs font-medium text-gray-700 mb-1">
+						<label className="block text-xs font-medium text-secondary mb-1">
 							Type <span className="text-red-500">*</span>
 						</label>
 						<div className="flex gap-2">
@@ -329,8 +329,8 @@ export function AddScheduledTransactionModal({
 								onClick={() => setTransactionType('expense')}
 								className={`${typeBaseBtn} ${
 									transactionType === 'expense'
-										? 'border-red-500 bg-red-50 text-red-700'
-										: 'border-gray-200 bg-white text-gray-500 hover:border-red-300 hover:bg-red-50/50'
+										? 'border-red-500 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300'
+										: 'bg-surface-card text-muted hover:border-red-300 hover:bg-red-50/50'
 								}`}
 								aria-pressed={transactionType === 'expense'}
 							>
@@ -341,8 +341,8 @@ export function AddScheduledTransactionModal({
 								onClick={() => setTransactionType('income')}
 								className={`${typeBaseBtn} ${
 									transactionType === 'income'
-										? 'border-green-500 bg-green-50 text-green-700'
-										: 'border-gray-200 bg-white text-gray-500 hover:border-green-300 hover:bg-green-50/50'
+										? 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400'
+										: 'bg-surface-card text-muted hover:border-green-300 hover:bg-green-50/50'
 								}`}
 								aria-pressed={transactionType === 'income'}
 							>
@@ -355,7 +355,7 @@ export function AddScheduledTransactionModal({
 						<div>
 							<label
 								htmlFor="sched-amount"
-								className="block text-xs font-medium text-gray-700 mb-1"
+								className="block text-xs font-medium text-secondary mb-1"
 							>
 								Amount{' '}
 								<span className="text-red-500">*</span>
@@ -366,16 +366,16 @@ export function AddScheduledTransactionModal({
 								value={amount}
 								onChange={(e) => setAmount(e.target.value)}
 								placeholder="e.g. 100 or 12 + 33"
-								className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							/>
-							<p className="mt-1 text-[11px] text-gray-500">
+							<p className="mt-1 text-[11px] text-muted">
 								Supports expressions: 12 + 33 + 45
 							</p>
 						</div>
 						<div>
 							<label
 								htmlFor="sched-recurrence"
-								className="block text-xs font-medium text-gray-700 mb-1"
+								className="block text-xs font-medium text-secondary mb-1"
 							>
 								Recurrence{' '}
 								<span className="text-red-500">*</span>
@@ -388,7 +388,7 @@ export function AddScheduledTransactionModal({
 										e.target.value as RecurrencePeriod,
 									)
 								}
-								className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							>
 								{RECURRENCE_OPTIONS.map((opt) => (
 									<option key={opt.value} value={opt.value}>
@@ -401,7 +401,7 @@ export function AddScheduledTransactionModal({
 							<div>
 								<label
 									htmlFor="sched-start-date"
-									className="block text-xs font-medium text-gray-700 mb-1"
+									className="block text-xs font-medium text-secondary mb-1"
 								>
 									Start Date{' '}
 									<span className="text-red-500">*</span>
@@ -411,7 +411,7 @@ export function AddScheduledTransactionModal({
 									type="date"
 									value={startDate}
 									onChange={(e) => setStartDate(e.target.value)}
-									className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+									className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								/>
 							</div>
 						)}
@@ -420,7 +420,7 @@ export function AddScheduledTransactionModal({
 					<div>
 						<label
 							htmlFor="sched-account"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Account <span className="text-red-500">*</span>
 						</label>
@@ -428,7 +428,7 @@ export function AddScheduledTransactionModal({
 							id="sched-account"
 							value={accountId}
 							onChange={(e) => setAccountId(e.target.value)}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							{accounts.length === 0 && (
 								<option value="">Loading accounts...</option>
@@ -442,7 +442,7 @@ export function AddScheduledTransactionModal({
 					</div>
 
 					<div ref={categoryDropdownRef} className="relative">
-						<label className="block text-xs font-medium text-gray-700 mb-1">
+						<label className="block text-xs font-medium text-secondary mb-1">
 							Category <span className="text-red-500">*</span>
 						</label>
 						<button
@@ -455,7 +455,7 @@ export function AddScheduledTransactionModal({
 									setIsCategoryOpen(true)
 								}
 							}}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
 							aria-haspopup="listbox"
 							aria-expanded={isCategoryOpen}
 							aria-label="Select category"
@@ -468,7 +468,7 @@ export function AddScheduledTransactionModal({
 									: 'Category'}
 							</span>
 							<span
-								className={`shrink-0 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
+								className={`shrink-0 text-faint transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
 								aria-hidden
 							>
 								▾
@@ -477,7 +477,7 @@ export function AddScheduledTransactionModal({
 						{isCategoryOpen && (
 							<ul
 								role="listbox"
-								className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border border-gray-200 bg-white py-1 shadow-lg"
+								className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border bg-surface-card py-1 shadow-lg"
 								aria-label="Category options"
 							>
 								<li className="px-2 pb-1">
@@ -489,7 +489,7 @@ export function AddScheduledTransactionModal({
 										}
 										autoFocus
 										placeholder="Type to filter categories…"
-										className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+										className="w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 									/>
 								</li>
 								{categoryOptions
@@ -508,10 +508,10 @@ export function AddScheduledTransactionModal({
 											aria-selected={
 												categoryId === cat.id
 											}
-											className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${
+											className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-surface-hover ${
 												categoryId === cat.id
-													? 'bg-emerald-50 text-emerald-800'
-													: 'text-gray-700'
+													? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'
+													: 'text-secondary'
 											} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
 											onClick={() => {
 												setCategoryId(cat.id)
@@ -534,15 +534,15 @@ export function AddScheduledTransactionModal({
 							onChange={(e) =>
 								setNotifyPayment(e.target.checked)
 							}
-							className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+							className="h-4 w-4 rounded border-strong text-emerald-600 focus:ring-emerald-500"
 						/>
 						<label
 							htmlFor="sched-notify"
-							className="text-sm text-gray-700"
+							className="text-sm text-secondary"
 						>
 							Notify about payment
 						</label>
-						<span className="text-xs text-gray-400">
+						<span className="text-xs text-faint">
 							(coming soon)
 						</span>
 					</div>
@@ -550,7 +550,7 @@ export function AddScheduledTransactionModal({
 					<div>
 						<label
 							htmlFor="sched-notes"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Notes
 						</label>
@@ -559,7 +559,7 @@ export function AddScheduledTransactionModal({
 							rows={2}
 							value={notes}
 							onChange={(e) => setNotes(e.target.value)}
-							className="block w-full resize-none rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full resize-none rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						/>
 					</div>
 
@@ -567,7 +567,7 @@ export function AddScheduledTransactionModal({
 						<button
 							type="button"
 							onClick={handleClose}
-							className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+							className="px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover transition-colors"
 						>
 							Cancel
 						</button>

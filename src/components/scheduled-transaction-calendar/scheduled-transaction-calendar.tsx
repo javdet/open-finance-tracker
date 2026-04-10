@@ -24,7 +24,7 @@ export function getOccurrencesForMonth(
 	year: number,
 	month: number,
 ): number[] {
-	const start = new Date(tx.startDate + 'T00:00:00')
+	const start = new Date(tx.startDate.slice(0, 10) + 'T00:00:00')
 	const startYear = start.getFullYear()
 	const startMonth = start.getMonth()
 	const startDay = start.getDate()
@@ -333,38 +333,38 @@ export function ScheduledTransactionCalendar({
 					onClick={onClose}
 					aria-hidden="true"
 				/>
-				<div className="relative z-10 w-full max-w-3xl bg-white border border-gray-200 rounded-lg shadow-xl mx-4 transform transition-all duration-200 scale-100 animate-scale-in flex flex-col max-h-[90vh]">
-					<header className="flex items-center justify-between px-5 py-3 border-b border-gray-200">
-						<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+				<div className="relative z-10 w-full max-w-3xl bg-surface-card border rounded-lg shadow-xl mx-4 transform transition-all duration-200 scale-100 animate-scale-in flex flex-col max-h-[90vh]">
+					<header className="flex items-center justify-between px-5 py-3 border-b">
+						<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 							Scheduled Transactions
 						</h2>
 						<button
 							type="button"
 							onClick={onClose}
-							className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+							className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary transition-colors"
 							aria-label="Close"
 						>
 							✕
 						</button>
 					</header>
 
-					<div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+					<div className="flex items-center justify-between px-5 py-3 border-b border-subtle">
 						<button
 							type="button"
 							onClick={handlePrevMonth}
-							className="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
+							className="inline-flex h-8 w-8 items-center justify-center rounded-md text-secondary hover:bg-surface-hover transition-colors"
 							aria-label="Previous month"
 						>
 							<ChevronLeftIcon />
 						</button>
 						<div className="flex items-center gap-3">
-							<h3 className="text-base font-semibold text-gray-900">
+							<h3 className="text-base font-semibold text-primary">
 								{MONTH_NAMES[month]} {year}
 							</h3>
 							<button
 								type="button"
 								onClick={handleToday}
-								className="px-2 py-0.5 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+								className="px-2 py-0.5 text-xs font-medium text-secondary border border-strong rounded hover:bg-surface-hover transition-colors"
 							>
 								Today
 							</button>
@@ -372,7 +372,7 @@ export function ScheduledTransactionCalendar({
 						<button
 							type="button"
 							onClick={handleNextMonth}
-							className="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
+							className="inline-flex h-8 w-8 items-center justify-center rounded-md text-secondary hover:bg-surface-hover transition-colors"
 							aria-label="Next month"
 						>
 							<ChevronRightIcon />
@@ -381,15 +381,15 @@ export function ScheduledTransactionCalendar({
 
 					<div className="overflow-y-auto flex-1 px-3 pb-3 pt-1">
 						{isLoading ? (
-							<div className="flex items-center justify-center py-16 text-sm text-gray-500">
+							<div className="flex items-center justify-center py-16 text-sm text-muted">
 								Loading scheduled transactions...
 							</div>
 						) : (
-							<div className="grid grid-cols-7 gap-px bg-gray-200 rounded-md overflow-hidden border border-gray-200">
+							<div className="grid grid-cols-7 gap-px bg-surface-hover rounded-md overflow-hidden border">
 								{DAY_LABELS.map((label) => (
 									<div
 										key={label}
-										className="bg-gray-50 px-1 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider"
+										className="bg-surface px-1 py-2 text-center text-xs font-semibold text-muted uppercase tracking-wider"
 									>
 										{label}
 									</div>
@@ -406,8 +406,8 @@ export function ScheduledTransactionCalendar({
 											type="button"
 											onClick={() => handleDayClick(cell.dateStr)}
 											className={[
-												'bg-white min-h-[80px] sm:min-h-[96px] p-1.5 text-left transition-all duration-150 hover:bg-emerald-50/40 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-emerald-500',
-												!cell.isCurrentMonth && 'bg-gray-50/60',
+												'bg-surface-card min-h-[80px] sm:min-h-[96px] p-1.5 text-left transition-all duration-150 hover:bg-emerald-50/40 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-emerald-500',
+												!cell.isCurrentMonth && 'bg-surface/60',
 											]
 												.filter(Boolean)
 												.join(' ')}
@@ -418,8 +418,8 @@ export function ScheduledTransactionCalendar({
 													cell.isToday
 														? 'bg-emerald-600 text-white shadow-sm shadow-emerald-200'
 														: cell.isCurrentMonth
-															? 'text-gray-800'
-															: 'text-gray-400',
+															? 'text-primary'
+															: 'text-faint',
 												]
 													.filter(Boolean)
 													.join(' ')}
@@ -434,7 +434,7 @@ export function ScheduledTransactionCalendar({
 															'flex items-center gap-1 rounded-md border-l-[3px] px-1.5 py-[3px] text-[11px] leading-tight font-medium truncate transition-colors duration-150',
 															tx.operationType === 'income'
 																? 'border-l-sky-400 bg-sky-50 text-sky-700 hover:bg-sky-100'
-																: 'border-l-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
+																: 'border-l-emerald-500 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900',
 														].join(' ')}
 														title={`${tx.name} · ${tx.recurrencePeriod} · ${tx.currencyCode} ${Number(tx.amount).toLocaleString()}`}
 													>
@@ -460,7 +460,7 @@ export function ScheduledTransactionCalendar({
 													</div>
 												))}
 												{events.length > 3 && (
-													<div className="text-[10px] text-gray-400 font-medium px-1.5">
+													<div className="text-[10px] text-faint font-medium px-1.5">
 														+{events.length - 3} more
 													</div>
 												)}

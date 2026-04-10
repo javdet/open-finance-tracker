@@ -408,15 +408,15 @@ function EditOperationModal({
 				onClick={handleClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-3xl bg-white border border-gray-200 rounded-md shadow-xl">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-3xl bg-surface-card border rounded-md shadow-xl">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						Edit Transaction
 					</h2>
 					<button
 						type="button"
 						onClick={handleClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary"
 						aria-label="Close edit transaction window"
 					>
 						✕
@@ -426,7 +426,7 @@ function EditOperationModal({
 				<div className="px-6 py-4 space-y-4">
 					{error && (
 						<div
-							className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+							className="rounded border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-3 py-2 text-sm text-red-700 dark:text-red-300"
 							role="alert"
 						>
 							{error}
@@ -434,42 +434,42 @@ function EditOperationModal({
 					)}
 					<div className="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4 items-start">
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Amount:
 							</label>
 							<input
 								type="text"
 								value={amount}
 								onChange={(e) => setAmount(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								placeholder="e.g. 100 or 12 + 33"
 							/>
-							<p className="mt-1 text-[11px] text-gray-500">
+							<p className="mt-1 text-[11px] text-muted">
 								Example: 12 + 33 + 45
 							</p>
 						</div>
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Date:
 							</label>
 							<input
 								type="date"
 								value={date}
 								onChange={(e) => setDate(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							/>
 						</div>
 					</div>
 
 					<div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4">
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Account:
 							</label>
 							<select
 								value={accountId}
 								onChange={(e) => setAccountId(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							>
 								{accounts.map((account) => (
 									<option key={account.id} value={account.id}>
@@ -479,7 +479,7 @@ function EditOperationModal({
 							</select>
 						</div>
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Transaction Type:
 							</label>
 							<TransactionTypeSelector
@@ -489,13 +489,13 @@ function EditOperationModal({
 						</div>
 						{transactionType !== 'transfer' && (
 							<div>
-								<label className="block text-xs font-medium text-gray-700 mb-1">
+								<label className="block text-xs font-medium text-secondary mb-1">
 									Scheduled:
 								</label>
 								<select
 									value={selectedScheduledTxId}
 									onChange={(e) => handleScheduledTxChange(e.target.value)}
-									className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+									className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								>
 									<option value="">— None —</option>
 									{filteredScheduledTx.map((st) => (
@@ -510,7 +510,7 @@ function EditOperationModal({
 
 					{showCategory && (
 						<div ref={categoryDropdownRef} className="relative">
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Category:
 							</label>
 							<button
@@ -523,7 +523,7 @@ function EditOperationModal({
 										setIsCategoryOpen(true)
 									}
 								}}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
+								className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
 								aria-haspopup="listbox"
 								aria-expanded={isCategoryOpen}
 								aria-label="Select category"
@@ -535,7 +535,7 @@ function EditOperationModal({
 										: 'Category'}
 								</span>
 								<span
-									className={`shrink-0 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
+									className={`shrink-0 text-faint transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
 									aria-hidden
 								>
 									▾
@@ -544,7 +544,7 @@ function EditOperationModal({
 							{isCategoryOpen && (
 								<ul
 									role="listbox"
-									className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border border-gray-200 bg-white py-1 shadow-lg"
+									className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border bg-surface-card py-1 shadow-lg"
 									aria-label="Category options"
 								>
 									<li className="px-2 pb-1">
@@ -556,7 +556,7 @@ function EditOperationModal({
 											}
 											autoFocus
 											placeholder="Type to filter categories…"
-											className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+											className="w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 										/>
 									</li>
 								{(() => {
@@ -578,7 +578,7 @@ function EditOperationModal({
 									return (
 										<>
 											{showSections && (
-												<li className="px-2 pt-1.5 pb-0.5 text-xs font-semibold text-gray-500">
+												<li className="px-2 pt-1.5 pb-0.5 text-xs font-semibold text-muted">
 													Frequently used categories
 												</li>
 											)}
@@ -588,7 +588,7 @@ function EditOperationModal({
 															key={cat.id}
 															role="option"
 															aria-selected={categoryId === cat.id}
-															className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+															className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-surface-hover ${categoryId === cat.id ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'text-secondary'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
 															onClick={() => {
 																setCategoryId(cat.id)
 																setIsCategoryOpen(false)
@@ -600,7 +600,7 @@ function EditOperationModal({
 													))
 												: null}
 											{showSections && otherFiltered.length > 0 && (
-												<li className="px-2 pt-2 pb-0.5 text-xs font-semibold text-gray-500">
+												<li className="px-2 pt-2 pb-0.5 text-xs font-semibold text-muted">
 													Other categories
 												</li>
 											)}
@@ -610,7 +610,7 @@ function EditOperationModal({
 														key={cat.id}
 														role="option"
 														aria-selected={categoryId === cat.id}
-														className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+														className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-surface-hover ${categoryId === cat.id ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'text-secondary'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
 														onClick={() => {
 															setCategoryId(cat.id)
 															setIsCategoryOpen(false)
@@ -631,13 +631,13 @@ function EditOperationModal({
 
 					{transactionType === 'transfer' && (
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Transfer to account:
 							</label>
 							<select
 								value={transferAccountId}
 								onChange={(e) => setTransferAccountId(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							>
 								<option value="">— Select account —</option>
 								{accounts
@@ -653,44 +653,44 @@ function EditOperationModal({
 
 					{isCrossCurrency && transferAccount && (
 						<div>
-							<label className="block text-xs font-medium text-gray-700 mb-1">
+							<label className="block text-xs font-medium text-secondary mb-1">
 								Received amount ({transferAccount.currencyCode}):
 							</label>
 							<input
 								type="text"
 								value={transferAmount}
 								onChange={(e) => setTransferAmount(e.target.value)}
-								className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+								className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								placeholder={`Amount in ${transferAccount.currencyCode}`}
 							/>
-							<p className="mt-1 text-[11px] text-gray-500">
+							<p className="mt-1 text-[11px] text-muted">
 								Amount credited to {transferAccount.name} in {transferAccount.currencyCode}
 							</p>
 						</div>
 					)}
 
 					<div>
-						<label className="block text-xs font-medium text-gray-700 mb-1">
+						<label className="block text-xs font-medium text-secondary mb-1">
 							Comments:
 						</label>
 						<textarea
 							rows={3}
 							value={notes}
 							onChange={(e) => setNotes(e.target.value)}
-							className="block w-full resize-none rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full resize-none rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						/>
 					</div>
 				</div>
 
-				<footer className="flex items-center justify-between px-6 py-3 border-t border-gray-200">
-					<p className="text-[11px] text-gray-500">
+				<footer className="flex items-center justify-between px-6 py-3 border-t">
+					<p className="text-[11px] text-muted">
 						Confirm changes with Ctrl+Enter
 					</p>
 					<div className="flex items-center gap-3">
 						<button
 							type="button"
 							onClick={handleClose}
-							className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100"
+							className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-strong text-secondary hover:bg-surface-hover"
 							aria-label="Cancel transaction edit"
 						>
 							✕
@@ -763,15 +763,15 @@ function ExportCsvModal({ isOpen, onClose }: ExportCsvModalProps) {
 				onClick={onClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-xl">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-md bg-surface-card border rounded-md shadow-xl">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						Export Transactions to CSV
 					</h2>
 					<button
 						type="button"
 						onClick={onClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary"
 						aria-label="Close export modal"
 					>
 						✕
@@ -784,44 +784,44 @@ function ExportCsvModal({ isOpen, onClose }: ExportCsvModalProps) {
 							type="checkbox"
 							checked={allTime}
 							onChange={(e) => setAllTime(e.target.checked)}
-							className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+							className="h-4 w-4 rounded border-strong text-emerald-600 focus:ring-emerald-500"
 						/>
-						<span className="text-sm text-gray-700">All time</span>
+						<span className="text-sm text-secondary">All time</span>
 					</label>
 
 					{!allTime && (
 						<div className="grid grid-cols-2 gap-4">
 							<div>
-								<label className="block text-xs font-medium text-gray-700 mb-1">
+								<label className="block text-xs font-medium text-secondary mb-1">
 									From
 								</label>
 								<input
 									type="date"
 									value={fromDate}
 									onChange={(e) => setFromDate(e.target.value)}
-									className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+									className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								/>
 							</div>
 							<div>
-								<label className="block text-xs font-medium text-gray-700 mb-1">
+								<label className="block text-xs font-medium text-secondary mb-1">
 									To
 								</label>
 								<input
 									type="date"
 									value={toDate}
 									onChange={(e) => setToDate(e.target.value)}
-									className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+									className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 								/>
 							</div>
 						</div>
 					)}
 				</div>
 
-				<footer className="flex items-center justify-end gap-3 px-6 py-3 border-t border-gray-200">
+				<footer className="flex items-center justify-end gap-3 px-6 py-3 border-t">
 					<button
 						type="button"
 						onClick={onClose}
-						className="rounded px-4 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 hover:bg-gray-100 transition-colors"
+						className="rounded px-4 py-1.5 text-sm font-medium text-secondary border border-strong hover:bg-surface-hover transition-colors"
 					>
 						Cancel
 					</button>
@@ -1022,7 +1022,7 @@ export function TransactionsPage() {
 	return (
 		<div className="flex flex-col h-full">
 			<div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-				<h2 className="text-lg font-semibold text-gray-900">
+				<h2 className="text-lg font-semibold text-primary">
 					Transactions
 				</h2>
 			<div className="flex items-center gap-1">
@@ -1039,7 +1039,7 @@ export function TransactionsPage() {
 						className={`rounded px-2.5 py-1 text-sm font-medium transition-colors ${
 							dateRangeDays === days
 								? 'bg-emerald-600 text-white'
-								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+								: 'bg-surface-hover text-secondary hover:bg-surface-hover'
 						}`}
 					>
 						{days}d
@@ -1052,7 +1052,7 @@ export function TransactionsPage() {
 						className={`rounded px-2 py-1 text-sm font-medium transition-colors ${
 							dateRangeDays === 'custom'
 								? 'bg-emerald-600 text-white'
-								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+								: 'bg-surface-hover text-secondary hover:bg-surface-hover'
 						}`}
 						aria-label="Custom date range"
 						aria-expanded={isDatePickerOpen}
@@ -1073,28 +1073,28 @@ export function TransactionsPage() {
 						</svg>
 					</button>
 					{isDatePickerOpen && (
-						<div className="absolute right-0 top-full mt-2 z-30 w-64 rounded-md border border-gray-200 bg-white p-3 shadow-lg">
+						<div className="absolute right-0 top-full mt-2 z-30 w-64 rounded-md border bg-surface-card p-3 shadow-lg">
 							<div className="space-y-2">
 								<div>
-									<label className="block text-xs font-medium text-gray-700 mb-1">
+									<label className="block text-xs font-medium text-secondary mb-1">
 										From
 									</label>
 									<input
 										type="date"
 										value={customFrom}
 										onChange={(e) => setCustomFrom(e.target.value)}
-										className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+										className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 									/>
 								</div>
 								<div>
-									<label className="block text-xs font-medium text-gray-700 mb-1">
+									<label className="block text-xs font-medium text-secondary mb-1">
 										To
 									</label>
 									<input
 										type="date"
 										value={customTo}
 										onChange={(e) => setCustomTo(e.target.value)}
-										className="block w-full rounded border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+										className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 									/>
 								</div>
 								<button
@@ -1115,7 +1115,7 @@ export function TransactionsPage() {
 				<button
 					type="button"
 					onClick={() => setIsExportModalOpen(true)}
-					className="rounded px-2 py-1 text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200"
+					className="rounded px-2 py-1 text-sm font-medium transition-colors bg-surface-hover text-secondary hover:bg-surface-hover"
 					aria-label="Export transactions to CSV"
 					title="Export to CSV"
 				>
@@ -1137,14 +1137,14 @@ export function TransactionsPage() {
 			</div>
 			</div>
 			{error && (
-				<p className="mb-2 text-sm text-amber-600">{error}</p>
+				<p className="mb-2 text-sm text-warning">{error}</p>
 			)}
-			<div className="flex-1 overflow-hidden rounded-md border border-gray-200 bg-white">
+			<div className="flex-1 overflow-hidden rounded-md border bg-surface-card">
 				<div className="max-h-[calc(100vh-220px)] overflow-auto">
 					<table className="min-w-full border-collapse text-xs md:text-sm">
-						<thead className="bg-gray-50 sticky top-0 z-10">
-							<tr className="text-left text-gray-600">
-								<th className="border-b border-gray-200 px-2 py-2">
+						<thead className="bg-surface sticky top-0 z-10">
+							<tr className="text-left text-secondary">
+								<th className="border-b px-2 py-2">
 									<button
 										type="button"
 										onClick={() => handleSortHeaderClick('date')}
@@ -1167,10 +1167,10 @@ export function TransactionsPage() {
 										)}
 									</button>
 								</th>
-								<th className="border-b border-gray-200 px-2 py-2 text-right">
+								<th className="border-b px-2 py-2 text-right">
 									Amount
 								</th>
-								<th className="border-b border-gray-200 px-2 py-2">
+								<th className="border-b px-2 py-2">
 									<button
 										type="button"
 										onClick={() => handleSortHeaderClick('account')}
@@ -1193,7 +1193,7 @@ export function TransactionsPage() {
 										)}
 									</button>
 								</th>
-								<th className="border-b border-gray-200 px-2 py-2">
+								<th className="border-b px-2 py-2">
 									<button
 										type="button"
 										onClick={() => handleSortHeaderClick('category')}
@@ -1216,10 +1216,10 @@ export function TransactionsPage() {
 										)}
 									</button>
 								</th>
-								<th className="border-b border-gray-200 px-2 py-2">
+								<th className="border-b px-2 py-2">
 									Tags and Comments
 								</th>
-								<th className="border-b border-gray-200 px-2 py-2 w-24">
+								<th className="border-b px-2 py-2 w-24">
 									{/* Actions */}
 								</th>
 							</tr>
@@ -1233,23 +1233,23 @@ export function TransactionsPage() {
 										className={clsx(
 											'group',
 											index % 2 === 0
-												? 'bg-emerald-50/40'
-												: 'bg-white',
+												? 'bg-emerald-50/40 dark:bg-emerald-950/40'
+												: 'bg-surface-card',
 											isSelected && 'bg-emerald-100',
 										)}
 										onMouseEnter={() => setSelectedTransactionId(op.id)}
 										onMouseLeave={() => setSelectedTransactionId(null)}
 									>
-								<td className="border-b border-gray-100 px-2 py-1.5 align-top text-gray-800">
+								<td className="border-b border-subtle px-2 py-1.5 align-top text-primary">
 										{formatDate(op.operationTime)}
 									</td>
 									<td
-										className={`border-b border-gray-100 px-2 py-1.5 align-top text-right font-medium ${
+										className={`border-b border-subtle px-2 py-1.5 align-top text-right font-medium ${
 											op.operationType === 'income'
-												? 'text-emerald-600'
+												? 'text-positive'
 												: op.operationType === 'payment'
 													? 'text-red-500'
-													: 'text-gray-600'
+													: 'text-secondary'
 										}`}
 									>
 										{formatAmount(
@@ -1258,21 +1258,21 @@ export function TransactionsPage() {
 											op.currencyCode,
 										)}
 									</td>
-									<td className="border-b border-gray-100 px-2 py-1.5 align-top text-gray-800">
+									<td className="border-b border-subtle px-2 py-1.5 align-top text-primary">
 										{accountMap[op.accountId] ?? op.accountId}
 										{op.transferAccountId
 											? ` → ${accountMap[op.transferAccountId] ?? op.transferAccountId}`
 											: ''}
 									</td>
-									<td className="border-b border-gray-100 px-2 py-1.5 align-top text-gray-800">
+									<td className="border-b border-subtle px-2 py-1.5 align-top text-primary">
 										{op.categoryId
 											? categoryMap[op.categoryId] ?? '-'
 											: '-'}
 									</td>
-									<td className="border-b border-gray-100 px-2 py-1.5 align-top text-gray-500">
+									<td className="border-b border-subtle px-2 py-1.5 align-top text-muted">
 										{op.notes ?? ''}
 									</td>
-									<td className="border-b border-gray-100 px-2 py-1.5 align-top">
+									<td className="border-b border-subtle px-2 py-1.5 align-top">
 										<div className="flex items-center gap-1">
 											<button
 												type="button"
@@ -1309,7 +1309,7 @@ export function TransactionsPage() {
 					</table>
 				</div>
 				{total > 0 && (
-					<p className="px-2 py-1.5 text-xs text-gray-500 border-t border-gray-100">
+					<p className="px-2 py-1.5 text-xs text-muted border-t border-subtle">
 						{operations.length} of {total} transactions
 					</p>
 				)}

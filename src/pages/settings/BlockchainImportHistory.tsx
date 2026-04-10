@@ -27,11 +27,11 @@ const STATUS_CONFIG: Record<
 > = {
 	processed: {
 		label: 'Processed',
-		className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+		className: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
 	},
 	failed: {
 		label: 'Failed',
-		className: 'bg-red-50 text-red-700 border-red-200',
+		className: 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
 	},
 	skipped: {
 		label: 'Skipped',
@@ -47,7 +47,7 @@ const CHAIN_LABELS: Record<Chain, string> = {
 
 const CHAIN_COLORS: Record<Chain, string> = {
 	ethereum: 'text-indigo-600',
-	tron: 'text-red-600',
+	tron: 'text-red-600 dark:text-red-400',
 	solana: 'text-purple-600',
 }
 
@@ -141,35 +141,35 @@ export function BlockchainImportHistory() {
 				<div className="flex-1">
 					<h3
 						id="blockchain-history-heading"
-						className="text-base font-semibold text-gray-900"
+						className="text-base font-semibold text-primary"
 					>
 						Blockchain Import History
 					</h3>
-					<p className="text-sm text-gray-500 mt-0.5">
+					<p className="text-sm text-muted mt-0.5">
 						View all blockchain transactions detected by the
 						wallet poller, their processing status, and details.
 					</p>
 				</div>
 				{total > 0 && (
-					<span className="shrink-0 text-xs text-gray-400 mt-1">
+					<span className="shrink-0 text-xs text-faint mt-1">
 						{total} total
 					</span>
 				)}
 			</div>
 
 			{error && (
-				<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 mb-4">
+				<div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-3 text-sm text-red-800 mb-4">
 					{error}
 				</div>
 			)}
 
 			{isLoading && imports.length === 0 ? (
-				<p className="text-sm text-gray-500 py-4 text-center">
+				<p className="text-sm text-muted py-4 text-center">
 					Loading blockchain imports...
 				</p>
 			) : imports.length === 0 ? (
-				<div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-6 text-center">
-					<p className="text-sm text-gray-500">
+				<div className="rounded-lg border bg-surface px-4 py-6 text-center">
+					<p className="text-sm text-muted">
 						No blockchain imports yet. Transactions will appear
 						here once the poller detects transfers to your
 						watched wallets.
@@ -184,7 +184,7 @@ export function BlockchainImportHistory() {
 							return (
 								<div
 									key={imp.id}
-									className="rounded-lg border border-gray-200 bg-white overflow-hidden"
+									className="rounded-lg border bg-surface-card overflow-hidden"
 								>
 									<button
 										type="button"
@@ -195,7 +195,7 @@ export function BlockchainImportHistory() {
 													: imp.id,
 											)
 										}
-										className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+										className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-hover transition-colors"
 										aria-expanded={isExpanded}
 									>
 										<StatusBadge
@@ -205,13 +205,13 @@ export function BlockchainImportHistory() {
 											className={clsx(
 												'text-xs font-semibold uppercase',
 												CHAIN_COLORS[chain] ??
-													'text-gray-600',
+													'text-secondary',
 											)}
 										>
 											{CHAIN_LABELS[chain] ??
 												imp.chain}
 										</span>
-										<span className="text-sm font-medium text-gray-900">
+										<span className="text-sm font-medium text-primary">
 											{imp.amount}{' '}
 											{imp.tokenSymbol}
 										</span>
@@ -230,7 +230,7 @@ export function BlockchainImportHistory() {
 											{truncateHash(imp.txHash)}
 										</a>
 										<span className="flex-1" />
-										<span className="shrink-0 text-xs text-gray-400">
+										<span className="shrink-0 text-xs text-faint">
 											{formatDate(
 												imp.blockTimestamp ||
 													imp.createdAt,
@@ -238,7 +238,7 @@ export function BlockchainImportHistory() {
 										</span>
 										<svg
 											className={clsx(
-												'w-4 h-4 text-gray-400 transition-transform shrink-0',
+												'w-4 h-4 text-faint transition-transform shrink-0',
 												isExpanded &&
 													'rotate-180',
 											)}
@@ -255,49 +255,49 @@ export function BlockchainImportHistory() {
 										</svg>
 									</button>
 									{isExpanded && (
-										<div className="border-t border-gray-100 px-4 py-3 space-y-3 bg-gray-50/50">
+										<div className="border-t border-subtle px-4 py-3 space-y-3 bg-surface/50">
 											<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
 												<div>
-													<span className="text-gray-500 block">
+													<span className="text-muted block">
 														From
 													</span>
-													<span className="text-gray-800 font-medium font-mono break-all">
+													<span className="text-primary font-medium font-mono break-all">
 														{truncateAddress(
 															imp.fromAddress,
 														)}
 													</span>
 												</div>
 												<div>
-													<span className="text-gray-500 block">
+													<span className="text-muted block">
 														To
 													</span>
-													<span className="text-gray-800 font-medium font-mono break-all">
+													<span className="text-primary font-medium font-mono break-all">
 														{truncateAddress(
 															imp.toAddress,
 														)}
 													</span>
 												</div>
 												<div>
-													<span className="text-gray-500 block">
+													<span className="text-muted block">
 														Block
 													</span>
-													<span className="text-gray-800 font-medium">
+													<span className="text-primary font-medium">
 														{imp.blockNumber?.toLocaleString() ??
 															'—'}
 													</span>
 												</div>
 												<div>
-													<span className="text-gray-500 block">
+													<span className="text-muted block">
 														Operation ID
 													</span>
-													<span className="text-gray-800 font-medium">
+													<span className="text-primary font-medium">
 														{imp.operationId ??
 															'—'}
 													</span>
 												</div>
 											</div>
 											<div>
-												<span className="text-xs text-gray-500 block mb-1">
+												<span className="text-xs text-muted block mb-1">
 													Full TX Hash
 												</span>
 												<a
@@ -313,21 +313,21 @@ export function BlockchainImportHistory() {
 												</a>
 											</div>
 											{imp.errorMessage && (
-												<div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-													<p className="text-xs font-medium text-red-700">
+												<div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-3 py-2">
+													<p className="text-xs font-medium text-red-700 dark:text-red-300">
 														Error
 													</p>
-													<p className="text-xs text-red-600 mt-0.5">
+													<p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
 														{imp.errorMessage}
 													</p>
 												</div>
 											)}
 											{imp.rawData ? (
 												<div>
-													<p className="text-xs font-medium text-gray-500 mb-1">
+													<p className="text-xs font-medium text-muted mb-1">
 														Raw Data
 													</p>
-													<pre className="text-xs text-gray-700 font-mono whitespace-pre-wrap break-all bg-white rounded-md border border-gray-200 px-3 py-2 max-h-48 overflow-y-auto">
+													<pre className="text-xs text-secondary font-mono whitespace-pre-wrap break-all bg-surface-card rounded-md border px-3 py-2 max-h-48 overflow-y-auto">
 														{JSON.stringify(
 															imp.rawData,
 															null,
@@ -351,11 +351,11 @@ export function BlockchainImportHistory() {
 									setPage((p) => Math.max(0, p - 1))
 								}
 								disabled={page === 0}
-								className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+								className="rounded-lg border border-strong px-3 py-1.5 text-xs font-medium text-secondary hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 							>
 								Previous
 							</button>
-							<span className="text-xs text-gray-500">
+							<span className="text-xs text-muted">
 								Page {page + 1} of {totalPages}
 							</span>
 							<button
@@ -366,7 +366,7 @@ export function BlockchainImportHistory() {
 									)
 								}
 								disabled={page >= totalPages - 1}
-								className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+								className="rounded-lg border border-strong px-3 py-1.5 text-xs font-medium text-secondary hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 							>
 								Next
 							</button>

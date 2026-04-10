@@ -46,14 +46,14 @@ export function ChangeCredentialsSection() {
 
 	return (
 		<div>
-			<h3 className="text-lg font-medium text-gray-900 mb-2">
+			<h3 className="text-lg font-medium text-primary mb-2">
 				Change login and password
 			</h3>
 			<form onSubmit={handleSubmit} className="space-y-4 max-w-md">
 				<div>
 					<label
 						htmlFor="current-password"
-						className="block text-sm font-medium text-gray-700 mb-1"
+						className="block text-sm font-medium text-secondary mb-1"
 					>
 						Current password
 					</label>
@@ -63,14 +63,14 @@ export function ChangeCredentialsSection() {
 						autoComplete="current-password"
 						value={currentPassword}
 						onChange={(e) => setCurrentPassword(e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+						className="w-full px-3 py-2 border border-strong rounded-md shadow-sm bg-surface-card text-primary focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
 						required
 					/>
 				</div>
 				<div>
 					<label
 						htmlFor="new-login"
-						className="block text-sm font-medium text-gray-700 mb-1"
+						className="block text-sm font-medium text-secondary mb-1"
 					>
 						New login (email)
 					</label>
@@ -80,14 +80,14 @@ export function ChangeCredentialsSection() {
 						autoComplete="username"
 						value={newLogin}
 						onChange={(e) => setNewLogin(e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+						className="w-full px-3 py-2 border border-strong rounded-md shadow-sm bg-surface-card text-primary focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
 						placeholder={user?.login}
 					/>
 				</div>
 				<div>
 					<label
 						htmlFor="new-password"
-						className="block text-sm font-medium text-gray-700 mb-1"
+						className="block text-sm font-medium text-secondary mb-1"
 					>
 						New password
 					</label>
@@ -97,13 +97,13 @@ export function ChangeCredentialsSection() {
 						autoComplete="new-password"
 						value={newPassword}
 						onChange={(e) => setNewPassword(e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+						className="w-full px-3 py-2 border border-strong rounded-md shadow-sm bg-surface-card text-primary focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
 					/>
 				</div>
 				<div>
 					<label
 						htmlFor="confirm-password"
-						className="block text-sm font-medium text-gray-700 mb-1"
+						className="block text-sm font-medium text-secondary mb-1"
 					>
 						Confirm new password
 					</label>
@@ -113,10 +113,10 @@ export function ChangeCredentialsSection() {
 						autoComplete="new-password"
 						value={confirmPassword}
 						onChange={(e) => setConfirmPassword(e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+						className="w-full px-3 py-2 border border-strong rounded-md shadow-sm bg-surface-card text-primary focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
 					/>
 				</div>
-				{error && <p className="text-sm text-red-600">{error}</p>}
+				{error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 				{success && (
 					<p className="text-sm text-emerald-600">
 						Credentials updated successfully.

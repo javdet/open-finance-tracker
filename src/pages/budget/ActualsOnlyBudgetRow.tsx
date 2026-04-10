@@ -70,9 +70,9 @@ export function ActualsOnlyBudgetRow({
 
 	if (isEditing) {
 		return (
-			<tr className="border-b border-gray-100 hover:bg-gray-50 bg-amber-50/50">
+			<tr className="border-b border-subtle hover:bg-surface-hover bg-amber-50/50">
 				<td
-					className="px-4 py-3 text-gray-800 truncate"
+					className="px-4 py-3 text-primary truncate"
 					title={row.categoryName}
 				>
 					{row.categoryName}
@@ -91,23 +91,23 @@ export function ActualsOnlyBudgetRow({
 								handleCancel()
 							}
 						}}
-						className="w-24 text-right rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+						className="w-24 text-right rounded border border-strong bg-surface-card text-primary px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						autoFocus
 						disabled={isSaving}
 						placeholder="0"
 					/>
 				</td>
-				<td className="px-4 py-3 text-right text-gray-800">
+				<td className="px-4 py-3 text-right text-primary">
 					{formatMoney(row.actualAmount, currencyCode)}
 				</td>
 				<td
 					className={clsx(
 						'px-4 py-3 text-right font-medium',
 						difference > 0
-							? 'text-emerald-600'
+							? 'text-positive'
 							: difference < 0
-								? 'text-red-600'
-								: 'text-gray-600',
+								? 'text-negative'
+								: 'text-secondary',
 					)}
 				>
 					{formatMoney(difference, currencyCode)}
@@ -125,7 +125,7 @@ export function ActualsOnlyBudgetRow({
 						type="button"
 						onClick={handleCancel}
 						disabled={isSaving}
-						className="text-sm font-medium text-gray-600 hover:text-gray-700 disabled:opacity-50"
+						className="text-sm font-medium text-secondary hover:text-secondary disabled:opacity-50"
 					>
 						Cancel
 					</button>
@@ -135,14 +135,14 @@ export function ActualsOnlyBudgetRow({
 	}
 
 	return (
-		<tr className="border-b border-gray-100 hover:bg-gray-50">
+		<tr className="border-b border-subtle hover:bg-surface-hover">
 			<td
-				className="px-4 py-3 text-gray-800 truncate"
+				className="px-4 py-3 text-primary truncate"
 				title={row.categoryName}
 			>
 				{row.categoryName}
 			</td>
-			<td className="px-4 py-3 text-right text-gray-500">
+			<td className="px-4 py-3 text-right text-muted">
 				<button
 					type="button"
 					onClick={() => setIsEditing(true)}
@@ -151,17 +151,17 @@ export function ActualsOnlyBudgetRow({
 					{formatMoney(0, currencyCode)}
 				</button>
 			</td>
-			<td className="px-4 py-3 text-right text-gray-800">
+			<td className="px-4 py-3 text-right text-primary">
 				{formatMoney(row.actualAmount, currencyCode)}
 			</td>
 			<td
 				className={clsx(
 					'px-4 py-3 text-right font-medium',
 					difference > 0
-						? 'text-emerald-600'
+						? 'text-positive'
 						: difference < 0
-							? 'text-red-600'
-							: 'text-gray-600',
+							? 'text-negative'
+							: 'text-secondary',
 				)}
 			>
 				{formatMoney(difference, currencyCode)}

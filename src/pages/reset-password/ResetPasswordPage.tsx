@@ -14,13 +14,13 @@ export function ResetPasswordPage() {
 
 	if (!token) {
 		return (
-			<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+			<div className="min-h-screen flex items-center justify-center bg-surface px-4">
 				<div className="w-full max-w-sm">
-					<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 text-center">
-						<h1 className="text-xl font-semibold text-gray-900 mb-4">
+					<div className="bg-surface-card rounded-lg border shadow-sm p-6 text-center">
+						<h1 className="text-xl font-semibold text-primary mb-4">
 							Invalid Reset Link
 						</h1>
-						<p className="text-sm text-gray-500 mb-4">
+						<p className="text-sm text-muted mb-4">
 							This password reset link is invalid or has expired.
 						</p>
 						<Link
@@ -69,13 +69,13 @@ export function ResetPasswordPage() {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-surface px-4">
 			<div className="w-full max-w-sm">
-				<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-					<h1 className="text-xl font-semibold text-gray-900 text-center mb-2">
+				<div className="bg-surface-card rounded-lg border shadow-sm p-6">
+					<h1 className="text-xl font-semibold text-primary text-center mb-2">
 						Set New Password
 					</h1>
-					<p className="text-sm text-gray-500 text-center mb-6">
+					<p className="text-sm text-muted text-center mb-6">
 						Enter your new password below.
 					</p>
 
@@ -83,7 +83,7 @@ export function ResetPasswordPage() {
 						<div>
 							<label
 								htmlFor="newPassword"
-								className="block text-sm font-medium text-gray-700 mb-1"
+								className="block text-sm font-medium text-secondary mb-1"
 							>
 								New password
 							</label>
@@ -93,11 +93,11 @@ export function ResetPasswordPage() {
 								autoComplete="new-password"
 								value={newPassword}
 								onChange={(e) => setNewPassword(e.target.value)}
-								className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+								className="w-full px-3 py-2 border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-surface-card text-primary"
 								minLength={8}
 								required
 							/>
-							<p className="mt-1 text-xs text-gray-400">
+							<p className="mt-1 text-xs text-faint">
 								At least 8 characters
 							</p>
 						</div>
@@ -105,7 +105,7 @@ export function ResetPasswordPage() {
 						<div>
 							<label
 								htmlFor="confirmPassword"
-								className="block text-sm font-medium text-gray-700 mb-1"
+								className="block text-sm font-medium text-secondary mb-1"
 							>
 								Confirm password
 							</label>
@@ -117,14 +117,14 @@ export function ResetPasswordPage() {
 								onChange={(e) =>
 									setConfirmPassword(e.target.value)
 								}
-								className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+								className="w-full px-3 py-2 border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-surface-card text-primary"
 								minLength={8}
 								required
 							/>
 						</div>
 
 						{error && (
-							<p className="text-sm text-red-600">{error}</p>
+							<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 						)}
 
 						<button

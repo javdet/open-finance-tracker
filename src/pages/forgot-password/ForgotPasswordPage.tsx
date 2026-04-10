@@ -25,20 +25,20 @@ export function ForgotPasswordPage() {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-surface px-4">
 			<div className="w-full max-w-sm">
-				<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-					<h1 className="text-xl font-semibold text-gray-900 text-center mb-2">
+				<div className="bg-surface-card rounded-lg border shadow-sm p-6">
+					<h1 className="text-xl font-semibold text-primary text-center mb-2">
 						Reset Password
 					</h1>
-					<p className="text-sm text-gray-500 text-center mb-6">
+					<p className="text-sm text-muted text-center mb-6">
 						Enter your email and we&apos;ll send you a reset link.
 					</p>
 
 					{submitted ? (
 						<div className="space-y-4">
-							<div className="rounded-md bg-emerald-50 border border-emerald-200 p-4">
-								<p className="text-sm text-emerald-800">
+							<div className="rounded-md bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 p-4">
+								<p className="text-sm text-emerald-800 dark:text-emerald-300">
 									If an account with that email exists, a
 									password reset link has been sent. Please
 									check your inbox.
@@ -56,7 +56,7 @@ export function ForgotPasswordPage() {
 							<div>
 								<label
 									htmlFor="email"
-									className="block text-sm font-medium text-gray-700 mb-1"
+									className="block text-sm font-medium text-secondary mb-1"
 								>
 									Email
 								</label>
@@ -66,14 +66,14 @@ export function ForgotPasswordPage() {
 									autoComplete="email"
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
-									className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+									className="w-full px-3 py-2 border border-strong rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-surface-card text-primary"
 									placeholder="admin@example.com"
 									required
 								/>
 							</div>
 
 							{error && (
-								<p className="text-sm text-red-600">{error}</p>
+								<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 							)}
 
 							<button

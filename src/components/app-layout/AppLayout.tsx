@@ -113,28 +113,26 @@ function AssetsIcon() {
 			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden
 		>
-			{/* Large green upward arrow */}
 			<path
 				d="M7 4l5-3 5 3v10l-5 3-5-3V4z"
 				fill="none"
 			/>
 			<path
 				d="M8 16l4-12 4 12"
-				stroke="#16a34a"
+				className="stroke-positive"
 				strokeWidth={2.5}
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M9.5 12h5"
-				stroke="#16a34a"
+				className="stroke-positive"
 				strokeWidth={2}
 				strokeLinecap="round"
 			/>
-			{/* Small red down arrow */}
 			<path
 				d="M19 14v5m0 0l-2-2m2 2l2-2"
-				stroke="#dc2626"
+				className="stroke-negative"
 				strokeWidth={1.5}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -152,18 +150,16 @@ function DebtsIcon() {
 			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden
 		>
-			{/* Large red downward arrow */}
 			<path
 				d="M12 3v14m0 0l-5-5m5 5l5-5"
-				stroke="#dc2626"
+				className="stroke-negative"
 				strokeWidth={2.5}
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
-			{/* Small green up arrow */}
 			<path
 				d="M19 10V5m0 0l-2 2m2-2l2 2"
-				stroke="#16a34a"
+				className="stroke-positive"
 				strokeWidth={1.5}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -324,15 +320,15 @@ export function AppLayout() {
 	const displayedTotal = showDebts ? totalDebtsBase : totalAssetsBase
 
 	return (
-		<div className="min-h-screen flex flex-col bg-gray-50">
-			<header className="bg-green-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-				<h1 className="text-xl font-semibold text-gray-900">
+		<div className="min-h-screen flex flex-col bg-surface">
+			<header className="bg-surface-alt border-b px-4 py-3 flex items-center justify-between">
+				<h1 className="text-xl font-semibold text-primary">
 					Finance Tracker
 				</h1>
 				<UserMenu />
 			</header>
 			<nav
-				className="bg-white border-b border-gray-200 px-2 py-2 flex items-center gap-1 overflow-x-auto"
+				className="bg-surface-card border-b px-2 py-2 flex items-center gap-1 overflow-x-auto"
 				aria-label="Main navigation"
 			>
 				<button
@@ -340,14 +336,16 @@ export function AppLayout() {
 					onClick={() => setIsAddOperationOpen(true)}
 					className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-emerald-600 bg-emerald-600 text-lg leading-none text-white hover:bg-emerald-700 hover:border-emerald-700"
 					aria-label="Add Transaction"
+					title="Add Transaction"
 				>
 					+
 				</button>
 				<button
 					type="button"
 					onClick={() => setIsAddRecurringOpen(true)}
-					className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400"
-					aria-label="Add recurring expense to calendar"
+					className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-strong bg-surface-card text-secondary hover:bg-surface-hover"
+					aria-label="Add Scheduled Transaction"
+					title="Add Scheduled Transaction"
 				>
 					<CalendarPlusIcon />
 				</button>
@@ -359,8 +357,8 @@ export function AppLayout() {
 							clsx(
 								'px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap',
 								isActive
-									? 'bg-gray-900 text-white'
-									: 'text-gray-600 hover:bg-gray-100',
+									? 'bg-nav-active text-white'
+									: 'text-secondary hover:bg-surface-hover',
 							)
 						}
 					>
@@ -369,15 +367,15 @@ export function AppLayout() {
 				))}
 			</nav>
 			<div className="flex-1 flex flex-col md:flex-row">
-				<aside className="w-full md:w-72 border-b md:border-b-0 md:border-r border-gray-200 bg-green-50">
+				<aside className="w-full md:w-72 border-b md:border-b-0 md:border-r bg-surface-alt">
 					<div className="p-4">
-						<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+						<div className="bg-surface-card rounded-lg border shadow-sm p-4">
 							<div className="flex items-baseline justify-between gap-2">
 								<div>
-									<p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+									<p className="text-xs font-semibold uppercase tracking-wide text-muted">
 										{showDebts ? 'Debts' : 'Money'}
 									</p>
-									<p className="text-xs text-gray-500">
+									<p className="text-xs text-muted">
 										{showDebts
 											? 'Loans & credit'
 											: 'Accounts & balance'}
@@ -389,7 +387,7 @@ export function AppLayout() {
 										onClick={() =>
 											setShowDebts((prev) => !prev)
 										}
-										className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400"
+										className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded border border-strong bg-surface-card hover:bg-surface-hover"
 										aria-label={
 											showDebts
 												? 'Switch to assets'
@@ -410,7 +408,7 @@ export function AppLayout() {
 									<button
 										type="button"
 										onClick={() => setIsAddAccountOpen(true)}
-										className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded border border-emerald-600 bg-white text-sm font-medium text-emerald-600 hover:bg-emerald-50 hover:border-emerald-700"
+										className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded border border-emerald-600 bg-surface-card text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:border-emerald-700"
 										aria-label="Add account"
 									>
 										+
@@ -419,10 +417,10 @@ export function AppLayout() {
 										className={clsx(
 											'text-base font-semibold',
 											showDebts
-												? 'text-red-600'
+												? 'text-negative'
 												: displayedTotal < 0
-													? 'text-red-600'
-													: 'text-emerald-600',
+													? 'text-negative'
+													: 'text-positive',
 										)}
 									>
 										{formatCurrency(
@@ -433,12 +431,12 @@ export function AppLayout() {
 								</div>
 							</div>
 							{accountsError && (
-								<p className="mt-2 text-xs text-amber-600">
+								<p className="mt-2 text-xs text-warning">
 									{accountsError}
 								</p>
 							)}
 							{fxError && (
-								<p className="mt-1 text-xs text-amber-600">{fxError}</p>
+								<p className="mt-1 text-xs text-warning">{fxError}</p>
 							)}
 							<ul className="mt-4 space-y-2">
 								{displayedAccounts.map((account) => {
@@ -457,10 +455,10 @@ export function AppLayout() {
 											}
 										>
 											<div className="flex flex-col min-w-0 flex-1">
-												<span className="font-medium text-gray-900 truncate">
+												<span className="font-medium text-primary truncate">
 													{account.name}
 												</span>
-												<span className="text-xs text-gray-500">
+												<span className="text-xs text-muted">
 													{getAccountTypeLabel(account.accountType)}
 												</span>
 											</div>
@@ -469,8 +467,8 @@ export function AppLayout() {
 													className={clsx(
 														'font-medium',
 														accountBalance(account) < 0
-															? 'text-red-600'
-															: 'text-emerald-600',
+															? 'text-negative'
+															: 'text-positive',
 													)}
 												>
 													{formatCurrency(
@@ -484,7 +482,7 @@ export function AppLayout() {
 														handleEdit(account)
 													}
 													className={clsx(
-														'inline-flex items-center justify-center w-6 h-6 rounded border border-emerald-600 text-emerald-600 transition-opacity hover:bg-emerald-50',
+														'inline-flex items-center justify-center w-6 h-6 rounded border border-emerald-600 text-emerald-600 transition-opacity hover:bg-emerald-50 dark:hover:bg-emerald-950',
 														isSelected
 															? 'opacity-100'
 															: 'opacity-0 group-hover:opacity-100',

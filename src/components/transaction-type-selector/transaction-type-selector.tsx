@@ -15,16 +15,16 @@ export function TransactionTypeSelector({
 }: TransactionTypeSelectorProps) {
 	const incomeClass =
 		value === 'income'
-			? `${baseBtn} border-green-500 bg-green-50 text-green-600`
-			: `${baseBtn} border-gray-200 bg-white text-gray-400 hover:border-green-300 hover:bg-green-50/50`
+			? `${baseBtn} border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400`
+			: `${baseBtn} bg-surface-card text-faint hover:border-green-300 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-950/50`
 	const expenseClass =
 		value === 'expense'
-			? `${baseBtn} border-red-500 bg-red-50 text-red-600`
-			: `${baseBtn} border-gray-200 bg-white text-gray-400 hover:border-red-300 hover:bg-red-50/50`
+			? `${baseBtn} border-red-500 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400`
+			: `${baseBtn} bg-surface-card text-faint hover:border-red-300 hover:bg-red-50/50`
 	const transferClass =
 		value === 'transfer'
 			? `${baseBtn} border-blue-500 bg-blue-50 text-blue-600`
-			: `${baseBtn} border-gray-200 bg-white text-gray-400 hover:border-blue-300 hover:bg-blue-50/50`
+			: `${baseBtn} bg-surface-card text-faint hover:border-blue-300 hover:bg-blue-50/50`
 
 	return (
 		<div className="flex items-center gap-1">

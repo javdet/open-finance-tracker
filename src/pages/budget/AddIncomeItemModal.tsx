@@ -136,15 +136,15 @@ export function AddIncomeItemModal({
 				onClick={handleClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-xl mx-4 transform transition-all duration-200 scale-100 animate-scale-in">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-md bg-surface-card border rounded-md shadow-xl mx-4 transform transition-all duration-200 scale-100 animate-scale-in">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						Add Income
 					</h2>
 					<button
 						type="button"
 						onClick={handleClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary transition-colors"
 						aria-label="Close"
 					>
 						✕
@@ -152,12 +152,12 @@ export function AddIncomeItemModal({
 				</header>
 				<form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
 					{error && (
-						<p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded animate-fade-in">
+						<p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 px-3 py-2 rounded animate-fade-in">
 							{error}
 						</p>
 					)}
 					<div ref={categoryDropdownRef} className="relative">
-						<label className="block text-xs font-medium text-gray-700 mb-1">
+						<label className="block text-xs font-medium text-secondary mb-1">
 							Category <span className="text-red-500">*</span>
 						</label>
 						<button
@@ -170,7 +170,7 @@ export function AddIncomeItemModal({
 									setIsCategoryOpen(true)
 								}
 							}}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm text-left focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 flex items-center justify-between gap-2"
 							aria-haspopup="listbox"
 							aria-expanded={isCategoryOpen}
 							aria-label="Select category"
@@ -182,7 +182,7 @@ export function AddIncomeItemModal({
 									: 'Category'}
 							</span>
 							<span
-								className={`shrink-0 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
+								className={`shrink-0 text-faint transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`}
 								aria-hidden
 							>
 								▾
@@ -191,7 +191,7 @@ export function AddIncomeItemModal({
 						{isCategoryOpen && (
 							<ul
 								role="listbox"
-								className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border border-gray-200 bg-white py-1 shadow-lg"
+								className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded border bg-surface-card py-1 shadow-lg"
 								aria-label="Category options"
 							>
 								<li className="px-2 pb-1">
@@ -203,7 +203,7 @@ export function AddIncomeItemModal({
 										}
 										autoFocus
 										placeholder="Type to filter categories…"
-										className="w-full rounded border border-gray-300 px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+										className="w-full rounded border border-strong bg-surface-card text-primary px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 									/>
 								</li>
 								{categories
@@ -227,7 +227,7 @@ export function AddIncomeItemModal({
 											aria-selected={
 												categoryId === cat.id
 											}
-											className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-gray-100 ${categoryId === cat.id ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
+											className={`cursor-pointer px-2 py-1.5 text-sm hover:bg-surface-hover ${categoryId === cat.id ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'text-secondary'} ${cat.parentCategoryId ? 'pl-4 font-normal' : 'font-semibold'}`}
 											onClick={() => {
 												setCategoryId(cat.id)
 												setIsCategoryOpen(false)
@@ -243,7 +243,7 @@ export function AddIncomeItemModal({
 					<div>
 						<label
 							htmlFor="planned-amount"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Planned Amount ($) <span className="text-red-500">*</span>
 						</label>
@@ -255,14 +255,14 @@ export function AddIncomeItemModal({
 							value={plannedAmount}
 							onChange={(e) => setPlannedAmount(e.target.value)}
 							placeholder="0.00"
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card text-primary px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						/>
 					</div>
 					<div className="flex gap-2 justify-end pt-2">
 						<button
 							type="button"
 							onClick={handleClose}
-							className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+							className="px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover transition-colors"
 						>
 							Cancel
 						</button>

@@ -84,7 +84,7 @@ export function TemplateSection({
 
 	if (isLoading) {
 		return (
-			<div className="text-sm text-gray-500 py-4">
+			<div className="text-sm text-muted py-4">
 				Loading {direction} data...
 			</div>
 		)
@@ -104,7 +104,7 @@ export function TemplateSection({
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h3 className="text-base font-semibold text-gray-900">{title}</h3>
+				<h3 className="text-base font-semibold text-primary">{title}</h3>
 				<button
 					type="button"
 					onClick={() => setIsAddModalOpen(true)}
@@ -113,7 +113,7 @@ export function TemplateSection({
 					{addLabel}
 				</button>
 			</div>
-			<div className="rounded-md border border-gray-200 bg-white overflow-hidden">
+			<div className="rounded-md border bg-surface-card overflow-hidden">
 				<div className="overflow-x-auto">
 					<table className="w-full table-fixed border-collapse text-sm">
 						<colgroup>
@@ -121,15 +121,15 @@ export function TemplateSection({
 							<col className="w-[25%]" />
 							<col className="w-[48px]" />
 						</colgroup>
-						<thead className="bg-gray-50">
-							<tr className="text-left text-gray-600">
-								<th className="border-b border-gray-200 px-4 py-2 font-medium">
+						<thead className="bg-surface">
+							<tr className="text-left text-secondary">
+								<th className="border-b px-4 py-2 font-medium">
 									Category
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2 text-right font-medium">
+								<th className="border-b px-4 py-2 text-right font-medium">
 									Planned
 								</th>
-								<th className="border-b border-gray-200 px-4 py-2"></th>
+								<th className="border-b px-4 py-2"></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -137,7 +137,7 @@ export function TemplateSection({
 								<tr>
 									<td
 										colSpan={3}
-										className="px-4 py-8 text-center text-gray-500"
+										className="px-4 py-8 text-center text-muted"
 									>
 										{emptyMessage}
 									</td>
@@ -163,10 +163,10 @@ export function TemplateSection({
 							)}
 						</tbody>
 						{filteredItems.length > 0 && (
-							<tfoot className="bg-gray-50 font-medium">
-								<tr className="border-t-2 border-gray-200">
-									<td className="px-4 py-2 text-gray-900">Total</td>
-									<td className="px-4 py-2 text-right text-gray-900">
+							<tfoot className="bg-surface font-medium">
+								<tr className="border-t-2">
+									<td className="px-4 py-2 text-primary">Total</td>
+									<td className="px-4 py-2 text-right text-primary">
 										{formatMoney(totalPlanned, currencyCode)}
 									</td>
 									<td className="px-4 py-2"></td>

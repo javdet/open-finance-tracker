@@ -119,8 +119,8 @@ export function BudgetItemRow({
 	}
 
 	return (
-		<tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors animate-fade-in-slide-up">
-			<td className="px-4 py-3 text-gray-800 truncate" title={category.name}>
+		<tr className="border-b border-subtle hover:bg-surface-hover transition-colors animate-fade-in-slide-up">
+			<td className="px-4 py-3 text-primary truncate" title={category.name}>
 				<span>{category.name}</span>
 				{minPlanned > 0 && (
 					<span
@@ -131,7 +131,7 @@ export function BudgetItemRow({
 					</span>
 				)}
 			</td>
-			<td className="px-4 py-3 text-right text-gray-800">
+			<td className="px-4 py-3 text-right text-primary">
 				{isEditing ? (
 					<div className="inline-flex flex-col items-end gap-1">
 						<input
@@ -154,16 +154,16 @@ export function BudgetItemRow({
 								}
 							}}
 							className={clsx(
-								'w-24 text-right rounded border px-2 py-1 text-sm focus:outline-none focus:ring-1',
+								'w-24 text-right rounded border bg-surface-card text-primary px-2 py-1 text-sm focus:outline-none focus:ring-1',
 								minError
 									? 'border-red-400 focus:ring-red-500 focus:border-red-500'
-									: 'border-gray-300 focus:ring-emerald-500 focus:border-emerald-500',
+									: 'border-strong focus:ring-emerald-500 focus:border-emerald-500',
 							)}
 							autoFocus
 							disabled={isSaving}
 						/>
 						{minError && (
-							<span className="text-[10px] text-red-600 max-w-[180px] text-right leading-tight">
+							<span className="text-[10px] text-red-600 dark:text-red-400 max-w-[180px] text-right leading-tight">
 								{minError}
 							</span>
 						)}
@@ -178,17 +178,17 @@ export function BudgetItemRow({
 					</button>
 				)}
 			</td>
-			<td className="px-4 py-3 text-right text-gray-800">
+			<td className="px-4 py-3 text-right text-primary">
 				{formatMoney(actualAmount, currencyCode)}
 			</td>
 			<td
 				className={clsx(
 					'px-4 py-3 text-right font-medium',
 					difference > 0
-						? 'text-emerald-600'
+						? 'text-positive'
 						: difference < 0
-							? 'text-red-600'
-							: 'text-gray-600',
+							? 'text-negative'
+							: 'text-secondary',
 				)}
 			>
 				{formatMoney(difference, currencyCode)}
@@ -198,7 +198,7 @@ export function BudgetItemRow({
 					type="button"
 					onClick={handleResetPlan}
 					disabled={isResetting}
-					className="text-gray-400 hover:text-amber-600 transition-colors disabled:opacity-50"
+					className="text-faint hover:text-warning transition-colors disabled:opacity-50"
 					aria-label="Reset plan"
 					title="Reset plan"
 				>

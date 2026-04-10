@@ -43,8 +43,8 @@ function CopyButton({ text }: { text: string }) {
 			className={clsx(
 				'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-colors',
 				copied
-					? 'text-emerald-700 bg-emerald-50'
-					: 'text-gray-500 hover:text-gray-700 hover:bg-gray-100',
+					? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950'
+					: 'text-muted hover:text-secondary hover:bg-surface-hover',
 			)}
 			aria-label="Copy to clipboard"
 		>
@@ -127,17 +127,17 @@ export function ApiKeysSection() {
 	return (
 		<section aria-labelledby="api-keys-heading">
 			<div className="flex items-start gap-3 mb-4">
-				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600">
 					<KeyIcon className="w-5 h-5" />
 				</div>
 				<div>
 					<h3
 						id="api-keys-heading"
-						className="text-base font-semibold text-gray-900"
+						className="text-base font-semibold text-primary"
 					>
 						API Keys
 					</h3>
-					<p className="text-sm text-gray-500 mt-0.5">
+					<p className="text-sm text-muted mt-0.5">
 						Generate API keys for the iOS Shortcut or other
 						integrations to authenticate with the SMS webhook.
 					</p>
@@ -145,7 +145,7 @@ export function ApiKeysSection() {
 			</div>
 
 			{error && (
-				<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 mb-4">
+				<div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-3 text-sm text-red-800 mb-4">
 					{error}
 				</div>
 			)}
@@ -158,8 +158,8 @@ export function ApiKeysSection() {
 					<p className="text-xs text-amber-700 mb-2">
 						This key will only be shown once. Store it securely.
 					</p>
-					<div className="flex items-center gap-2 bg-white rounded-md border border-amber-200 px-3 py-2">
-						<code className="flex-1 text-xs font-mono text-gray-800 break-all select-all">
+					<div className="flex items-center gap-2 bg-surface-card rounded-md border border-amber-200 px-3 py-2">
+						<code className="flex-1 text-xs font-mono text-primary break-all select-all">
 							{newKey.rawKey}
 						</code>
 						<CopyButton text={newKey.rawKey} />
@@ -183,7 +183,7 @@ export function ApiKeysSection() {
 					value={newLabel}
 					onChange={(e) => setNewLabel(e.target.value)}
 					placeholder="Key label (e.g. iPhone Shortcut)"
-					className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+					className="flex-1 rounded-lg border border-strong bg-surface-card px-3 py-2 text-sm text-primary placeholder:text-faint focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
 					maxLength={100}
 				/>
 				<button
@@ -196,27 +196,27 @@ export function ApiKeysSection() {
 			</form>
 
 			{isLoading ? (
-				<p className="text-sm text-gray-500 py-4 text-center">
+				<p className="text-sm text-muted py-4 text-center">
 					Loading API keys...
 				</p>
 			) : keys.length === 0 ? (
-				<div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-6 text-center">
-					<p className="text-sm text-gray-500">
+				<div className="rounded-lg border bg-surface px-4 py-6 text-center">
+					<p className="text-sm text-muted">
 						No API keys yet. Generate one to get started.
 					</p>
 				</div>
 			) : (
-				<div className="overflow-hidden rounded-lg border border-gray-200">
+				<div className="overflow-hidden rounded-lg border">
 					<table className="min-w-full text-sm">
-						<thead className="bg-gray-50">
+						<thead className="bg-surface">
 							<tr>
-								<th className="px-4 py-2 text-left font-medium text-gray-600">
+								<th className="px-4 py-2 text-left font-medium text-secondary">
 									Label
 								</th>
-								<th className="px-4 py-2 text-left font-medium text-gray-600">
+								<th className="px-4 py-2 text-left font-medium text-secondary">
 									Created
 								</th>
-								<th className="px-4 py-2 text-right font-medium text-gray-600">
+								<th className="px-4 py-2 text-right font-medium text-secondary">
 									Actions
 								</th>
 							</tr>
@@ -225,12 +225,12 @@ export function ApiKeysSection() {
 							{keys.map((key) => (
 								<tr
 									key={key.id}
-									className="border-t border-gray-200"
+									className="border-t"
 								>
-									<td className="px-4 py-3 text-gray-900 font-medium">
+									<td className="px-4 py-3 text-primary font-medium">
 										{key.label}
 									</td>
-									<td className="px-4 py-3 text-gray-500">
+									<td className="px-4 py-3 text-muted">
 										{formatDate(key.createdAt)}
 									</td>
 									<td className="px-4 py-3 text-right">
@@ -238,7 +238,7 @@ export function ApiKeysSection() {
 											type="button"
 											onClick={() => handleRevoke(key.id)}
 											disabled={revokingId === key.id}
-											className="text-xs font-medium text-red-600 hover:text-red-800 disabled:opacity-50 transition-colors"
+											className="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-800 disabled:opacity-50 transition-colors"
 										>
 											{revokingId === key.id
 												? 'Revoking...'

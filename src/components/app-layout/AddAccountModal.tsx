@@ -134,25 +134,25 @@ function TrackingFields({
 	readOnlyChainAddress?: boolean
 }) {
 	return (
-		<div className="border border-emerald-200 rounded-md overflow-hidden">
+		<div className="border border-emerald-200 dark:border-emerald-800 rounded-md overflow-hidden">
 			<button
 				type="button"
 				onClick={() =>
 					setTracking({ ...tracking, enabled: !tracking.enabled })
 				}
-				className="w-full flex items-center justify-between px-3 py-2 bg-emerald-50 hover:bg-emerald-100 transition-colors text-left"
+				className="w-full flex items-center justify-between px-3 py-2 bg-emerald-50 dark:bg-emerald-950 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors text-left"
 			>
-				<span className="text-xs font-semibold text-emerald-800 uppercase tracking-wide">
+				<span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
 					Transaction Tracking
 				</span>
 				<ChevronIcon open={tracking.enabled} />
 			</button>
 			{tracking.enabled && (
-				<div className="px-3 py-3 space-y-3 bg-white">
+				<div className="px-3 py-3 space-y-3 bg-surface-card">
 					<div>
 						<label
 							htmlFor={`${idPrefix}-chain`}
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Blockchain
 						</label>
@@ -167,7 +167,7 @@ function TrackingFields({
 								})
 							}
 							disabled={readOnlyChainAddress}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:text-gray-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-surface-hover disabled:text-muted"
 						>
 							{CHAIN_OPTIONS.map(({ value, label }) => (
 								<option key={value} value={value}>
@@ -179,7 +179,7 @@ function TrackingFields({
 					<div>
 						<label
 							htmlFor={`${idPrefix}-address`}
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Wallet address
 						</label>
@@ -195,13 +195,13 @@ function TrackingFields({
 							}
 							placeholder={ADDRESS_PLACEHOLDERS[tracking.chain]}
 							disabled={readOnlyChainAddress}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:text-gray-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-surface-hover disabled:text-muted"
 						/>
 					</div>
 					<div>
 						<label
 							htmlFor={`${idPrefix}-category`}
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Default category
 						</label>
@@ -214,7 +214,7 @@ function TrackingFields({
 									defaultCategoryId: e.target.value,
 								})
 							}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							<option value="">
 								None (auto-detect by direction)
@@ -229,7 +229,7 @@ function TrackingFields({
 					<div>
 						<label
 							htmlFor={`${idPrefix}-interval`}
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Poll interval
 						</label>
@@ -242,7 +242,7 @@ function TrackingFields({
 									pollIntervalMs: Number(e.target.value),
 								})
 							}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							{POLL_INTERVAL_OPTIONS.map(({ value, label }) => (
 								<option key={value} value={value}>
@@ -388,15 +388,15 @@ export function AddAccountModal({
 				onClick={handleClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-xl mx-4 max-h-[90vh] overflow-y-auto">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-md bg-surface-card border rounded-md shadow-xl mx-4 max-h-[90vh] overflow-y-auto">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						New account
 					</h2>
 					<button
 						type="button"
 						onClick={handleClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary"
 						aria-label="Close"
 					>
 						✕
@@ -405,7 +405,7 @@ export function AddAccountModal({
 
 				<form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
 					{error && (
-						<p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+						<p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 px-3 py-2 rounded">
 							{error}
 						</p>
 					)}
@@ -413,7 +413,7 @@ export function AddAccountModal({
 					<div>
 						<label
 							htmlFor="account-type"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Account type
 						</label>
@@ -423,7 +423,7 @@ export function AddAccountModal({
 							onChange={(e) =>
 								handleAccountTypeChange(e.target.value as AccountType)
 							}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							{accountTypeOptions.map(({ value, label }) => (
 								<option key={value} value={value}>
@@ -436,7 +436,7 @@ export function AddAccountModal({
 					<div>
 						<label
 							htmlFor="account-name"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Name <span className="text-red-500">*</span>
 						</label>
@@ -446,7 +446,7 @@ export function AddAccountModal({
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							placeholder="e.g. Main wallet"
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							autoFocus
 						/>
 					</div>
@@ -454,7 +454,7 @@ export function AddAccountModal({
 					<div>
 						<label
 							htmlFor="account-description"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Description
 						</label>
@@ -464,14 +464,14 @@ export function AddAccountModal({
 							onChange={(e) => setDescription(e.target.value)}
 							placeholder="Optional"
 							rows={2}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
 						/>
 					</div>
 
 					<div>
 						<label
 							htmlFor="account-balance"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							{forDebt ? 'Outstanding debt' : 'Start balance'}
 						</label>
@@ -489,10 +489,10 @@ export function AddAccountModal({
 								)
 							}
 							placeholder="0"
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						/>
 						{forDebt && initialBalance > 0 && (
-							<p className="mt-1 text-xs text-gray-500">
+							<p className="mt-1 text-xs text-muted">
 								Will be saved as {formatDebtPreview(-initialBalance, currencyCode)}
 							</p>
 						)}
@@ -501,7 +501,7 @@ export function AddAccountModal({
 					<div>
 						<label
 							htmlFor="account-currency"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Currency
 						</label>
@@ -513,7 +513,7 @@ export function AddAccountModal({
 									: currencyOptions[0]?.value ?? 'USD'
 							}
 							onChange={(e) => setCurrencyCode(e.target.value)}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							{currencyOptions.map(({ value, label }) => (
 								<option key={value} value={value}>
@@ -536,7 +536,7 @@ export function AddAccountModal({
 						<button
 							type="button"
 							onClick={handleClose}
-							className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+							className="flex-1 px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover"
 						>
 							Cancel
 						</button>
@@ -756,15 +756,15 @@ export function EditAccountModal({
 				onClick={handleClose}
 				aria-hidden="true"
 			/>
-			<div className="relative z-10 w-full max-w-md bg-white border border-gray-200 rounded-md shadow-xl mx-4 max-h-[90vh] overflow-y-auto">
-				<header className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
-					<h2 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+			<div className="relative z-10 w-full max-w-md bg-surface-card border rounded-md shadow-xl mx-4 max-h-[90vh] overflow-y-auto">
+				<header className="flex items-center justify-between px-6 py-3 border-b">
+					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
 						Edit account
 					</h2>
 					<button
 						type="button"
 						onClick={handleClose}
-						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+						className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-hover hover:text-secondary"
 						aria-label="Close"
 					>
 						✕
@@ -773,13 +773,13 @@ export function EditAccountModal({
 
 				<form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
 					{error && (
-						<p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+						<p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 px-3 py-2 rounded">
 							{error}
 						</p>
 					)}
 
 					{pollResult && (
-						<p className="text-sm text-emerald-700 bg-emerald-50 px-3 py-2 rounded">
+						<p className="text-sm text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950 px-3 py-2 rounded">
 							{pollResult}
 						</p>
 					)}
@@ -787,7 +787,7 @@ export function EditAccountModal({
 					<div>
 						<label
 							htmlFor="edit-account-type"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Account type
 						</label>
@@ -797,7 +797,7 @@ export function EditAccountModal({
 							onChange={(e) =>
 								handleAccountTypeChange(e.target.value as AccountType)
 							}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							{accountTypeOptions.map(({ value, label }) => (
 								<option key={value} value={value}>
@@ -810,7 +810,7 @@ export function EditAccountModal({
 					<div>
 						<label
 							htmlFor="edit-account-name"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Name <span className="text-red-500">*</span>
 						</label>
@@ -820,7 +820,7 @@ export function EditAccountModal({
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							placeholder="e.g. Main wallet"
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 							autoFocus
 						/>
 					</div>
@@ -828,7 +828,7 @@ export function EditAccountModal({
 					<div>
 						<label
 							htmlFor="edit-account-description"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Description
 						</label>
@@ -838,14 +838,14 @@ export function EditAccountModal({
 							onChange={(e) => setDescription(e.target.value)}
 							placeholder="Optional"
 							rows={2}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
 						/>
 					</div>
 
 					<div>
 						<label
 							htmlFor="edit-account-currency"
-							className="block text-xs font-medium text-gray-700 mb-1"
+							className="block text-xs font-medium text-secondary mb-1"
 						>
 							Currency
 						</label>
@@ -857,7 +857,7 @@ export function EditAccountModal({
 									: currencyOptions[0]?.value ?? 'USD'
 							}
 							onChange={(e) => setCurrencyCode(e.target.value)}
-							className="block w-full rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+							className="block w-full rounded border border-strong bg-surface-card px-2 py-1.5 text-sm text-primary shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
 						>
 							{currencyOptions.map(({ value, label }) => (
 								<option key={value} value={value}>
@@ -882,11 +882,11 @@ export function EditAccountModal({
 										type="button"
 										onClick={handlePollNow}
 										disabled={pollingNow || !existingWatch.isActive}
-										className="font-medium text-emerald-600 hover:text-emerald-800 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+										className="font-medium text-emerald-600 hover:text-emerald-800 disabled:text-faint disabled:cursor-not-allowed transition-colors"
 									>
 										{pollingNow ? 'Polling…' : 'Poll Now'}
 									</button>
-									<span className="text-gray-300">|</span>
+									<span className="text-faint">|</span>
 									<button
 										type="button"
 										onClick={handleTogglePause}
@@ -900,8 +900,8 @@ export function EditAccountModal({
 									</button>
 									{existingWatch.lastCheckedAt && (
 										<>
-											<span className="text-gray-300">|</span>
-											<span className="text-gray-500">
+											<span className="text-faint">|</span>
+											<span className="text-muted">
 												Last check:{' '}
 												{new Date(existingWatch.lastCheckedAt).toLocaleDateString('en-US', {
 													month: 'short',
@@ -921,7 +921,7 @@ export function EditAccountModal({
 						<button
 							type="button"
 							onClick={handleClose}
-							className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+							className="flex-1 px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover"
 						>
 							Cancel
 						</button>

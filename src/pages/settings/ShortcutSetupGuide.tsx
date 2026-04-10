@@ -99,8 +99,8 @@ function CopyButton({ text }: { text: string }) {
 			className={clsx(
 				'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-colors',
 				copied
-					? 'text-emerald-700 bg-emerald-50'
-					: 'text-gray-500 hover:text-gray-700 hover:bg-gray-100',
+					? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950'
+					: 'text-muted hover:text-secondary hover:bg-surface-hover',
 			)}
 			aria-label="Copy to clipboard"
 		>
@@ -125,7 +125,7 @@ function CodeBlock({ children }: { children: string }) {
 			<div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
 				<CopyButton text={children.trim()} />
 			</div>
-			<pre className="bg-gray-900 text-gray-100 rounded-lg px-4 py-3 text-sm overflow-x-auto font-mono leading-relaxed">
+			<pre className="bg-gray-900 text-gray-100 dark:bg-gray-950 dark:border dark:border-strong rounded-lg px-4 py-3 text-sm overflow-x-auto font-mono leading-relaxed">
 				{children.trim()}
 			</pre>
 		</div>
@@ -145,7 +145,7 @@ function Tip({ children }: { children: React.ReactNode }) {
 
 function Warning({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="flex gap-3 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+		<div className="flex gap-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-800">
 			<span className="shrink-0 mt-0.5 text-red-500 font-bold">
 				Important
 			</span>
@@ -167,8 +167,8 @@ function Step({
 			className={clsx(
 				'rounded-lg border transition-colors',
 				isActive
-					? 'border-emerald-200 bg-white shadow-sm'
-					: 'border-gray-200 bg-white',
+					? 'border-emerald-200 dark:border-emerald-800 bg-surface-card shadow-sm'
+					: 'bg-surface-card',
 			)}
 		>
 			<button
@@ -181,10 +181,10 @@ function Step({
 					className={clsx(
 						'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors',
 						isCompleted
-							? 'bg-emerald-100 text-emerald-700'
+							? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300'
 							: isActive
 								? 'bg-emerald-600 text-white'
-								: 'bg-gray-100 text-gray-500',
+								: 'bg-surface-hover text-muted',
 					)}
 				>
 					{isCompleted ? (
@@ -196,14 +196,14 @@ function Step({
 				<span
 					className={clsx(
 						'flex-1 text-sm font-medium',
-						isActive ? 'text-gray-900' : 'text-gray-700',
+						isActive ? 'text-primary' : 'text-secondary',
 					)}
 				>
 					{title}
 				</span>
 				<ChevronIcon
 					className={clsx(
-						'w-4 h-4 text-gray-400 transition-transform',
+						'w-4 h-4 text-faint transition-transform',
 						isActive && 'rotate-180',
 					)}
 				/>
@@ -219,7 +219,7 @@ function Step({
 
 function InlineKbd({ children }: { children: React.ReactNode }) {
 	return (
-		<span className="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 text-xs font-medium text-gray-700 font-mono">
+		<span className="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-hover border text-xs font-medium text-secondary font-mono">
 			{children}
 		</span>
 	)
@@ -260,17 +260,17 @@ export function ShortcutSetupGuide() {
 	return (
 		<section aria-labelledby="shortcut-guide-heading">
 			<div className="flex items-start gap-3 mb-4">
-				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600">
 					<PhoneIcon className="w-5 h-5" />
 				</div>
 				<div>
 					<h3
 						id="shortcut-guide-heading"
-						className="text-base font-semibold text-gray-900"
+						className="text-base font-semibold text-primary"
 					>
 						iPhone Shortcut Setup
 					</h3>
-					<p className="text-sm text-gray-500 mt-0.5">
+					<p className="text-sm text-muted mt-0.5">
 						Auto-import transactions from Bangkok Bank SMS
 						notifications using iOS Shortcuts.
 					</p>
@@ -295,10 +295,10 @@ export function ShortcutSetupGuide() {
 					isCompleted={completedSteps.has(1)}
 					onToggle={() => handleToggle(1)}
 				>
-					<p className="text-sm text-gray-600">
+					<p className="text-sm text-secondary">
 						Before starting, make sure you have the following ready:
 					</p>
-					<ul className="text-sm text-gray-600 list-disc list-inside space-y-1.5 ml-1">
+					<ul className="text-sm text-secondary list-disc list-inside space-y-1.5 ml-1">
 						<li>
 							An iPhone running{' '}
 							<strong>iOS 16 or later</strong> with the{' '}
@@ -348,7 +348,7 @@ export function ShortcutSetupGuide() {
 					isCompleted={completedSteps.has(2)}
 					onToggle={() => handleToggle(2)}
 				>
-					<ol className="text-sm text-gray-600 list-decimal list-inside space-y-2 ml-1">
+					<ol className="text-sm text-secondary list-decimal list-inside space-y-2 ml-1">
 						<li>
 							Open the <strong>Shortcuts</strong> app on your
 							iPhone
@@ -381,7 +381,7 @@ export function ShortcutSetupGuide() {
 						at&rdquo;, &ldquo;Wi-Fi&rdquo;, etc.
 					</Warning>
 					<ol
-						className="text-sm text-gray-600 list-decimal list-inside space-y-2 ml-1"
+						className="text-sm text-secondary list-decimal list-inside space-y-2 ml-1"
 						start={5}
 					>
 						<li>
@@ -432,11 +432,11 @@ export function ShortcutSetupGuide() {
 					isCompleted={completedSteps.has(3)}
 					onToggle={() => handleToggle(3)}
 				>
-					<p className="text-sm text-gray-600 mb-2">
+					<p className="text-sm text-secondary mb-2">
 						In the shortcut editor, add a single action that sends
 						the SMS content to your server:
 					</p>
-					<ol className="text-sm text-gray-600 list-decimal list-inside space-y-2 ml-1">
+					<ol className="text-sm text-secondary list-decimal list-inside space-y-2 ml-1">
 						<li>
 							Tap{' '}
 							<strong>
@@ -454,7 +454,7 @@ export function ShortcutSetupGuide() {
 					</ol>
 					<CodeBlock>{WEBHOOK_URL_PLACEHOLDER}</CodeBlock>
 					<ol
-						className="text-sm text-gray-600 list-decimal list-inside space-y-2 ml-1"
+						className="text-sm text-secondary list-decimal list-inside space-y-2 ml-1"
 						start={3}
 					>
 						<li>
@@ -496,35 +496,35 @@ export function ShortcutSetupGuide() {
 					isCompleted={completedSteps.has(4)}
 					onToggle={() => handleToggle(4)}
 				>
-					<p className="text-sm text-gray-600 font-medium mb-1">
+					<p className="text-sm text-secondary font-medium mb-1">
 						Headers
 					</p>
-					<p className="text-sm text-gray-600 mb-2">
+					<p className="text-sm text-secondary mb-2">
 						Add the following headers to the request:
 					</p>
-					<div className="overflow-hidden rounded-lg border border-gray-200">
+					<div className="overflow-hidden rounded-lg border">
 						<table className="min-w-full text-sm">
-							<thead className="bg-gray-50">
+							<thead className="bg-surface">
 								<tr>
-									<th className="px-3 py-2 text-left font-medium text-gray-600">
+									<th className="px-3 py-2 text-left font-medium text-secondary">
 										Header
 									</th>
-									<th className="px-3 py-2 text-left font-medium text-gray-600">
+									<th className="px-3 py-2 text-left font-medium text-secondary">
 										Value
 									</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr className="border-t border-gray-200">
-									<td className="px-3 py-2 font-mono text-xs text-gray-800">
+								<tr className="border-t">
+									<td className="px-3 py-2 font-mono text-xs text-primary">
 										Content-Type
 									</td>
-									<td className="px-3 py-2 font-mono text-xs text-gray-800">
+									<td className="px-3 py-2 font-mono text-xs text-primary">
 										application/json
 									</td>
 								</tr>
-								<tr className="border-t border-gray-200">
-									<td className="px-3 py-2 font-mono text-xs text-gray-800">
+								<tr className="border-t">
+									<td className="px-3 py-2 font-mono text-xs text-primary">
 										X-Api-Key
 									</td>
 									<td className="px-3 py-2 font-mono text-xs text-emerald-700">
@@ -535,61 +535,61 @@ export function ShortcutSetupGuide() {
 						</table>
 					</div>
 
-					<p className="text-sm text-gray-600 font-medium mb-1 mt-4">
+					<p className="text-sm text-secondary font-medium mb-1 mt-4">
 						Request Body (JSON)
 					</p>
-					<p className="text-sm text-gray-600 mb-2">
+					<p className="text-sm text-secondary mb-2">
 						Set the request body to <strong>JSON</strong> with the
 						following fields:
 					</p>
 					<CodeBlock>{JSON_BODY_EXAMPLE}</CodeBlock>
 
-					<div className="overflow-hidden rounded-lg border border-gray-200 mt-3">
+					<div className="overflow-hidden rounded-lg border mt-3">
 						<table className="min-w-full text-sm">
-							<thead className="bg-gray-50">
+							<thead className="bg-surface">
 								<tr>
-									<th className="px-3 py-2 text-left font-medium text-gray-600">
+									<th className="px-3 py-2 text-left font-medium text-secondary">
 										Field
 									</th>
-									<th className="px-3 py-2 text-left font-medium text-gray-600">
+									<th className="px-3 py-2 text-left font-medium text-secondary">
 										Value in Shortcuts
 									</th>
-									<th className="px-3 py-2 text-left font-medium text-gray-600">
+									<th className="px-3 py-2 text-left font-medium text-secondary">
 										Description
 									</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr className="border-t border-gray-200">
-									<td className="px-3 py-2 font-mono text-xs text-gray-800">
+								<tr className="border-t">
+									<td className="px-3 py-2 font-mono text-xs text-primary">
 										message
 									</td>
-									<td className="px-3 py-2 text-xs text-gray-700">
+									<td className="px-3 py-2 text-xs text-secondary">
 										Shortcut Input (the SMS body)
 									</td>
-									<td className="px-3 py-2 text-xs text-gray-500">
+									<td className="px-3 py-2 text-xs text-muted">
 										Raw SMS text to be parsed
 									</td>
 								</tr>
-								<tr className="border-t border-gray-200">
-									<td className="px-3 py-2 font-mono text-xs text-gray-800">
+								<tr className="border-t">
+									<td className="px-3 py-2 font-mono text-xs text-primary">
 										sender
 									</td>
-									<td className="px-3 py-2 text-xs text-gray-700">
+									<td className="px-3 py-2 text-xs text-secondary">
 										<InlineKbd>BANGKOKBANK</InlineKbd>
 									</td>
-									<td className="px-3 py-2 text-xs text-gray-500">
+									<td className="px-3 py-2 text-xs text-muted">
 										Identifies which parser to use
 									</td>
 								</tr>
-								<tr className="border-t border-gray-200">
-									<td className="px-3 py-2 font-mono text-xs text-gray-800">
+								<tr className="border-t">
+									<td className="px-3 py-2 font-mono text-xs text-primary">
 										receivedAt
 									</td>
-									<td className="px-3 py-2 text-xs text-gray-700">
+									<td className="px-3 py-2 text-xs text-secondary">
 										Current Date (ISO 8601 format)
 									</td>
-									<td className="px-3 py-2 text-xs text-gray-500">
+									<td className="px-3 py-2 text-xs text-muted">
 										Timestamp when SMS was received
 									</td>
 								</tr>
@@ -626,11 +626,11 @@ export function ShortcutSetupGuide() {
 					isCompleted={completedSteps.has(5)}
 					onToggle={() => handleToggle(5)}
 				>
-					<p className="text-sm text-gray-600 mb-2">
+					<p className="text-sm text-secondary mb-2">
 						Optionally, add a notification to confirm whether the
 						transaction was imported successfully:
 					</p>
-					<ol className="text-sm text-gray-600 list-decimal list-inside space-y-2 ml-1">
+					<ol className="text-sm text-secondary list-decimal list-inside space-y-2 ml-1">
 						<li>
 							After the &ldquo;Get Contents of URL&rdquo; action,
 							tap <strong>&ldquo;Add Action&rdquo;</strong>
@@ -679,10 +679,10 @@ export function ShortcutSetupGuide() {
 					isCompleted={completedSteps.has(6)}
 					onToggle={() => handleToggle(6)}
 				>
-					<p className="text-sm text-gray-600 mb-2">
+					<p className="text-sm text-secondary mb-2">
 						Verify everything works end-to-end:
 					</p>
-					<ol className="text-sm text-gray-600 list-decimal list-inside space-y-2 ml-1">
+					<ol className="text-sm text-secondary list-decimal list-inside space-y-2 ml-1">
 						<li>
 							Open the shortcut you just created and tap{' '}
 							<strong>&ldquo;Run&rdquo;</strong> (the play
@@ -699,7 +699,7 @@ export function ShortcutSetupGuide() {
 						}
 					</CodeBlock>
 					<ol
-						className="text-sm text-gray-600 list-decimal list-inside space-y-2 ml-1"
+						className="text-sm text-secondary list-decimal list-inside space-y-2 ml-1"
 						start={3}
 					>
 						<li>
@@ -721,7 +721,7 @@ export function ShortcutSetupGuide() {
 						key.
 					</Warning>
 
-					<p className="text-sm text-gray-600 mt-3">
+					<p className="text-sm text-secondary mt-3">
 						Once the manual test works, wait for a real SMS from
 						Bangkok Bank. The automation will trigger automatically
 						and import the transaction.
@@ -741,9 +741,9 @@ export function ShortcutSetupGuide() {
 			</div>
 
 			{allCompleted && (
-				<div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 animate-fade-in">
+				<div className="mt-4 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-300 animate-fade-in">
 					<p className="font-medium">Setup complete!</p>
-					<p className="text-emerald-700 mt-0.5">
+					<p className="text-emerald-700 dark:text-emerald-300 mt-0.5">
 						Your iPhone will now automatically forward Bangkok Bank
 						SMS messages to Finance Tracker. Transactions will
 						appear on the Transactions page shortly after each SMS
@@ -753,28 +753,28 @@ export function ShortcutSetupGuide() {
 			)}
 
 			<details className="mt-4 group">
-				<summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+				<summary className="cursor-pointer text-sm font-medium text-secondary hover:text-primary transition-colors">
 					Troubleshooting
 				</summary>
 				<div className="mt-3 space-y-3 pl-1">
-					<div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+					<div className="rounded-lg border bg-surface-card overflow-hidden">
 						<table className="min-w-full text-sm">
-							<thead className="bg-gray-50">
+							<thead className="bg-surface">
 								<tr>
-									<th className="px-4 py-2 text-left font-medium text-gray-600 w-1/3">
+									<th className="px-4 py-2 text-left font-medium text-secondary w-1/3">
 										Problem
 									</th>
-									<th className="px-4 py-2 text-left font-medium text-gray-600">
+									<th className="px-4 py-2 text-left font-medium text-secondary">
 										Solution
 									</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr className="border-t border-gray-200">
-									<td className="px-4 py-3 text-gray-700 align-top">
+								<tr className="border-t">
+									<td className="px-4 py-3 text-secondary align-top">
 										Automation doesn&apos;t trigger
 									</td>
-									<td className="px-4 py-3 text-gray-600">
+									<td className="px-4 py-3 text-secondary">
 										Make sure the sender name in the
 										automation matches exactly. Check
 										Settings &gt; Notifications &gt;
@@ -782,43 +782,43 @@ export function ShortcutSetupGuide() {
 										enabled.
 									</td>
 								</tr>
-								<tr className="border-t border-gray-200">
-									<td className="px-4 py-3 text-gray-700 align-top">
+								<tr className="border-t">
+									<td className="px-4 py-3 text-secondary align-top">
 										Network/connection error
 									</td>
-									<td className="px-4 py-3 text-gray-600">
+									<td className="px-4 py-3 text-secondary">
 										Verify your Cloudflare Tunnel is running
 										and the URL is accessible. Test by
 										opening the URL in Safari on your
 										iPhone.
 									</td>
 								</tr>
-								<tr className="border-t border-gray-200">
-									<td className="px-4 py-3 text-gray-700 align-top">
+								<tr className="border-t">
+									<td className="px-4 py-3 text-secondary align-top">
 										401 Unauthorized
 									</td>
-									<td className="px-4 py-3 text-gray-600">
+									<td className="px-4 py-3 text-secondary">
 										Your API key is invalid or revoked.
 										Generate a new one from Settings &gt;
 										API Keys and update the shortcut.
 									</td>
 								</tr>
-								<tr className="border-t border-gray-200">
-									<td className="px-4 py-3 text-gray-700 align-top">
+								<tr className="border-t">
+									<td className="px-4 py-3 text-secondary align-top">
 										Transaction not created
 									</td>
-									<td className="px-4 py-3 text-gray-600">
+									<td className="px-4 py-3 text-secondary">
 										The SMS format may not be recognized by
 										the parser. Check SMS Import History in
 										Settings for the raw message and error
 										details.
 									</td>
 								</tr>
-								<tr className="border-t border-gray-200">
-									<td className="px-4 py-3 text-gray-700 align-top">
+								<tr className="border-t">
+									<td className="px-4 py-3 text-secondary align-top">
 										Duplicate transactions
 									</td>
-									<td className="px-4 py-3 text-gray-600">
+									<td className="px-4 py-3 text-secondary">
 										The server deduplicates by SMS content
 										hash. If the same SMS is sent twice, the
 										second one will be rejected. No action
