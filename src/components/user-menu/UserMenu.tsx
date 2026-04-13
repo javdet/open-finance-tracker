@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/auth-context'
+import { useTheme } from '@/contexts/theme-context'
 
 function UserIcon() {
 	return (
@@ -65,6 +66,64 @@ function LogoutIcon() {
 				d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
 			/>
 		</svg>
+	)
+}
+
+function SunIcon() {
+	return (
+		<svg
+			className="w-4 h-4"
+			fill="none"
+			stroke="currentColor"
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-hidden
+		>
+			<path
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				strokeWidth={2}
+				d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71M21 12h-1M4 12H3m16.66 7.66l-.71-.71M4.05 4.05l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+			/>
+		</svg>
+	)
+}
+
+function MoonIcon() {
+	return (
+		<svg
+			className="w-4 h-4"
+			fill="none"
+			stroke="currentColor"
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-hidden
+		>
+			<path
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				strokeWidth={2}
+				d="M20.354 15.354A9 9 0 018.646 3.646 9.005 9.005 0 0012 21a9.005 9.005 0 008.354-5.646z"
+			/>
+		</svg>
+	)
+}
+
+function ThemeToggleRow() {
+	const { theme, toggleTheme } = useTheme()
+	const isDark = theme === 'dark'
+
+	return (
+		<button
+			type="button"
+			onClick={toggleTheme}
+			className="flex w-full items-center gap-2 px-4 py-2 text-sm text-secondary hover:bg-surface-hover"
+			role="menuitem"
+			aria-label="Toggle dark mode"
+		>
+			{isDark ? <SunIcon /> : <MoonIcon />}
+			{isDark ? 'Light Mode' : 'Dark Mode'}
+		</button>
 	)
 }
 
@@ -138,17 +197,19 @@ export function UserMenu() {
 						</p>
 					</div>
 
-					<div className="py-1">
-						<button
-							type="button"
-							onClick={handleAccountSettings}
-							className="flex w-full items-center gap-2 px-4 py-2 text-sm text-secondary hover:bg-surface-hover"
-							role="menuitem"
-						>
-							<SettingsIcon />
-							Account Settings
-						</button>
-					</div>
+				<div className="py-1">
+					<ThemeToggleRow />
+
+					<button
+						type="button"
+						onClick={handleAccountSettings}
+						className="flex w-full items-center gap-2 px-4 py-2 text-sm text-secondary hover:bg-surface-hover"
+						role="menuitem"
+					>
+						<SettingsIcon />
+						Account Settings
+					</button>
+				</div>
 
 					<div className="border-t border-subtle py-1">
 						<button
