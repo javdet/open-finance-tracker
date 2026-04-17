@@ -61,12 +61,16 @@ export {
 export {
 	createScheduledTransaction,
 	deleteScheduledTransaction,
+	fetchPaidDates,
 	fetchScheduledCategoryTotals,
 	fetchScheduledTransactionById,
 	fetchScheduledTransactions,
 	updateScheduledTransaction,
 } from './scheduled-transactions'
-export type { ScheduledCategoryTotalsResponse } from './scheduled-transactions'
+export type {
+	PaidDatesMap,
+	ScheduledCategoryTotalsResponse,
+} from './scheduled-transactions'
 export { fetchLatestExchangeRates } from './currency'
 export {
 	createApiKey,

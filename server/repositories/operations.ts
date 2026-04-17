@@ -17,6 +17,7 @@ export interface OperationRow {
 	amount_in_base: string | null
 	transfer_amount: string | null
 	notes: string | null
+	scheduled_transaction_id: string | null
 	created_at: Date
 }
 
@@ -32,6 +33,7 @@ export interface CreateOperationRow {
 	amount_in_base?: number | null
 	transfer_amount?: number | null
 	notes?: string | null
+	scheduled_transaction_id?: string | null
 }
 
 export interface UpdateOperationRow {
@@ -45,6 +47,7 @@ export interface UpdateOperationRow {
 	amount_in_base?: number | null
 	transfer_amount?: number | null
 	notes?: string | null
+	scheduled_transaction_id?: string | null
 }
 
 export interface ListOperationsOptions {
@@ -74,6 +77,9 @@ function rowToOperation(row: OperationRow) {
 		amountInBase: row.amount_in_base ? Number(row.amount_in_base) : null,
 		transferAmount: row.transfer_amount ? Number(row.transfer_amount) : null,
 		notes: row.notes,
+		scheduledTransactionId: row.scheduled_transaction_id
+			? String(row.scheduled_transaction_id)
+			: null,
 		createdAt: row.created_at.toISOString(),
 	}
 }
@@ -126,7 +132,8 @@ export async function listOperations(
 	params.push(limit, offset)
 	const result = await client.query<OperationRow>(
 		`SELECT id, user_id, operation_type, operation_time, account_id, transfer_account_id,
-		 category_id, amount, currency_code, amount_in_base, transfer_amount, notes, created_at
+		 category_id, amount, currency_code, amount_in_base, transfer_amount, notes,
+		 scheduled_transaction_id, created_at
 		 FROM operations WHERE ${whereClause}
 		 ORDER BY operation_time DESC, id DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
 		params,
@@ -143,7 +150,8 @@ export async function getOperationById(
 	const client = pool ?? getPool()
 	const result = await client.query<OperationRow>(
 		`SELECT id, user_id, operation_type, operation_time, account_id, transfer_account_id,
-		 category_id, amount, currency_code, amount_in_base, transfer_amount, notes, created_at
+		 category_id, amount, currency_code, amount_in_base, transfer_amount, notes,
+		 scheduled_transaction_id, created_at
 		 FROM operations WHERE id = $1 AND user_id = $2`,
 		[id, userId],
 	)
@@ -161,9 +169,11 @@ export async function createOperation(
 			? new Date(data.operation_time)
 			: data.operation_time
 	const result = await client.query<OperationRow>(
-		`INSERT INTO operations (user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, transfer_amount, notes)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-		 RETURNING id, user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, transfer_amount, notes, created_at`,
+		`INSERT INTO operations (user_id, operation_type, operation_time, account_id, transfer_account_id, category_id, amount, currency_code, amount_in_base, transfer_amount, notes, scheduled_transaction_id)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		 RETURNING id, user_id, operation_type, operation_time, account_id, transfer_account_id,
+		 category_id, amount, currency_code, amount_in_base, transfer_amount, notes,
+		 scheduled_transaction_id, created_at`,
 		[
 			data.user_id,
 			data.operation_type,
@@ -176,6 +186,7 @@ export async function createOperation(
 			data.amount_in_base ?? null,
 			data.transfer_amount ?? null,
 			data.notes ?? null,
+			data.scheduled_transaction_id ?? null,
 		],
 	)
 	return rowToOperation(result.rows[0])
@@ -220,6 +231,8 @@ export async function updateOperation(
 	if (data.transfer_amount !== undefined)
 		addField('transfer_amount', data.transfer_amount)
 	if (data.notes !== undefined) addField('notes', data.notes)
+	if (data.scheduled_transaction_id !== undefined)
+		addField('scheduled_transaction_id', data.scheduled_transaction_id)
 
 	if (setClauses.length === 0) {
 		return getOperationById(id, userId, pool)
@@ -230,7 +243,7 @@ export async function updateOperation(
 		 WHERE id = $1 AND user_id = $2
 		 RETURNING id, user_id, operation_type, operation_time, account_id,
 		 transfer_account_id, category_id, amount, currency_code, amount_in_base,
-		 transfer_amount, notes, created_at`,
+		 transfer_amount, notes, scheduled_transaction_id, created_at`,
 		params,
 	)
 	const row = result.rows[0]
@@ -457,6 +470,35 @@ export async function getCategoryUsageCounts(
 		 ORDER BY COUNT(*) DESC
 		 LIMIT $4`,
 		[userId, operationType, fromTime.toISOString(), POPULAR_CATEGORIES_LIMIT],
+	)
+	return result.rows
+}
+
+/**
+ * Get paid dates for scheduled transactions within a given month.
+ * Returns rows mapping scheduled_transaction_id to an operation date.
+ */
+export async function getPaidDatesForMonth(
+	userId: string,
+	year: number,
+	month: number,
+	pool?: Pool,
+): Promise<{ scheduled_transaction_id: string; operation_date: string }[]> {
+	const client = pool ?? getPool()
+	const fromTime = new Date(year, month - 1, 1).toISOString()
+	const toTime = new Date(year, month, 1).toISOString()
+	const result = await client.query<{
+		scheduled_transaction_id: string
+		operation_date: string
+	}>(
+		`SELECT scheduled_transaction_id::text AS scheduled_transaction_id,
+		        operation_time::date::text AS operation_date
+		 FROM operations
+		 WHERE user_id = $1
+		   AND scheduled_transaction_id IS NOT NULL
+		   AND operation_time >= $2
+		   AND operation_time < $3`,
+		[userId, fromTime, toTime],
 	)
 	return result.rows
 }

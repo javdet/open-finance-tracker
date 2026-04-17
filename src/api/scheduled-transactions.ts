@@ -82,3 +82,21 @@ export function fetchScheduledCategoryTotals(
 		options,
 	)
 }
+
+export type PaidDatesMap = Record<string, string[]>
+
+export function fetchPaidDates(
+	userId: string,
+	year: number,
+	month: number,
+	options?: ApiOptions,
+): Promise<PaidDatesMap> {
+	const params = new URLSearchParams()
+	params.set('userId', userId)
+	params.set('year', String(year))
+	params.set('month', String(month))
+	return get<PaidDatesMap>(
+		`/api/scheduled-transactions/paid-dates?${params.toString()}`,
+		options,
+	)
+}

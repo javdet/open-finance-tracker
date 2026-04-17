@@ -3,6 +3,7 @@
  */
 import { Router, type Request, type Response } from 'express'
 import * as scheduledTxRepo from '../repositories/scheduled-transactions.js'
+import * as operationsRepo from '../repositories/operations.js'
 
 const router = Router()
 
@@ -11,6 +12,33 @@ function getUserId(req: Request): string {
 	if (typeof id === 'string') return id
 	return '1'
 }
+
+router.get('/paid-dates', async (req: Request, res: Response) => {
+	try {
+		const userId = getUserId(req)
+		const year = Number(req.query.year)
+		const month = Number(req.query.month)
+		if (!year || !month || month < 1 || month > 12) {
+			res.status(400).json({ error: 'year and month (1-12) are required' })
+			return
+		}
+		const rows = await operationsRepo.getPaidDatesForMonth(
+			userId,
+			year,
+			month,
+		)
+		const map: Record<string, string[]> = {}
+		for (const row of rows) {
+			const arr = map[row.scheduled_transaction_id] ?? []
+			arr.push(row.operation_date)
+			map[row.scheduled_transaction_id] = arr
+		}
+		res.json(map)
+	} catch (err) {
+		console.error('getPaidDates', err)
+		res.status(500).json({ error: 'Failed to get paid dates' })
+	}
+})
 
 router.get('/category-totals', async (req: Request, res: Response) => {
 	try {

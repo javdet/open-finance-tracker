@@ -318,6 +318,7 @@ CREATE TABLE IF NOT EXISTS operations (
 	transfer_amount     NUMERIC(18,2),
 	amount_in_base      NUMERIC(18,2),
 	notes               TEXT,
+	scheduled_transaction_id BIGINT,
 	created_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
 
 	CONSTRAINT operations_pk
@@ -357,7 +358,11 @@ CREATE TABLE IF NOT EXISTS operations (
 		REFERENCES categories (id),
 	CONSTRAINT operations_currency_fk
 		FOREIGN KEY (currency_code)
-		REFERENCES currencies (code)
+		REFERENCES currencies (code),
+	CONSTRAINT operations_scheduled_tx_fk
+		FOREIGN KEY (scheduled_transaction_id)
+		REFERENCES scheduled_transactions (id)
+		ON DELETE SET NULL
 ) PARTITION BY RANGE (operation_time);
 
 CREATE TABLE IF NOT EXISTS operations_default
@@ -371,6 +376,10 @@ CREATE INDEX IF NOT EXISTS operations_user_category_operation_time_idx
 
 CREATE INDEX IF NOT EXISTS operations_user_account_operation_time_idx
 	ON operations (user_id, account_id, operation_time);
+
+CREATE INDEX IF NOT EXISTS operations_scheduled_transaction_id_idx
+	ON operations (scheduled_transaction_id)
+	WHERE scheduled_transaction_id IS NOT NULL;
 
 -- =========================
 -- Budgets

@@ -104,6 +104,24 @@ The `cloudflared` service starts alongside the app and automatically reconnects 
 
 In the Cloudflare dashboard, add a **Public Hostname** to your tunnel (e.g. `finance.example.com`) and point it to `http://app:3001`. The tunnel container shares the Docker network with the app, so it can reach it by service name.
 
+## CI/CD & Auto-Deploy
+
+Pushing to `main` triggers a GitHub Actions workflow that:
+
+1. Builds the Docker image and pushes it to Docker Hub (`javdet/finance-tracker:latest`).
+2. SSHes into the production host and runs `docker compose pull && docker compose up -d`.
+
+The deploy step only runs when the repository owner pushes. All connection details are stored as **GitHub repository secrets** (encrypted, never exposed in logs).
+
+### Required secrets
+
+Add these in **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|---|---|
+| `DOCKERHUB_USERNAME` | Docker Hub username |
+| `DOCKERHUB_TOKEN` | Docker Hub access token |
+
 ## Next steps
 
 - Implement dashboard balance panel, transaction forms, category CRUD, budget plan/fact views

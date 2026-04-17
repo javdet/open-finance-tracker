@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import type { ScheduledTransaction } from '@/types'
-import { fetchScheduledTransactions } from '@/api'
+import { fetchScheduledTransactions, fetchPaidDates } from '@/api'
+import type { PaidDatesMap } from '@/api'
 import { AddScheduledTransactionModal } from '@/pages/budget/AddScheduledTransactionModal'
 import { useAuth } from '@/contexts/auth-context'
 
@@ -250,6 +251,9 @@ export function ScheduledTransactionCalendar({
 	const [transactions, setTransactions] = useState<ScheduledTransaction[]>([])
 	const [isLoading, setIsLoading] = useState(false)
 	const [addModalDate, setAddModalDate] = useState<string | null>(null)
+	const [editingTransaction, setEditingTransaction] =
+		useState<ScheduledTransaction | null>(null)
+	const [paidDates, setPaidDates] = useState<PaidDatesMap>({})
 
 	const loadTransactions = useCallback(() => {
 		setIsLoading(true)
@@ -261,11 +265,18 @@ export function ScheduledTransactionCalendar({
 			.finally(() => setIsLoading(false))
 	}, [user?.userId])
 
+	const loadPaidDates = useCallback(() => {
+		fetchPaidDates(user?.userId ?? '', year, month + 1)
+			.then(setPaidDates)
+			.catch(() => setPaidDates({}))
+	}, [user?.userId, year, month])
+
 	useEffect(() => {
 		if (isOpen) {
 			loadTransactions()
+			loadPaidDates()
 		}
-	}, [isOpen, loadTransactions])
+	}, [isOpen, loadTransactions, loadPaidDates])
 
 	const handlePrevMonth = useCallback(() => {
 		setMonth((prev) => {
@@ -311,17 +322,48 @@ export function ScheduledTransactionCalendar({
 		return map
 	}, [transactions, year, month])
 
+	const todayStr = useMemo(() => {
+		const now = new Date()
+		return [
+			now.getFullYear(),
+			String(now.getMonth() + 1).padStart(2, '0'),
+			String(now.getDate()).padStart(2, '0'),
+		].join('-')
+	}, [])
+
+	const isOverdue = useCallback(
+		(tx: ScheduledTransaction, dateStr: string): boolean => {
+			if (tx.operationType === 'income') return false
+			if (dateStr >= todayStr) return false
+			const txPaidDates = paidDates[tx.id]
+			if (!txPaidDates) return true
+			return !txPaidDates.includes(dateStr)
+		},
+		[todayStr, paidDates],
+	)
+
 	const handleDayClick = useCallback((dateStr: string) => {
 		setAddModalDate(dateStr)
 	}, [])
 
+	const handleChipClick = useCallback(
+		(e: React.MouseEvent, tx: ScheduledTransaction) => {
+			e.stopPropagation()
+			setEditingTransaction(tx)
+		},
+		[],
+	)
+
 	const handleAddModalClose = useCallback(() => {
 		setAddModalDate(null)
+		setEditingTransaction(null)
 	}, [])
 
 	const handleAddSuccess = useCallback(() => {
+		setEditingTransaction(null)
 		loadTransactions()
-	}, [loadTransactions])
+		loadPaidDates()
+	}, [loadTransactions, loadPaidDates])
 
 	if (!isOpen) return null
 
@@ -427,23 +469,38 @@ export function ScheduledTransactionCalendar({
 												{cell.day}
 											</span>
 											<div className="mt-1 space-y-1 overflow-hidden">
-												{events.slice(0, 3).map((tx) => (
-													<div
-														key={tx.id}
-														className={[
-															'flex items-center gap-1 rounded-md border-l-[3px] px-1.5 py-[3px] text-[11px] leading-tight font-medium truncate transition-colors duration-150',
-															tx.operationType === 'income'
+											{events.slice(0, 3).map((tx) => {
+												const overdue = isOverdue(tx, cell.dateStr)
+												return (
+												<div
+													key={tx.id}
+													role="button"
+													tabIndex={0}
+													onClick={(e) => handleChipClick(e, tx)}
+													onKeyDown={(e) => {
+														if (e.key === 'Enter' || e.key === ' ') {
+															e.stopPropagation()
+															setEditingTransaction(tx)
+														}
+													}}
+													className={[
+														'flex items-center gap-1 rounded-md border-l-[3px] px-1.5 py-[3px] text-[11px] leading-tight font-medium truncate transition-colors duration-150 cursor-pointer',
+														overdue
+															? 'border-l-red-500 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900'
+															: tx.operationType === 'income'
 																? 'border-l-sky-400 bg-sky-50 text-sky-700 hover:bg-sky-100'
 																: 'border-l-emerald-500 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900',
-														].join(' ')}
-														title={`${tx.name} · ${tx.recurrencePeriod} · ${tx.currencyCode} ${Number(tx.amount).toLocaleString()}`}
-													>
+													].join(' ')}
+													title={`${tx.name} · ${tx.recurrencePeriod} · ${tx.currencyCode} ${Number(tx.amount).toLocaleString()}${overdue ? ' · OVERDUE' : ''}`}
+												>
 														<svg
 															className={[
 																'w-3 h-3 flex-shrink-0',
-																tx.operationType === 'income'
-																	? 'text-sky-400'
-																	: 'text-emerald-400',
+																overdue
+																	? 'text-red-400'
+																	: tx.operationType === 'income'
+																		? 'text-sky-400'
+																		: 'text-emerald-400',
 															].join(' ')}
 															fill="none"
 															stroke="currentColor"
@@ -458,7 +515,8 @@ export function ScheduledTransactionCalendar({
 														</svg>
 														<span className="truncate">{tx.name}</span>
 													</div>
-												))}
+												)
+												})}
 												{events.length > 3 && (
 													<div className="text-[10px] text-faint font-medium px-1.5">
 														+{events.length - 3} more
@@ -475,10 +533,11 @@ export function ScheduledTransactionCalendar({
 			</div>
 
 			<AddScheduledTransactionModal
-				isOpen={addModalDate !== null}
+				isOpen={addModalDate !== null || editingTransaction !== null}
 				onClose={handleAddModalClose}
 				onSuccess={handleAddSuccess}
 				initialDate={addModalDate ?? undefined}
+				editTransaction={editingTransaction ?? undefined}
 			/>
 		</>
 	)

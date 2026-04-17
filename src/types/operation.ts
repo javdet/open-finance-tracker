@@ -16,6 +16,7 @@ export interface Operation {
 	currencyCode: string
 	amountInBase: number | null
 	notes: string | null
+	scheduledTransactionId: string | null
 	createdAt: string
 }
 
@@ -30,6 +31,7 @@ export interface CreateOperationInput {
 	currencyCode: string
 	amountInBase?: number | null
 	notes?: string | null
+	scheduledTransactionId?: string | null
 }
 
 export interface UpdateOperationInput {
@@ -43,6 +45,7 @@ export interface UpdateOperationInput {
 	currencyCode?: string
 	amountInBase?: number | null
 	notes?: string | null
+	scheduledTransactionId?: string | null
 }
 
 /** List/query params for operations. */

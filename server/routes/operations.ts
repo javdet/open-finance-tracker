@@ -183,6 +183,7 @@ router.post('/', async (req: Request, res: Response) => {
 			amountInBase?: number | null
 			transferAmount?: number | null
 			notes?: string | null
+			scheduledTransactionId?: string | null
 		}
 		const op = await operationsRepo.createOperation({
 			user_id: userId,
@@ -196,6 +197,7 @@ router.post('/', async (req: Request, res: Response) => {
 			amount_in_base: body.amountInBase ?? null,
 			transfer_amount: body.transferAmount ?? null,
 			notes: body.notes ?? null,
+			scheduled_transaction_id: body.scheduledTransactionId ?? null,
 		})
 		res.status(201).json(op)
 	} catch (err) {
@@ -218,6 +220,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
 			amountInBase?: number | null
 			transferAmount?: number | null
 			notes?: string | null
+			scheduledTransactionId?: string | null
 		}
 		const data: operationsRepo.UpdateOperationRow = {}
 		if ('operationType' in body) data.operation_type = body.operationType
@@ -231,6 +234,8 @@ router.patch('/:id', async (req: Request, res: Response) => {
 		if ('amountInBase' in body) data.amount_in_base = body.amountInBase
 		if ('transferAmount' in body) data.transfer_amount = body.transferAmount
 		if ('notes' in body) data.notes = body.notes
+		if ('scheduledTransactionId' in body)
+			data.scheduled_transaction_id = body.scheduledTransactionId
 
 		const op = await operationsRepo.updateOperation(
 			req.params.id,

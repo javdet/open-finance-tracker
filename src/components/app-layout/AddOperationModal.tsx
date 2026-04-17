@@ -234,6 +234,7 @@ export function AddOperationModal({
 					transferAmount: parsedTransferAmount ?? null,
 					currencyCode,
 					notes: notes.trim() || null,
+					scheduledTransactionId: selectedScheduledTxId || null,
 				},
 			)
 			resetForm()
@@ -257,6 +258,7 @@ export function AddOperationModal({
 		currencyCode,
 		resetForm,
 		onSuccess,
+		selectedScheduledTxId,
 	])
 
 	const baseOrdered =

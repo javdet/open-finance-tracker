@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import type { Account, Category, RecurrencePeriod } from '@/types'
+import type { Account, Category, RecurrencePeriod, ScheduledTransaction } from '@/types'
 import { DEBT_ACCOUNT_TYPES } from '@/types'
-import { fetchCategories, fetchAccounts, createScheduledTransaction } from '@/api'
+import {
+	fetchCategories,
+	fetchAccounts,
+	createScheduledTransaction,
+	updateScheduledTransaction,
+	deleteScheduledTransaction,
+} from '@/api'
 
 const RECURRENCE_OPTIONS: { value: RecurrencePeriod; label: string }[] = [
 	{ value: 'daily', label: 'Daily' },
@@ -61,6 +67,7 @@ interface AddScheduledTransactionModalProps {
 	onClose: () => void
 	onSuccess?: () => void
 	initialDate?: string
+	editTransaction?: ScheduledTransaction
 }
 
 export function AddScheduledTransactionModal({
@@ -68,6 +75,7 @@ export function AddScheduledTransactionModal({
 	onClose,
 	onSuccess,
 	initialDate,
+	editTransaction,
 }: AddScheduledTransactionModalProps) {
 	const [name, setName] = useState('')
 	const [transactionType, setTransactionType] = useState<
@@ -94,10 +102,14 @@ export function AddScheduledTransactionModal({
 	const [categories, setCategories] = useState<Category[]>([])
 	const [error, setError] = useState<string | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [isDeleting, setIsDeleting] = useState(false)
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
 	const [isCategoryOpen, setIsCategoryOpen] = useState(false)
 	const [categorySearch, setCategorySearch] = useState('')
 	const categoryDropdownRef = useRef<HTMLDivElement>(null)
+
+	const isEditMode = !!editTransaction
 
 	useEffect(() => {
 		if (isOpen) {
@@ -111,7 +123,7 @@ export function AddScheduledTransactionModal({
 					)
 					setAccounts(filtered)
 					setCategories(cats)
-					if (filtered.length > 0 && !accountId) {
+					if (filtered.length > 0 && !accountId && !editTransaction) {
 						setAccountId(filtered[0].id)
 					}
 				})
@@ -121,6 +133,22 @@ export function AddScheduledTransactionModal({
 				})
 		}
 	}, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+
+	useEffect(() => {
+		if (isOpen && editTransaction) {
+			setName(editTransaction.name)
+			setTransactionType(
+				editTransaction.operationType === 'income' ? 'income' : 'expense',
+			)
+			setAmount(String(Math.abs(editTransaction.amount)))
+			setAccountId(editTransaction.accountId)
+			setCategoryId(editTransaction.categoryId ?? '')
+			setRecurrencePeriod(editTransaction.recurrencePeriod)
+			setStartDate(editTransaction.startDate.slice(0, 10))
+			setNotifyPayment(editTransaction.notifyPayment)
+			setNotes(editTransaction.notes ?? '')
+		}
+	}, [isOpen, editTransaction])
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -180,6 +208,7 @@ export function AddScheduledTransactionModal({
 		setError(null)
 		setIsCategoryOpen(false)
 		setCategorySearch('')
+		setShowDeleteConfirm(false)
 	}, [initialDate])
 
 	const handleClose = useCallback(() => {
@@ -225,8 +254,22 @@ export function AddScheduledTransactionModal({
 					? -Math.abs(amountNum)
 					: Math.abs(amountNum)
 
-			setIsSubmitting(true)
-			try {
+		setIsSubmitting(true)
+		try {
+			if (editTransaction) {
+				await updateScheduledTransaction(editTransaction.id, {
+					name: name.trim(),
+					operationType,
+					categoryId,
+					accountId,
+					amount: signedAmount,
+					currencyCode,
+					recurrencePeriod,
+					startDate,
+					notifyPayment,
+					notes: notes.trim() || null,
+				})
+			} else {
 				await createScheduledTransaction({
 					name: name.trim(),
 					operationType,
@@ -239,15 +282,18 @@ export function AddScheduledTransactionModal({
 					notifyPayment,
 					notes: notes.trim() || null,
 				})
-				handleClose()
-				onSuccess?.()
-			} catch {
-				setError(
-					'Failed to create scheduled transaction. Please try again.',
-				)
-			} finally {
-				setIsSubmitting(false)
 			}
+			handleClose()
+			onSuccess?.()
+		} catch {
+			setError(
+				editTransaction
+					? 'Failed to update scheduled transaction. Please try again.'
+					: 'Failed to create scheduled transaction. Please try again.',
+			)
+		} finally {
+			setIsSubmitting(false)
+		}
 		},
 		[
 			name,
@@ -262,8 +308,25 @@ export function AddScheduledTransactionModal({
 			notes,
 			handleClose,
 			onSuccess,
+			editTransaction,
 		],
 	)
+
+	const handleDelete = useCallback(async () => {
+		if (!editTransaction) return
+		setIsDeleting(true)
+		setError(null)
+		try {
+			await deleteScheduledTransaction(editTransaction.id)
+			handleClose()
+			onSuccess?.()
+		} catch {
+			setError('Failed to delete scheduled transaction. Please try again.')
+		} finally {
+			setIsDeleting(false)
+			setShowDeleteConfirm(false)
+		}
+	}, [editTransaction, handleClose, onSuccess])
 
 	if (!isOpen) return null
 
@@ -280,7 +343,7 @@ export function AddScheduledTransactionModal({
 			<div className="relative z-10 w-full max-w-lg bg-surface-card border rounded-md shadow-xl mx-4 transform transition-all duration-200 scale-100 animate-scale-in">
 				<header className="flex items-center justify-between px-6 py-3 border-b">
 					<h2 className="text-sm font-semibold tracking-wide text-primary uppercase">
-						Add Scheduled Transaction
+						{isEditMode ? 'Edit Scheduled Transaction' : 'Add Scheduled Transaction'}
 					</h2>
 					<button
 						type="button"
@@ -563,21 +626,61 @@ export function AddScheduledTransactionModal({
 						/>
 					</div>
 
-					<div className="flex gap-2 justify-end pt-2">
-						<button
-							type="button"
-							onClick={handleClose}
-							className="px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover transition-colors"
-						>
-							Cancel
-						</button>
-						<button
-							type="submit"
-							disabled={isSubmitting}
-							className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 border border-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-						>
-							{isSubmitting ? 'Creating...' : 'Create'}
-						</button>
+					<div className="flex gap-2 justify-between pt-2">
+						{isEditMode ? (
+							<div>
+								{showDeleteConfirm ? (
+									<div className="flex items-center gap-2">
+										<span className="text-xs text-red-600 dark:text-red-400">
+											Delete this transaction?
+										</span>
+										<button
+											type="button"
+											onClick={handleDelete}
+											disabled={isDeleting}
+											className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+										>
+											{isDeleting ? 'Deleting...' : 'Confirm'}
+										</button>
+										<button
+											type="button"
+											onClick={() => setShowDeleteConfirm(false)}
+											className="px-3 py-1.5 text-xs font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover transition-colors"
+										>
+											No
+										</button>
+									</div>
+								) : (
+									<button
+										type="button"
+										onClick={() => setShowDeleteConfirm(true)}
+										className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-surface-card border border-red-300 dark:border-red-800 rounded-md hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+									>
+										Delete
+									</button>
+								)}
+							</div>
+						) : (
+							<div />
+						)}
+						<div className="flex gap-2">
+							<button
+								type="button"
+								onClick={handleClose}
+								className="px-4 py-2 text-sm font-medium text-secondary bg-surface-card border border-strong rounded-md hover:bg-surface-hover transition-colors"
+							>
+								Cancel
+							</button>
+							<button
+								type="submit"
+								disabled={isSubmitting}
+								className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 border border-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							>
+								{isSubmitting
+									? (isEditMode ? 'Saving...' : 'Creating...')
+									: (isEditMode ? 'Save' : 'Create')}
+							</button>
+						</div>
 					</div>
 				</form>
 			</div>
