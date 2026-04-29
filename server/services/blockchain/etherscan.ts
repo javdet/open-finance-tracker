@@ -1,12 +1,18 @@
 /**
  * Etherscan API client for fetching ERC-20 USDT/USDC transfers on
- * Ethereum. Uses the free `tokentx` endpoint (5 req/s with API key,
- * 1 req/5 s without).
+ * Ethereum. Uses the multichain V2 `tokentx` endpoint (5 req/s per API
+ * key on the free tier).
+ *
+ * Note: Etherscan retired the legacy V1 endpoints on Aug 15, 2025 in
+ * favour of the unified V2 API at `/v2/api` which requires a
+ * `chainid` parameter (1 = Ethereum mainnet) and an API key for every
+ * request. See https://docs.etherscan.io/v2-migration.
  */
 
 import type { BlockchainClient, BlockchainTransfer } from './index.js'
 
-const ETHERSCAN_BASE_URL = 'https://api.etherscan.io/api'
+const ETHERSCAN_BASE_URL = 'https://api.etherscan.io/v2/api'
+const ETHEREUM_CHAIN_ID = '1'
 
 const KNOWN_TOKENS: Record<string, { symbol: string; decimals: number }> = {
 	'0xdac17f958d2ee523a2206206994597c13d831ec7': {
@@ -91,7 +97,16 @@ export class EtherscanClient implements BlockchainClient {
 		contractAddress: string,
 		startBlock: number,
 	): Promise<BlockchainTransfer[]> {
+		const apiKey = getApiKey()
+		if (!apiKey) {
+			throw new Error(
+				'ETHERSCAN_API_KEY is not set. Etherscan V2 requires an API key — ' +
+				'create one at https://etherscan.io/myapikey and set it in your env.',
+			)
+		}
+
 		const params = new URLSearchParams({
+			chainid: ETHEREUM_CHAIN_ID,
 			module: 'account',
 			action: 'tokentx',
 			address,
@@ -101,43 +116,33 @@ export class EtherscanClient implements BlockchainClient {
 			page: '1',
 			offset: '100',
 			sort: 'desc',
+			apikey: apiKey,
 		})
-
-		const apiKey = getApiKey()
-		if (apiKey) {
-			params.set('apikey', apiKey)
-		}
 
 		const url = `${ETHERSCAN_BASE_URL}?${params.toString()}`
 
-		try {
-			const response = await fetch(url)
-			if (!response.ok) {
-				console.error(
-					'Etherscan fetch failed:',
-					response.status,
-					response.statusText,
-				)
-				return []
-			}
-
-			const data = (await response.json()) as EtherscanResponse
-
-			if (data.status !== '1' || !Array.isArray(data.result)) {
-				if (data.message === 'No transactions found') return []
-				console.error('Etherscan API error:', data.message, data.result)
-				return []
-			}
-
-			const results: BlockchainTransfer[] = []
-			for (const tx of data.result) {
-				const transfer = parseTransfer(tx)
-				if (transfer) results.push(transfer)
-			}
-			return results
-		} catch (err) {
-			console.error('Etherscan request error:', err)
-			return []
+		const response = await fetch(url)
+		if (!response.ok) {
+			throw new Error(
+				`Etherscan HTTP ${response.status} ${response.statusText}`,
+			)
 		}
+
+		const data = (await response.json()) as EtherscanResponse
+
+		if (data.status !== '1' || !Array.isArray(data.result)) {
+			if (data.message === 'No transactions found') return []
+			// Empty result set for NOTOK with no message should also be treated as empty
+			const detail =
+				typeof data.result === 'string' ? data.result : data.message
+			throw new Error(`Etherscan API error: ${detail}`)
+		}
+
+		const results: BlockchainTransfer[] = []
+		for (const tx of data.result) {
+			const transfer = parseTransfer(tx)
+			if (transfer) results.push(transfer)
+		}
+		return results
 	}
 }

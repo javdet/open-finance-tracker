@@ -202,7 +202,8 @@ router.post('/:id/poll-now', async (req: Request, res: Response) => {
 		res.json({ created, message: `Poll complete. ${created} new operation(s) created.` })
 	} catch (err) {
 		console.error('pollNowWalletWatch', err)
-		res.status(500).json({ error: 'Failed to poll wallet watch' })
+		const message = err instanceof Error ? err.message : 'Failed to poll wallet watch'
+		res.status(502).json({ error: message })
 	}
 })
 

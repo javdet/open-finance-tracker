@@ -77,26 +77,21 @@ function classifyTransfer(
 /**
  * Poll a single wallet watch for new transfers.
  * Returns the number of new operations created.
+ *
+ * Throws when the upstream explorer returns a terminal error (bad API
+ * key, deprecated endpoint, network failure). The background poller
+ * catches these per-watch; the `/poll-now` route surfaces them to the
+ * UI so users understand why no operations were created.
  */
 export async function pollWatch(watch: WalletWatch): Promise<number> {
 	const chain = watch.chain as Chain
 	const client = getClient(chain)
 	const startBlock = watch.lastBlockNumber ?? 0
 
-	let transfers: BlockchainTransfer[]
-	try {
-		transfers = await client.getTokenTransfers(
-			watch.walletAddress,
-			startBlock,
-		)
-	} catch (err) {
-		console.error(
-			`[blockchain-poller] Failed to fetch transfers for watch ${watch.id} ` +
-			`(${chain}:${watch.walletAddress}):`,
-			err instanceof Error ? err.message : err,
-		)
-		return 0
-	}
+	const transfers: BlockchainTransfer[] = await client.getTokenTransfers(
+		watch.walletAddress,
+		startBlock,
+	)
 
 	if (transfers.length === 0) {
 		await walletWatchesRepo.updateLastChecked(
@@ -245,8 +240,15 @@ export async function pollAllWatches(): Promise<void> {
 
 	let totalCreated = 0
 	for (const watch of watches) {
-		const count = await pollWatch(watch)
-		totalCreated += count
+		try {
+			totalCreated += await pollWatch(watch)
+		} catch (err) {
+			console.error(
+				`[blockchain-poller] Failed to poll watch ${watch.id} ` +
+				`(${watch.chain}:${watch.walletAddress}):`,
+				err instanceof Error ? err.message : err,
+			)
+		}
 	}
 
 	if (totalCreated > 0) {
