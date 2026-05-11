@@ -62,6 +62,5 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
           script: |
-            sudo cd /opt/open-finance-tracker
-            sudo docker compose pull
-            sudo docker compose up -d
+            sudo docker compose --project-directory /opt/open-finance-tracker pull
+            sudo docker compose --project-directory /opt/open-finance-tracker up -d

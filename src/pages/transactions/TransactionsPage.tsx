@@ -862,6 +862,8 @@ export function TransactionsPage() {
 	const datePickerRef = useRef<HTMLDivElement>(null)
 	const [sortBy, setSortBy] = useState<SortColumn>('date')
 	const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+	const [extraDays, setExtraDays] = useState(0)
+	const [isLoadingMore, setIsLoadingMore] = useState(false)
 
 	const loadOperations = useCallback(() => {
 		let fromTime: string
@@ -888,6 +890,16 @@ export function TransactionsPage() {
 			).toISOString()
 		}
 
+		fromTime = new Date(
+			new Date(fromTime).getTime() -
+				extraDays * 24 * 60 * 60 * 1000,
+		).toISOString()
+
+		const isLoadMoreFetch = extraDays > 0
+		if (isLoadMoreFetch) {
+			setIsLoadingMore(true)
+		}
+
 		fetchOperations({
 			fromTime,
 			toTime,
@@ -898,7 +910,12 @@ export function TransactionsPage() {
 				setTotal(res.total)
 			})
 			.catch((err: Error) => setError(err.message))
-	}, [dateRangeDays, customFrom, customTo])
+			.finally(() => {
+				if (isLoadMoreFetch) {
+					setIsLoadingMore(false)
+				}
+			})
+	}, [dateRangeDays, customFrom, customTo, extraDays])
 
 	useEffect(() => {
 		fetchAccounts()
@@ -938,7 +955,14 @@ export function TransactionsPage() {
 	}, [loadOperations])
 
 	useEffect(() => {
-		const handler = () => loadOperations()
+		const handler = () => {
+			setExtraDays((prev) => {
+				if (prev === 0) {
+					queueMicrotask(() => loadOperations())
+				}
+				return 0
+			})
+		}
 		window.addEventListener('operation-created', handler)
 		return () => window.removeEventListener('operation-created', handler)
 	}, [loadOperations])
@@ -1003,6 +1027,7 @@ export function TransactionsPage() {
 			try {
 				await deleteOperation(operationId)
 				loadOperations()
+				window.dispatchEvent(new CustomEvent('operation-created'))
 			} catch (err) {
 				setError(err instanceof Error ? err.message : 'Failed to delete transaction')
 			}
@@ -1031,6 +1056,7 @@ export function TransactionsPage() {
 						key={days}
 						type="button"
 						onClick={() => {
+							setExtraDays(0)
 							setCustomFrom('')
 							setCustomTo('')
 							setDateRangeDays(days)
@@ -1101,6 +1127,7 @@ export function TransactionsPage() {
 									type="button"
 									disabled={!customFrom || !customTo}
 									onClick={() => {
+										setExtraDays(0)
 										setDateRangeDays('custom')
 										setIsDatePickerOpen(false)
 									}}
@@ -1307,6 +1334,16 @@ export function TransactionsPage() {
 							})}
 						</tbody>
 					</table>
+					<div className="flex justify-center py-2">
+						<button
+							type="button"
+							onClick={() => setExtraDays((d) => d + 5)}
+							disabled={isLoadingMore}
+							className="text-xs text-muted hover:text-secondary hover:underline underline-offset-2 disabled:opacity-50"
+						>
+							{isLoadingMore ? 'Loading…' : 'Load 5 more days'}
+						</button>
+					</div>
 				</div>
 				{total > 0 && (
 					<p className="px-2 py-1.5 text-xs text-muted border-t border-subtle">
